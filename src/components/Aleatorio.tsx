@@ -210,7 +210,8 @@ export default function Aleatorio({
 
           return (
             <div key={i} className="rounded-xl border p-3">
-              <div className="flex items-start justify-between gap-2">
+              <div className="grid grid-cols-2 gap-2 items-start">
+                {/* Coluna esquerda */}
                 <div>
                   <div className="font-medium">Semana {i + 1}</div>
                   <div className="text-xs text-neutral-500">
@@ -218,10 +219,13 @@ export default function Aleatorio({
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2">
+                {/* Coluna direita */}
+                <div className="flex flex-col items-end gap-1">
                   <span
                     className={`text-xs px-2 py-1 rounded-full border ${
-                      fechadas[i] ? "bg-green-50 border-green-200 text-green-700" : "bg-neutral-50 border-neutral-200 text-neutral-600"
+                      fechadas[i]
+                        ? "bg-green-50 border-green-200 text-green-700"
+                        : "bg-neutral-50 border-neutral-200 text-neutral-600"
                     }`}
                   >
                     {fechadas[i] ? "Semana finalizada" : "Semana aberta"}
@@ -230,8 +234,6 @@ export default function Aleatorio({
                     variant="secondary"
                     size="sm"
                     onClick={() => {
-                      // se estamos fechando (fechadas[i] === false) passamos a quota atual para fixar
-                      // se estamos reabrindo (fechadas[i] === true) passamos null para limpar a fixação
                       onToggleFechar(i, fechadas[i] ? null : quotasDinamicas[i]);
                     }}
                   >
