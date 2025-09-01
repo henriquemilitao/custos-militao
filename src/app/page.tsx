@@ -14,8 +14,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 export type CategoriaFixaType = {
   id: string;
   nome: string;
-  meta: number; // valor planejado da categoria no mês
-  pago: boolean; // se foi pago (incrementa gasto igual à meta)
+  meta: number;
+  gastos: { id: string; valor: number; data: string }[];
 };
 
 export type GastoItem = {
