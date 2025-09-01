@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import type { EstadoMes, GastoItem } from "@/app/page";
+import type { GastoItem } from "@/app/page";
 
 const PESOS = [1, 1, 1, 1.5] as const;
 
@@ -20,16 +20,16 @@ function dataHojeCampoGrande(): string {
 /**
  * Calcula quotas base e quotas dinâmicas.
  * - metaMes: número total para o mês
- * - totaisPorSemana: [n0,n1,n2,n3] soma de gastos por semana
- * - fechadas: flags de "finalizado" (não usadas para fixar, mas para lógica de redistribuição)
- * - fixas: quotas travadas (number | null); se fixas[i] != null => quota daquela semana está fixa
+ * - totaisPorSemana: [n0,n1,n2,n3] soma de gastos por semana (number[])
+ * - fechadas: flags de "finalizado" (boolean[])
+ * - fixas: quotas travadas (number | null)[]
  *
- * Algoritmo:
- *  - começa com base = meta * peso / somaPesos
- *  - aplica fixas (substitui quota[i] = fixas[i] onde houver)
- *  - percorre j=0..3: calcula delta = quota[j] - gasto[j]; se delta != 0 e a semana j "pode redistribuir"
- *    (teve gasto > 0 ou foi marcada como finalizada), então distribui delta entre semanas futuras
- *    que não estão fixas, proporcional aos seus pesos.
+ * Regras principais:
+ * - Se não houve gasto e não há semanas fechadas/fixas => quotasDinamicas = quotasBase
+ * - Se existe ao menos uma semana fechada/fixa => pivot = último índice fechado/fixo
+ *   -> quotas até pivot = base (ou quota fixa se fixada)
+ *   -> quotas futuras = distribuir (meta - gastoAtePivot) pelas semanas futuras proporcional ao peso
+ * - Se NÃO há semanas fechadas/fixas e existe gasto -> pivot = último índice com gasto (comportamento dinâmico)
  */
 function calcularQuotasDinamicas(
   metaMes: number,
@@ -38,80 +38,79 @@ function calcularQuotasDinamicas(
   fixas: [number | null, number | null, number | null, number | null]
 ): { base: number[]; quotas: number[] } {
   const somaPesos = PESOS.reduce((a, b) => a + b, 0);
-
-  // Quotas base com pesos [1,1,1,1.5]
   const base = PESOS.map((p) => (metaMes / somaPesos) * p);
 
-  // Se nada foi gasto e nenhuma semana está marcada como fechada/fixa -> quotas = base
-  const anySpentOrClosedOrFixed =
-    totaisPorSemana.some((v) => (v || 0) > 0) ||
-    fechadas.some(Boolean) ||
-    fixas.some((v) => v != null);
-  if (!anySpentOrClosedOrFixed) {
+  const anySpent = totaisPorSemana.some((v) => (v || 0) > 0);
+  const anyClosedOrFixed = fechadas.some(Boolean) || fixas.some((v) => v != null);
+
+  // sem nada acontecendo -> quotas = base
+  if (!anySpent && !anyClosedOrFixed) {
     return { base, quotas: [...base] };
   }
 
-  // encontra o último índice que possui gasto / está fechado / tem quota fixa
+  // determina pivot:
+  // - se houver semanas fechadas/fixas: pivot = último índice fechado/fixo
+  // - senão (nenhuma fechada/fixa), pivot = último índice com gasto
   let lastIdx = -1;
-  for (let i = 0; i < 4; i++) {
-    if ((totaisPorSemana[i] || 0) > 0 || fechadas[i] || fixas[i] != null) lastIdx = i;
+  if (anyClosedOrFixed) {
+    for (let i = 0; i < 4; i++) {
+      if (fechadas[i] || fixas[i] != null) lastIdx = i;
+    }
+  } else {
+    for (let i = 0; i < 4; i++) {
+      if ((totaisPorSemana[i] ?? 0) > 0) lastIdx = i;
+    }
   }
+
+  // se pivot não definido, retorna base
   if (lastIdx === -1) return { base, quotas: [...base] };
 
-  // quotas começam como base
+  // quotas começam iguais à base
   const quotas = [...base];
 
-  // para semanas já até lastIdx: aplicar quota fixa (se houver) ou base
+  // aplica quotas até pivot: base ou quota fixa se houver
   for (let i = 0; i <= lastIdx; i++) {
     quotas[i] = fixas[i] != null ? fixas[i]! : base[i];
   }
 
-  // resto real disponível = meta - soma(gastos até lastIdx)
-  const gastoAteLast = totaisPorSemana.slice(0, lastIdx + 1).reduce((s, v) => s + (v || 0), 0);
-  let restante = metaMes - gastoAteLast;
+  // gasto até pivot (somente gastos, NÃO subtrair quotas fixas)
+  const gastoAtePivot = totaisPorSemana.slice(0, lastIdx + 1).reduce((s, v) => s + (v || 0), 0);
+  const restante = metaMes - gastoAtePivot;
 
-  // semanas futuras (indices > lastIdx)
+  // indices futuros (> pivot)
   const futureIdxs: number[] = [];
   for (let i = lastIdx + 1; i < 4; i++) futureIdxs.push(i);
-
   if (futureIdxs.length === 0) return { base, quotas };
 
-  // soma de quotas fixas já definidas nas futuras
+  // soma das quotas fixas já definidas nas futuras (reservas)
   let fixedFutureSum = 0;
   for (const i of futureIdxs) {
     if (fixas[i] != null) fixedFutureSum += fixas[i]!;
   }
 
-  // pesos dos futuros que NÃO são fixos
+  // pesos das futuras não-fixas
   const nonFixedWeights = futureIdxs.reduce((acc, i) => (fixas[i] == null ? acc + PESOS[i] : acc), 0);
 
-  // quanto sobra depois de reservar as quotas fixas futuras
+  // quanto sobra para distribuir entre as não-fixadas
   const restanteDepoisFix = restante - fixedFutureSum;
 
-  // se não há quotas não-fixas (tudo futuro já fixo), só aplicamos as fixas
   if (nonFixedWeights <= 0) {
-    for (const i of futureIdxs) {
-      quotas[i] = fixas[i] != null ? fixas[i]! : 0;
-    }
+    // todas as futuras já fixadas -> aplica fixas (ou 0)
+    for (const i of futureIdxs) quotas[i] = fixas[i] != null ? fixas[i]! : 0;
     return { base, quotas };
   }
 
-  // distribuir restanteDepoisFix proporcionalmente pelos pesos das semanas futuras não-fixas
+  // se restanteDepoisFix <= 0, então não há mais orçamento para distribuir -> quotas não-fixas = 0
   for (const i of futureIdxs) {
     if (fixas[i] != null) {
       quotas[i] = fixas[i]!;
     } else {
-      quotas[i] = (restanteDepoisFix * PESOS[i]) / nonFixedWeights;
+      quotas[i] = restanteDepoisFix > 0 ? (restanteDepoisFix * PESOS[i]) / nonFixedWeights : 0;
     }
   }
 
   return { base, quotas };
 }
-
-
-
-
-
 
 export default function Aleatorio({
   meta,
@@ -130,11 +129,12 @@ export default function Aleatorio({
   onChangeMeta: (v: number) => void;
   onAddGasto: (semanaIndex: number, item: GastoItem) => void;
   onRemoveGasto: (semanaIndex: number, itemId: string) => void;
-  // agora o segundo argumento é a quota atual (number) quando fechando, ou null/undefined quando reabrindo
   onToggleFechar: (semanaIndex: number, fixedQuota?: number | null) => void;
 }) {
+  // totais por semana (números)
   const totaisPorSemana = semanas.map((items) => items.reduce((s, it) => s + it.valor, 0));
 
+  // calcula quotas e base (useMemo para performance)
   const { base: quotaBasePorSemana, quotas: quotasDinamicas } = useMemo(
     () => calcularQuotasDinamicas(meta, totaisPorSemana, fechadas, fixas),
     [meta, totaisPorSemana, fechadas, fixas]
@@ -202,7 +202,7 @@ export default function Aleatorio({
             onChange={(e) => onChangeMeta(Number(e.target.value) || 0)}
           />
           <div className="text-xs text-neutral-500">
-            Cotas base: [{quotaBasePorSemana.map((q) => moeda(q)).join(", ")}]
+            Cotas base: [{quotaBasePorSemana.map((q: number) => moeda(q)).join(", ")}]
           </div>
         </div>
 
@@ -217,7 +217,7 @@ export default function Aleatorio({
                 <div>
                   <div className="font-medium">Semana {i + 1}</div>
                   <div className="text-xs text-neutral-500">
-                    Quota dinâmica: {moeda(quotaDin)} {fixas[i] != null ? "(fixa)" : i === 0 ? "(fixa pela base)" : ""}
+                    Quota dinâmica: {moeda(quotaDin)} {fixas[i] != null ? "(fixa)" : ""}
                   </div>
                 </div>
 

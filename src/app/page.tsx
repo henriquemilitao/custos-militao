@@ -44,17 +44,17 @@ function yyyymm(d: Date) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
 }
 
-function moeda(n: number) {
-  return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(
-    isFinite(n) ? n : 0
-  );
-}
+// function moeda(n: number) {
+//   return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(
+//     isFinite(n) ? n : 0
+//   );
+// }
 
 function load(): MapMeses {
   try {
     const raw = localStorage.getItem(LS_KEY);
     if (!raw) return {};
-    const parsed = JSON.parse(raw) as Record<string, any>;
+    const parsed = JSON.parse(raw) as Record<string, Partial<EstadoMes>>;
 
     const migrated: MapMeses = {};
     for (const k of Object.keys(parsed)) {
