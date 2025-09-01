@@ -16,16 +16,22 @@ export default function ResumoMes({
   aleatorioMeta,
 }: {
   saldoInicial: number;
-  economias: { meta: number }[];
+  economias: { meta: number; guardado: number }[];
   gastoFixas: number;
   gastoAleatorio: number;
   totalPlanejadoFixas: number;
   aleatorioMeta: number;
 }) {
-  // total economias
+  // total economias planejadas
   const totalEconomias = economias.reduce((acc, e) => acc + e.meta, 0);
 
-  // saldo após economias
+  // total já economizado
+  const totalEconomizado = economias.reduce((acc, e) => acc + e.guardado, 0);
+
+  // quanto falta economizar
+  const restanteEconomias = totalEconomias - totalEconomizado;
+
+  // saldo após economias planejadas
   const totalRealParaGastar = saldoInicial - totalEconomias;
 
   // ainda a gastar / disponível
@@ -47,8 +53,18 @@ export default function ResumoMes({
 
           {/* Economias */}
           <div>
-            <div className="text-neutral-500">Quanto quero economizar</div>
-            <div className="text-lg font-semibold text-blue-600">{moeda(totalEconomias)}</div>
+            <div className="text-neutral-500">Economias</div>
+            <div className="text-lg font-semibold text-blue-600">
+              Planejado: {moeda(totalEconomias)}
+            </div>
+            <div className="text-xs text-green-600">
+              Já economizei: {moeda(totalEconomizado)}
+            </div>
+            <div
+              className={`text-xs ${restanteEconomias < 0 ? "text-red-600" : "text-blue-600"}`}
+            >
+              Ainda preciso economizar: {moeda(restanteEconomias)}
+            </div>
           </div>
 
           {/* Total real para gastar */}
@@ -64,8 +80,10 @@ export default function ResumoMes({
             <div className="text-xs text-neutral-500">
               Planejado: {moeda(totalPlanejadoFixas)}
             </div>
-            <div className="text-xs text-green-600">
-              Ainda tenho que gastar: {moeda(restanteFixas)}
+            <div
+              className={`text-xs ${restanteFixas < 0 ? "text-red-600" : "text-green-600"}`}
+            >
+              Ainda vou gastar: {moeda(restanteFixas)}
             </div>
           </div>
 
@@ -76,7 +94,9 @@ export default function ResumoMes({
             <div className="text-xs text-neutral-500">
               Planejado: {moeda(aleatorioMeta)}
             </div>
-            <div className="text-xs text-green-600">
+            <div
+              className={`text-xs ${restanteAleatorio < 0 ? "text-red-600" : "text-green-600"}`}
+            >
               Ainda posso gastar: {moeda(restanteAleatorio)}
             </div>
           </div>

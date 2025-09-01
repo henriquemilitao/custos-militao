@@ -95,6 +95,14 @@ export default function Page() {
     setEconomias((prev) => prev.filter((e) => e.id !== id));
   }
 
+  function handleGuardarEconomia(id: string, valor: number) {
+    setEconomias((prev) =>
+      prev.map((e) =>
+        e.id === id ? { ...e, guardado: Math.min(e.guardado + valor, e.meta) } : e
+      )
+    );
+  }
+
   // carregar dados salvos
   useEffect(() => {
     const m = load();
@@ -170,7 +178,7 @@ export default function Page() {
 
       <ResumoMes
         saldoInicial={estado.saldoInicial}
-        economias={economias}
+        economias={economias.map((e) => ({ meta: e.meta, guardado: e.guardado }))}
         gastoFixas={gastoFixas}
         gastoAleatorio={gastoAleatorio}
         totalPlanejadoFixas={totalPlanejadoFixas}
@@ -190,11 +198,7 @@ export default function Page() {
               <EconomiaItem
                 key={eco.id}
                 economia={eco}
-                onGuardar={() =>
-                  setEconomias((prev) =>
-                    prev.map((e) => (e.id === eco.id ? { ...e, guardado: e.meta } : e))
-                  )
-                }
+                onGuardar={() => handleGuardarEconomia(eco.id, eco.meta)}
                 onRemove={() => handleRemoverEconomia(eco.id)}
               />
             ))
@@ -262,3 +266,4 @@ export default function Page() {
     </main>
   );
 }
+
