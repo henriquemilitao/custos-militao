@@ -194,9 +194,9 @@ export default function Aleatorio({
           <div className="text-sm text-neutral-600">
             Total disponível para Aleatório: <b>{moeda(meta)}</b>
           </div>
-          <div className="text-xs text-neutral-500">
-            Cotas base: [{quotaBasePorSemana.map((q: number) => moeda(q)).join(", ")}]
-          </div>
+          {/* <div className="text-xs text-neutral-500">
+            Metas por semana: [{quotaBasePorSemana.map((q: number) => moeda(q)).join(", ")}]
+          </div> */}
         </div>
 
         {Array.from({ length: 4 }, (_, i) => i).map((i) => {
@@ -210,7 +210,7 @@ export default function Aleatorio({
                 <div>
                   <div className="font-medium">Semana {i + 1}</div>
                   <div className="text-xs text-neutral-500">
-                    Quota dinâmica: {moeda(quotaDin)} {fixas[i] != null ? "(fixa)" : ""}
+                    Meta de gasto: {moeda(quotaDin)} {fixas[i] != null ? "(fixa)" : ""}
                   </div>
                 </div>
 
@@ -244,13 +244,13 @@ export default function Aleatorio({
                 {semanas[i].map((g) => (
                   <div
                     key={g.id}
-                    className="flex items-center justify-between text-sm bg-neutral-50 rounded-lg px-2 py-1"
+                    className="flex items-center justify-between text-sm bg-neutral-50 rounded-lg px-2 py-2"
                   >
-                    <div className="truncate">
-                      <span className="text-neutral-500 mr-2">{g.dataPtBr}</span>
-                      <span className="font-medium">{g.descricao}</span>
+                    <div className="flex flex-col">
+                      <span className="text-xs text-neutral-500">{g.dataPtBr}</span>
+                      <span className="font-medium break-words">{g.descricao}</span>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 ml-2">
                       <span>{moeda(g.valor)}</span>
                       <button
                         onClick={() => onRemoveGasto(i, g.id)}
@@ -260,16 +260,16 @@ export default function Aleatorio({
                       </button>
                     </div>
                   </div>
-                ))}
+                    ))}
               </div>
 
               {/* Adicionar gasto */}
               <AddForm index={i} />
 
               <div className="mt-2 text-xs text-neutral-600 flex items-center justify-between">
-                <span>Total na semana: <b>{moeda(totalSemana)}</b></span>
+                <span>Total gasto: <b>{moeda(totalSemana)}</b></span>
                 <span className={`${restante < 0 ? "text-red-600" : "text-green-600"}`}>
-                  Restante: {moeda(restante)}
+                  Posso gastar ainda: {moeda(restante)}
                 </span>
               </div>
             </div>
