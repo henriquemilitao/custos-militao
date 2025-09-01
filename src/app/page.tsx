@@ -103,6 +103,14 @@ export default function Page() {
     );
   }
 
+  function handleDesfazerEconomia(id: string) {
+    setEconomias((prev) =>
+      prev.map((e) =>
+        e.id === id ? { ...e, guardado: 0 } : e
+      )
+    );
+  }
+
   // carregar dados salvos
   useEffect(() => {
     const m = load();
@@ -199,6 +207,7 @@ export default function Page() {
                 key={eco.id}
                 economia={eco}
                 onGuardar={() => handleGuardarEconomia(eco.id, eco.meta)}
+                onDesfazer={() => handleDesfazerEconomia(eco.id)}
                 onRemove={() => handleRemoverEconomia(eco.id)}
               />
             ))

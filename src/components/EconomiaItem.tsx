@@ -1,84 +1,68 @@
 // components/EconomiaItem.tsx
 "use client";
 
+import { CheckCircle, RotateCcw, Trash2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import type { Economia } from "./ConfigEconomia";
 
 function moeda(n: number) {
-  return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(
-    isFinite(n) ? n : 0
-  );
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  }).format(isFinite(n) ? n : 0);
 }
 
 export default function EconomiaItem({
   economia,
   onGuardar,
+  onDesfazer,
   onRemove,
 }: {
   economia: Economia;
   onGuardar: () => void;
+  onDesfazer: () => void;
   onRemove: () => void;
 }) {
   const concluida = economia.guardado >= economia.meta;
 
   return (
     <Card
-      className={`flex items-center justify-between p-4 rounded-2xl border shadow-sm transition-opacity duration-200 ${
-        concluida ? "opacity-60" : "opacity-100"
+      className={`p-4 border rounded-2xl shadow flex items-center justify-between transition duration-200 ${
+        concluida ? "opacity-70 bg-gray-100" : "opacity-100 bg-white"
       }`}
     >
-      {/* Ícone de status */}
-      <div className="flex items-center gap-3 min-w-0">
-        <div
-          className={`h-10 w-10 rounded-full flex items-center justify-center ${
-            concluida ? "bg-green-100" : "bg-neutral-100"
-          }`}
-        >
-          {concluida ? (
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5 text-green-600"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-          ) : (
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5 text-neutral-400"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-          )}
-        </div>
-
-        {/* Título + metas */}
-        <div className="min-w-0">
-          <p className="font-medium truncate">{economia.titulo}</p>
-          <p className="text-xs text-neutral-500">
-            Meta: {moeda(economia.meta)} — Guardado: {moeda(economia.guardado)}
-          </p>
-        </div>
+      <div>
+        <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+          {economia.titulo}
+          {concluida && <CheckCircle className="w-5 h-5 text-green-600" />}
+        </h3>
+        <p className="text-sm text-gray-600">
+          Meta: {moeda(economia.meta)} — Guardado: {moeda(economia.guardado)}
+        </p>
       </div>
 
-      {/* Botões */}
       <div className="flex items-center gap-2">
-        {!concluida && (
-          <Button onClick={onGuardar} className="px-3 py-1">
-            Guardar
-          </Button>
-        )}
-        {/* <Button variant={economia.guardado >= economia.meta ? "secondary" : "default"} onClick={onGuardar} className="px-3 py-1">
-          {economia.guardado >= economia.meta ? "Desfazer" : "Pagar"}
-        </Button> */}
-        <Button variant="destructive" onClick={onRemove} className="px-3 py-1">
-          Remover
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={concluida ? onDesfazer : onGuardar}
+          className={concluida ? "text-blue-500" : "text-green-600"}
+        >
+          {concluida ? (
+            <RotateCcw className="w-5 h-5" />
+          ) : (
+            <CheckCircle className="w-5 h-5" />
+          )}
+        </Button>
+
+        <Button
+          variant="ghost"
+          size="icon"
+          className="text-red-500 hover:text-red-700"
+          onClick={onRemove}
+        >
+          <Trash2 className="w-5 h-5" />
         </Button>
       </div>
     </Card>
