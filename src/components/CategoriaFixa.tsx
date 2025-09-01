@@ -61,7 +61,7 @@ export default function CategoriaFixa({
           <h3 className="text-lg font-semibold text-gray-800">
             {categoria.nome} - Total gasto: R$ {totalGasto.toFixed(2)}
           </h3>
-          <Button variant="destructive" size="icon" onClick={removerCategoria}>
+          <Button variant="ghost" onClick={removerCategoria} className="text-red-500 hover:text-red-700">
             <Trash2 className="w-4 h-4" />
           </Button>
         </div>
