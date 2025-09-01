@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import type { CategoriaFixaType, EstadoMes } from "@/app/page";
 import { useState } from "react";
+import { Trash2 } from "lucide-react";
 
 function moeda(n: number) {
   return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(
@@ -49,7 +50,7 @@ export default function ConfigMes({
           <div className="text-sm font-medium mb-2">Adicionar categoria fixa</div>
           <div className="flex flex-col sm:flex-row gap-2">
             <input
-              className="border rounded-xl px-3 py-2 flex-1 w-full break-words"
+              className="border rounded-xl px-3 py-2 flex-1 w-full"
               placeholder="Nome (ex.: Roupas)"
               value={novoNome}
               onChange={(e) => setNovoNome(e.target.value)}
@@ -57,7 +58,7 @@ export default function ConfigMes({
             <input
               type="number"
               inputMode="decimal"
-              className="border rounded-xl px-3 py-2 w-36"
+              className="border rounded-xl px-3 py-2 w-full sm:w-36"
               placeholder="Meta (R$)"
               value={novoValor}
               onChange={(e) => setNovoValor(e.target.value)}
@@ -91,39 +92,29 @@ export default function ConfigMes({
               <div className="text-sm text-neutral-500">Nenhuma categoria.</div>
             )}
             {estado.categorias.map((c) => (
-              <div key={c.id} className="flex items-start gap-2">
-                <input
-                  className="border rounded-xl px-2 py-1 flex-1 min-w-0 break-words whitespace-normal"
-                  value={c.nome}
-                  onChange={(e) =>
-                    onUpdate({
-                      categorias: estado.categorias.map((x) =>
-                        x.id === c.id ? { ...x, nome: e.target.value } : x
-                      ),
-                    })
-                  }
-                />
-                <input
-                  type="number"
-                  inputMode="decimal"
-                  className="border rounded-xl px-2 py-1 w-28 text-right"
-                  value={String(c.meta)}
-                  onChange={(e) =>
-                    onUpdate({
-                      categorias: estado.categorias.map((x) =>
-                        x.id === c.id ? { ...x, meta: Number(e.target.value) || 0 } : x
-                      ),
-                    })
-                  }
-                />
-                <Button
-                  variant="destructive"
+              <div
+                key={c.id}
+                className="flex items-center justify-between rounded-lg border px-3 py-2"
+              >
+                <span className="text-sm font-medium break-words">
+                  {c.nome} –{" "}
+                  <span className="text-neutral-600">
+                    {new Intl.NumberFormat("pt-BR", {
+                      style: "currency",
+                      currency: "BRL",
+                    }).format(c.meta)}
+                  </span>
+                </span>
+                <button
+                  className="text-red-500 hover:text-red-700 transition"
                   onClick={() =>
-                    onUpdate({ categorias: estado.categorias.filter((x) => x.id !== c.id) })
+                    onUpdate({
+                      categorias: estado.categorias.filter((x) => x.id !== c.id),
+                    })
                   }
                 >
-                  Remover
-                </Button>
+                  <Trash2 size={18} />
+                </button>
               </div>
             ))}
           </div>

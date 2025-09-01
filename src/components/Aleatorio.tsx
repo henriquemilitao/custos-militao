@@ -125,7 +125,6 @@ export default function Aleatorio({
   semanas: [GastoItem[], GastoItem[], GastoItem[], GastoItem[]];
   fechadas: [boolean, boolean, boolean, boolean];
   fixas: [number | null, number | null, number | null, number | null];
-  onChangeMeta: (v: number) => void;
   onAddGasto: (semanaIndex: number, item: GastoItem) => void;
   onRemoveGasto: (semanaIndex: number, itemId: string) => void;
   onToggleFechar: (semanaIndex: number, fixedQuota?: number | null) => void;
