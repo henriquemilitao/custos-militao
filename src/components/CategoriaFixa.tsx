@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Trash2, CheckCircle, RotateCcw } from "lucide-react";
+import { Trash2, CheckCircle, RotateCcw, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CategoriaFixaType, EstadoMes } from "@/app/page";
@@ -82,7 +82,13 @@ export default function CategoriaFixa({
             onChange={(e) => setNovoValor(e.target.value)}
             className="flex-1"
           />
-          <Button onClick={adicionarGasolina}>Adicionar</Button>
+          <Button
+            onClick={adicionarGasolina}
+            size="icon"
+            className="bg-blue-500 hover:bg-blue-600 text-white rounded-full"
+          >
+            <Plus className="w-5 h-5" />
+          </Button>
         </div>
 
         <ul className="space-y-2">
