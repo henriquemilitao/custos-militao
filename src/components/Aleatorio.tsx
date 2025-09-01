@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import type { GastoItem } from "@/app/page";
+import type { EstadoMes, GastoItem } from "@/app/page";
 
 const PESOS = [1, 1, 1, 1.5] as const;
 
@@ -21,57 +21,65 @@ function dataHojeCampoGrande(): string {
  * Calcula quotas base e quotas dinâmicas.
  * - metaMes: número total para o mês
  * - totaisPorSemana: [n0,n1,n2,n3] soma de gastos por semana
- * - fechadas: [b0,b1,b2,b3] (se true, semana está "fechada" e não recebe redistribuições futuras)
+ * - fechadas: flags de "finalizado" (não usadas para fixar, mas para lógica de redistribuição)
+ * - fixas: quotas travadas (number | null); se fixas[i] != null => quota daquela semana está fixa
  *
- * Retorna: { base: number[], quotas: number[] }
+ * Algoritmo:
+ *  - começa com base = meta * peso / somaPesos
+ *  - aplica fixas (substitui quota[i] = fixas[i] onde houver)
+ *  - percorre j=0..3: calcula delta = quota[j] - gasto[j]; se delta != 0 e a semana j "pode redistribuir"
+ *    (teve gasto > 0 ou foi marcada como finalizada), então distribui delta entre semanas futuras
+ *    que não estão fixas, proporcional aos seus pesos.
  */
 function calcularQuotasDinamicas(
   metaMes: number,
   totaisPorSemana: number[],
-  fechadas: [boolean, boolean, boolean, boolean]
+  fechadas: [boolean, boolean, boolean, boolean],
+  fixas: [number | null, number | null, number | null, number | null],
+  semanaAtualIndex: number
 ): { base: number[]; quotas: number[] } {
+  const PESOS = [1, 1, 1, 1.5];
   const somaPesos = PESOS.reduce((a, b) => a + b, 0);
+
+  // quotas base
   const base = PESOS.map((p) => (metaMes / somaPesos) * p);
 
-  // quotas começam iguais à base
+  // quotas dinâmicas começam iguais à base
   const quotas = [...base];
 
-  // para cada semana j que pode redistribuir (teve gasto ou foi marcada como fechada)
-  // calculamos delta = base[j] - gasto_j (pode ser positivo ou negativo)
-  // e propagamos esse delta proporcionalmente para semanas futuras não fechadas (i > j)
-  for (let j = 0; j < 4; j++) {
-    const gastoJ = Number(totaisPorSemana[j] ?? 0);
-    const teveGasto = gastoJ > 0;
-    const podeRedistribuir = teveGasto || fechadas[j] === true;
-    if (!podeRedistribuir) continue;
+  // aplica fixações
+  for (let i = 0; i < 4; i++) {
+    if (fixas[i] != null) quotas[i] = fixas[i] as number;
+  }
 
-    const delta = (base[j] ?? 0) - gastoJ; // positivo => sobra; negativo => excesso
-    if (delta === 0) continue;
+  // calcula quanto já foi gasto e quanto resta no mês
+  const gastoTotal = totaisPorSemana.reduce((a, b) => a + b, 0);
+  const restanteTotal = metaMes - gastoTotal;
 
-    // peso disponível nas semanas futuras (somente i > j que não estejam fechadas)
-    let pesoFuturo = 0;
-    for (let k = j + 1; k < 4; k++) {
-      if (!fechadas[k]) pesoFuturo += PESOS[k];
-    }
+  // índices das semanas futuras que **não estão fixas** e **não são a semana atual**
+  const indicesFuturasNaoFixas = [];
+  for (let i = semanaAtualIndex + 1; i < 4; i++) {
+    if (fixas[i] == null) indicesFuturasNaoFixas.push(i);
+  }
 
-    if (pesoFuturo <= 0) {
-      // nada pra receber → nada a fazer
-      continue;
-    }
+  // soma dos pesos apenas das semanas futuras não fixas
+  const somaPesosFuturasNaoFixas = indicesFuturasNaoFixas.reduce((s, i) => s + PESOS[i], 0);
 
-    for (let i = j + 1; i < 4; i++) {
-      if (fechadas[i]) continue;
-      quotas[i] += delta * (PESOS[i] / pesoFuturo);
-    }
+  // redistribui restante proporcionalmente apenas entre semanas futuras não fixas
+  for (const i of indicesFuturasNaoFixas) {
+    quotas[i] = (restanteTotal * PESOS[i]) / somaPesosFuturasNaoFixas;
   }
 
   return { base, quotas };
 }
 
+
+
 export default function Aleatorio({
   meta,
   semanas,
   fechadas,
+  fixas,
   onChangeMeta,
   onAddGasto,
   onRemoveGasto,
@@ -80,18 +88,21 @@ export default function Aleatorio({
   meta: number;
   semanas: [GastoItem[], GastoItem[], GastoItem[], GastoItem[]];
   fechadas: [boolean, boolean, boolean, boolean];
+  fixas: [number | null, number | null, number | null, number | null];
   onChangeMeta: (v: number) => void;
   onAddGasto: (semanaIndex: number, item: GastoItem) => void;
   onRemoveGasto: (semanaIndex: number, itemId: string) => void;
-  onToggleFechar: (semanaIndex: number) => void;
+  // agora o segundo argumento é a quota atual (number) quando fechando, ou null/undefined quando reabrindo
+  onToggleFechar: (semanaIndex: number, fixedQuota?: number | null) => void;
 }) {
-  // totais numéricos por semana (usado pelo cálculo)
   const totaisPorSemana = semanas.map((items) => items.reduce((s, it) => s + it.valor, 0));
 
-  const { base: quotaBasePorSemana, quotas: quotasDinamicas } = useMemo(
-    () => calcularQuotasDinamicas(meta, totaisPorSemana, fechadas),
-    [meta, totaisPorSemana, fechadas]
-  );
+ const semanaAtualIndex = semanas.findIndex((_, i) => !fechadas[i]) ?? 0;
+
+    const { base: quotaBasePorSemana, quotas: quotasDinamicas } = useMemo(
+    () => calcularQuotasDinamicas(meta, totaisPorSemana, fechadas, fixas, semanaAtualIndex),
+    [meta, totaisPorSemana, fechadas, fixas, semanaAtualIndex]
+    ); 
 
   // UI de adicionar gasto (inline por semana)
   function AddForm({ index }: { index: number }) {
@@ -170,7 +181,7 @@ export default function Aleatorio({
                 <div>
                   <div className="font-medium">Semana {i + 1}</div>
                   <div className="text-xs text-neutral-500">
-                    Quota dinâmica: {moeda(quotaDin)} {i === 0 ? "(fixa pela base)" : ""}
+                    Quota dinâmica: {moeda(quotaDin)} {fixas[i] != null ? "(fixa)" : i === 0 ? "(fixa pela base)" : ""}
                   </div>
                 </div>
 
@@ -180,9 +191,17 @@ export default function Aleatorio({
                       fechadas[i] ? "bg-green-50 border-green-200 text-green-700" : "bg-neutral-50 border-neutral-200 text-neutral-600"
                     }`}
                   >
-                    {fechadas[i] ? "Semana fechada" : "Semana aberta"}
+                    {fechadas[i] ? "Semana finalizada" : "Semana aberta"}
                   </span>
-                  <Button variant="secondary" size="sm" onClick={() => onToggleFechar(i)}>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => {
+                      // se estamos fechando (fechadas[i] === false) passamos a quota atual para fixar
+                      // se estamos reabrindo (fechadas[i] === true) passamos null para limpar a fixação
+                      onToggleFechar(i, fechadas[i] ? null : quotasDinamicas[i]);
+                    }}
+                  >
                     {fechadas[i] ? "Reabrir" : "Finalizar semana"}
                   </Button>
                 </div>

@@ -30,8 +30,10 @@ export type EstadoMes = {
   aleatorioMeta: number; // meta do "Aleatório" para o mês
   // gastos aleatórios por semana (índices 0..3)
   aleatorioSemanas: [GastoItem[], GastoItem[], GastoItem[], GastoItem[]];
-  // permite “fechar” uma semana para repassar a sobra mesmo sem gastos
+  // permite “fechar” / marcar uma semana (botão Finalizar)
   aleatorioFechadas: [boolean, boolean, boolean, boolean];
+  // NOVO: quotas travadas quando o usuário clica Finalizar (ou null se não travada)
+  aleatorioQuotaFixas: [number | null, number | null, number | null, number | null];
 };
 
 type MapMeses = Record<string, EstadoMes>;
@@ -58,14 +60,14 @@ function load(): MapMeses {
     for (const k of Object.keys(parsed)) {
       const v = parsed[k] as Partial<EstadoMes>;
       migrated[k] = {
-        mesId: (v.mesId as string) ?? k,
-        saldoInicial: Number(v.saldoInicial ?? 1200),
-        categorias: (v.categorias as CategoriaFixaType[]) ?? [],
-        aleatorioMeta: Number(v.aleatorioMeta ?? 400),
-        // garantir tupla de 4 arrays
-        aleatorioSemanas: (v.aleatorioSemanas as EstadoMes["aleatorioSemanas"]) ?? [[], [], [], []],
-        // garantir tupla de 4 booleans
-        aleatorioFechadas: (v.aleatorioFechadas as EstadoMes["aleatorioFechadas"]) ?? [false, false, false, false],
+        mesId: (v?.mesId as string) ?? k,
+        saldoInicial: Number(v?.saldoInicial ?? 1200),
+        categorias: (v?.categorias as CategoriaFixaType[]) ?? [],
+        aleatorioMeta: Number(v?.aleatorioMeta ?? 400),
+        aleatorioSemanas: (v?.aleatorioSemanas as EstadoMes["aleatorioSemanas"]) ?? [[], [], [], []],
+        aleatorioFechadas: (v?.aleatorioFechadas as EstadoMes["aleatorioFechadas"]) ?? [false, false, false, false],
+        aleatorioQuotaFixas:
+          (v?.aleatorioQuotaFixas as EstadoMes["aleatorioQuotaFixas"]) ?? [null, null, null, null],
       };
     }
     return migrated;
@@ -100,20 +102,23 @@ export default function Page() {
         aleatorioMeta: 400,
         aleatorioSemanas: [[], [], [], []],
         aleatorioFechadas: [false, false, false, false],
+        aleatorioQuotaFixas: [null, null, null, null],
       };
     } else {
-      // defensive: garantir que o campo exista e seja uma tupla/array com 4 itens
+      // defensive: garantir estrutura consistente
       const v = m[mesHoje]!;
       if (!Array.isArray(v.aleatorioFechadas) || v.aleatorioFechadas.length !== 4) {
         v.aleatorioFechadas = [false, false, false, false];
       }
-      // também garantir que aleatorioSemanas exista e tenha 4 arrays
       if (
         !Array.isArray(v.aleatorioSemanas) ||
         v.aleatorioSemanas.length !== 4 ||
         !v.aleatorioSemanas.every((a) => Array.isArray(a))
       ) {
         v.aleatorioSemanas = [[], [], [], []];
+      }
+      if (!Array.isArray(v.aleatorioQuotaFixas) || v.aleatorioQuotaFixas.length !== 4) {
+        v.aleatorioQuotaFixas = [null, null, null, null];
       }
     }
 
@@ -132,7 +137,15 @@ export default function Page() {
     setMap((old) => ({
       ...old,
       [mes]: {
-        ...(old[mes] ?? { mesId: mes, saldoInicial: 0, categorias: [], aleatorioMeta: 0, aleatorioSemanas: [[], [], [], []], aleatorioFechadas: [false, false, false, false] }),
+        ...(old[mes] ?? {
+          mesId: mes,
+          saldoInicial: 0,
+          categorias: [],
+          aleatorioMeta: 0,
+          aleatorioSemanas: [[], [], [], []],
+          aleatorioFechadas: [false, false, false, false],
+          aleatorioQuotaFixas: [null, null, null, null],
+        }),
         ...patch,
       },
     }));
@@ -215,6 +228,7 @@ export default function Page() {
             meta={estado.aleatorioMeta}
             semanas={estado.aleatorioSemanas}
             fechadas={estado.aleatorioFechadas}
+            fixas={estado.aleatorioQuotaFixas}
             onChangeMeta={(v) => atualizarMes({ aleatorioMeta: v })}
             onAddGasto={(semanaIndex, item) => {
               const novo = estado.aleatorioSemanas.map((arr, i) =>
@@ -228,9 +242,14 @@ export default function Page() {
               ) as EstadoMes["aleatorioSemanas"];
               atualizarMes({ aleatorioSemanas: novo });
             }}
-            onToggleFechar={(semanaIndex) => {
+            onToggleFechar={(semanaIndex, fixedQuota) => {
+              // fixedQuota === number when we are closing and want to fix the current quota
+              // fixedQuota === null/undefined when reopening
               const novo = estado.aleatorioFechadas.map((f, i) => (i === semanaIndex ? !f : f)) as EstadoMes["aleatorioFechadas"];
-              atualizarMes({ aleatorioFechadas: novo });
+              const novoFixas = estado.aleatorioQuotaFixas.map((q, i) =>
+                i === semanaIndex ? (fixedQuota ?? null) : q
+              ) as EstadoMes["aleatorioQuotaFixas"];
+              atualizarMes({ aleatorioFechadas: novo, aleatorioQuotaFixas: novoFixas });
             }}
           />
         </div>
