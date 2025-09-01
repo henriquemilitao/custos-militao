@@ -9,46 +9,75 @@ function moeda(n: number) {
 
 export default function ResumoMes({
   saldoInicial,
-  totalPlanejado,
-  totalGasto,
-  saldoDisponivel,
-  diferencaPlanejadoSaldo,
+  economias,
+  gastoFixas,
+  gastoAleatorio,
+  totalPlanejadoFixas,
+  aleatorioMeta,
 }: {
   saldoInicial: number;
-  totalPlanejado: number;
-  totalGasto: number;
-  saldoDisponivel: number;
-  diferencaPlanejadoSaldo: number;
+  economias: { meta: number }[];
+  gastoFixas: number;
+  gastoAleatorio: number;
+  totalPlanejadoFixas: number;
+  aleatorioMeta: number;
 }) {
+  // total economias
+  const totalEconomias = economias.reduce((acc, e) => acc + e.meta, 0);
+
+  // saldo após economias
+  const totalRealParaGastar = saldoInicial - totalEconomias;
+
+  // ainda a gastar / disponível
+  const restanteFixas = totalPlanejadoFixas - gastoFixas;
+  const restanteAleatorio = aleatorioMeta - gastoAleatorio;
+
   return (
     <Card className="rounded-2xl shadow-sm">
       <CardHeader>
         <CardTitle>Resumo do Mês</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-center">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+          {/* Total recebido */}
           <div>
-            <div className="text-xs text-neutral-500">Saldo inicial</div>
+            <div className="text-neutral-500">Total recebido</div>
             <div className="text-lg font-semibold">{moeda(saldoInicial)}</div>
           </div>
+
+          {/* Economias */}
           <div>
-            <div className="text-xs text-neutral-500">Planejado</div>
-            <div className="text-lg font-semibold">{moeda(totalPlanejado)}</div>
+            <div className="text-neutral-500">Quanto quero economizar</div>
+            <div className="text-lg font-semibold text-blue-600">{moeda(totalEconomias)}</div>
           </div>
+
+          {/* Total real para gastar */}
           <div>
-            <div className="text-xs text-neutral-500">Gasto</div>
-            <div className="text-lg font-semibold text-red-600">{moeda(totalGasto)}</div>
+            <div className="text-neutral-500">Total real para gastar no mês</div>
+            <div className="text-lg font-semibold text-green-600">{moeda(totalRealParaGastar)}</div>
           </div>
+
+          {/* Categorias fixas */}
           <div>
-            <div className="text-xs text-neutral-500">Saldo disponível</div>
-            <div className={`text-lg font-semibold ${saldoDisponivel < 0 ? "text-red-600" : "text-green-600"}`}>
-              {moeda(saldoDisponivel)}
+            <div className="text-neutral-500">Total gasto com categorias fixas</div>
+            <div className="text-lg font-semibold text-red-600">{moeda(gastoFixas)}</div>
+            <div className="text-xs text-neutral-500">
+              Planejado: {moeda(totalPlanejadoFixas)}
+            </div>
+            <div className="text-xs text-green-600">
+              Ainda tenho que gastar: {moeda(restanteFixas)}
             </div>
           </div>
+
+          {/* Aleatório */}
           <div>
-            <div className="text-xs text-neutral-500">Dif. (Saldo - Planejado)</div>
-            <div className={`text-lg font-semibold ${diferencaPlanejadoSaldo < 0 ? "text-red-600" : "text-neutral-900"}`}>
-              {moeda(diferencaPlanejadoSaldo)}
+            <div className="text-neutral-500">Total gasto com aleatório</div>
+            <div className="text-lg font-semibold text-red-600">{moeda(gastoAleatorio)}</div>
+            <div className="text-xs text-neutral-500">
+              Planejado: {moeda(aleatorioMeta)}
+            </div>
+            <div className="text-xs text-green-600">
+              Ainda posso gastar: {moeda(restanteAleatorio)}
             </div>
           </div>
         </div>

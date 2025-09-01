@@ -310,10 +310,11 @@ function handleAdicionarEconomia(nova: Omit<EconomiaType, "id" | "guardado">) {
         {/* Resumo */}
         <ResumoMes
           saldoInicial={estado.saldoInicial}
-          totalPlanejado={totalPlanejado}
-          totalGasto={totalGasto}
-          saldoDisponivel={saldoDisponivel}
-          diferencaPlanejadoSaldo={diferençaPlanejadoSaldo}
+          economias={economias}
+          gastoFixas={gastoFixas}
+          gastoAleatorio={gastoAleatorio}
+          totalPlanejadoFixas={totalPlanejadoFixas}
+          aleatorioMeta={estado.aleatorioMeta}
         />
 
         <footer className="text-center text-xs text-neutral-500 py-8">
