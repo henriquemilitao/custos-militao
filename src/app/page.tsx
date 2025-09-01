@@ -1,3 +1,4 @@
+// page.tsx
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -29,9 +30,12 @@ export type EstadoMes = {
   aleatorioMeta: number; // meta do "Aleatório" para o mês
   // gastos aleatórios por semana (índices 0..3)
   aleatorioSemanas: [GastoItem[], GastoItem[], GastoItem[], GastoItem[]];
+  // permite “fechar” uma semana para repassar a sobra mesmo sem gastos
+  aleatorioFechadas: [boolean, boolean, boolean, boolean];
 };
 
-const pesosPadrao = [1, 1, 1, 1.5] as const;
+type MapMeses = Record<string, EstadoMes>;
+
 const LS_KEY = "budget-planner-v2";
 
 function yyyymm(d: Date) {
@@ -44,42 +48,75 @@ function moeda(n: number) {
   );
 }
 
-function load(): Record<string, EstadoMes> {
+function load(): MapMeses {
   try {
     const raw = localStorage.getItem(LS_KEY);
     if (!raw) return {};
-    return JSON.parse(raw);
+    const parsed = JSON.parse(raw) as Record<string, any>;
+
+    const migrated: MapMeses = {};
+    for (const k of Object.keys(parsed)) {
+      const v = parsed[k] as Partial<EstadoMes>;
+      migrated[k] = {
+        mesId: (v.mesId as string) ?? k,
+        saldoInicial: Number(v.saldoInicial ?? 1200),
+        categorias: (v.categorias as CategoriaFixaType[]) ?? [],
+        aleatorioMeta: Number(v.aleatorioMeta ?? 400),
+        // garantir tupla de 4 arrays
+        aleatorioSemanas: (v.aleatorioSemanas as EstadoMes["aleatorioSemanas"]) ?? [[], [], [], []],
+        // garantir tupla de 4 booleans
+        aleatorioFechadas: (v.aleatorioFechadas as EstadoMes["aleatorioFechadas"]) ?? [false, false, false, false],
+      };
+    }
+    return migrated;
   } catch {
     return {};
   }
 }
 
-function save(map: Record<string, EstadoMes>) {
+function save(map: MapMeses) {
   localStorage.setItem(LS_KEY, JSON.stringify(map));
 }
 
 export default function Page() {
   const mesHoje = useMemo(() => yyyymm(new Date()), []);
-  const [map, setMap] = useState<Record<string, EstadoMes>>({});
+  const [map, setMap] = useState<MapMeses>({});
   const [mes, setMes] = useState<string>(mesHoje);
 
   // bootstrap localStorage
   useEffect(() => {
-    const m = load();
+    const m: MapMeses = load();
+
     // cria estado inicial do mês, se não existir
     if (!m[mesHoje]) {
       m[mesHoje] = {
         mesId: mesHoje,
         saldoInicial: 1200,
         categorias: [
-          { id: crypto.randomUUID(), nome: "Cabeleireiro", meta: 120, paid: false } as any,
-          { id: crypto.randomUUID(), nome: "Comida", meta: 600, paid: false } as any,
-          { id: crypto.randomUUID(), nome: "Água", meta: 80, paid: false } as any,
+          { id: crypto.randomUUID(), nome: "Cabeleireiro", meta: 120, pago: false },
+          { id: crypto.randomUUID(), nome: "Comida", meta: 600, pago: false },
+          { id: crypto.randomUUID(), nome: "Água", meta: 80, pago: false },
         ],
         aleatorioMeta: 400,
         aleatorioSemanas: [[], [], [], []],
+        aleatorioFechadas: [false, false, false, false],
       };
+    } else {
+      // defensive: garantir que o campo exista e seja uma tupla/array com 4 itens
+      const v = m[mesHoje]!;
+      if (!Array.isArray(v.aleatorioFechadas) || v.aleatorioFechadas.length !== 4) {
+        v.aleatorioFechadas = [false, false, false, false];
+      }
+      // também garantir que aleatorioSemanas exista e tenha 4 arrays
+      if (
+        !Array.isArray(v.aleatorioSemanas) ||
+        v.aleatorioSemanas.length !== 4 ||
+        !v.aleatorioSemanas.every((a) => Array.isArray(a))
+      ) {
+        v.aleatorioSemanas = [[], [], [], []];
+      }
     }
+
     setMap(m);
   }, [mesHoje]);
 
@@ -92,23 +129,29 @@ export default function Page() {
   const estado = map[mes] as EstadoMes | undefined;
 
   function atualizarMes(patch: Partial<EstadoMes>) {
-    setMap((old) => ({ ...old, [mes]: { ...(old[mes] || ({} as EstadoMes)), ...patch } as EstadoMes }));
+    setMap((old) => ({
+      ...old,
+      [mes]: {
+        ...(old[mes] ?? { mesId: mes, saldoInicial: 0, categorias: [], aleatorioMeta: 0, aleatorioSemanas: [[], [], [], []], aleatorioFechadas: [false, false, false, false] }),
+        ...patch,
+      },
+    }));
   }
 
-  if (!estado) return (
-    <main className="p-6">
-      <p>Carregando…</p>
-    </main>
-  );
+  if (!estado) {
+    return (
+      <main className="p-6">
+        <p>Carregando…</p>
+      </main>
+    );
+  }
 
   // ----- Cálculos Resumo -----
   const totalPlanejadoFixas = estado.categorias.reduce((s, c) => s + c.meta, 0);
   const totalPlanejado = totalPlanejadoFixas + estado.aleatorioMeta;
 
   const gastoFixas = estado.categorias.reduce((s, c) => s + (c.pago ? c.meta : 0), 0);
-  const gastoAleatorio = estado.aleatorioSemanas
-    .flat()
-    .reduce((s, it) => s + it.valor, 0);
+  const gastoAleatorio = estado.aleatorioSemanas.flat().reduce((s, it) => s + it.valor, 0);
   const totalGasto = gastoFixas + gastoAleatorio;
 
   const saldoDisponivel = estado.saldoInicial - totalGasto;
@@ -133,11 +176,7 @@ export default function Page() {
 
       <div className="max-w-6xl mx-auto p-4 md:p-6 space-y-6">
         {/* Configurações do mês */}
-        <ConfigMes
-          mes={mes}
-          estado={estado}
-          onUpdate={atualizarMes}
-        />
+        <ConfigMes mes={mes} estado={estado} onUpdate={atualizarMes} />
 
         {/* Grid principal responsivo */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -175,6 +214,7 @@ export default function Page() {
           <Aleatorio
             meta={estado.aleatorioMeta}
             semanas={estado.aleatorioSemanas}
+            fechadas={estado.aleatorioFechadas}
             onChangeMeta={(v) => atualizarMes({ aleatorioMeta: v })}
             onAddGasto={(semanaIndex, item) => {
               const novo = estado.aleatorioSemanas.map((arr, i) =>
@@ -187,6 +227,10 @@ export default function Page() {
                 i === semanaIndex ? arr.filter((g) => g.id !== itemId) : arr
               ) as EstadoMes["aleatorioSemanas"];
               atualizarMes({ aleatorioSemanas: novo });
+            }}
+            onToggleFechar={(semanaIndex) => {
+              const novo = estado.aleatorioFechadas.map((f, i) => (i === semanaIndex ? !f : f)) as EstadoMes["aleatorioFechadas"];
+              atualizarMes({ aleatorioFechadas: novo });
             }}
           />
         </div>
