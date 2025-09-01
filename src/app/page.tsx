@@ -84,9 +84,9 @@ export default function Page() {
   const [mes, setMes] = useState<string>(mesHoje);
   const [economias, setEconomias] = useState<EconomiaType[]>([]);
 
-  function handleAdicionarEconomia(nova: Omit<EconomiaType, "id" | "guardado">) {
+  function handleAdicionarEconomia(nova: Omit<EconomiaType, "id" | "aportes">) {
     setEconomias((prev) => [
-      { id: crypto.randomUUID(), titulo: nova.titulo, meta: nova.meta, guardado: 0 },
+      { id: crypto.randomUUID(), titulo: nova.titulo, meta: nova.meta, aportes: [] },
       ...prev,
     ]);
   }
@@ -95,21 +95,47 @@ export default function Page() {
     setEconomias((prev) => prev.filter((e) => e.id !== id));
   }
 
-  function handleGuardarEconomia(id: string, valor: number) {
+  // function handleGuardarEconomia(id: string, valor: number) {
+  //   setEconomias((prev) =>
+  //     prev.map((e) =>
+  //       e.id === id ? { ...e, guardado: Math.min(e.guardado + valor, e.meta) } : e
+  //     )
+  //   );
+  // }
+
+  // function handleDesfazerEconomia(id: string) {
+  //   setEconomias((prev) =>
+  //     prev.map((e) =>
+  //       e.id === id ? { ...e, guardado: 0 } : e
+  //     )
+  //   );
+  // }
+
+  function handleAdicionarAporte(economiaId: string, valor: number) {
     setEconomias((prev) =>
       prev.map((e) =>
-        e.id === id ? { ...e, guardado: Math.min(e.guardado + valor, e.meta) } : e
+        e.id === economiaId
+          ? {
+              ...e,
+              aportes: [
+                ...e.aportes,
+                { id: crypto.randomUUID(), data: new Date().toLocaleDateString("pt-BR"), valor },
+              ],
+            }
+          : e
       )
     );
   }
 
-  function handleDesfazerEconomia(id: string) {
+  function handleRemoverAporte(economiaId: string, aporteId: string) {
     setEconomias((prev) =>
       prev.map((e) =>
-        e.id === id ? { ...e, guardado: 0 } : e
+        e.id === economiaId
+          ? { ...e, aportes: e.aportes.filter((a) => a.id !== aporteId) }
+          : e
       )
     );
-  }
+}
 
   // carregar dados salvos
   useEffect(() => {
@@ -186,7 +212,10 @@ export default function Page() {
 
       <ResumoMes
         saldoInicial={estado.saldoInicial}
-        economias={economias.map((e) => ({ meta: e.meta, guardado: e.guardado }))}
+        economias={economias.map((e) => ({
+          meta: e.meta,
+          guardado: e.aportes.reduce((s, a) => s + a.valor, 0),
+        }))}
         gastoFixas={gastoFixas}
         gastoAleatorio={gastoAleatorio}
         totalPlanejadoFixas={totalPlanejadoFixas}
@@ -206,8 +235,8 @@ export default function Page() {
               <EconomiaItem
                 key={eco.id}
                 economia={eco}
-                onGuardar={() => handleGuardarEconomia(eco.id, eco.meta)}
-                onDesfazer={() => handleDesfazerEconomia(eco.id)}
+                onAdicionarAporte={(valor) => handleAdicionarAporte(eco.id, valor)}
+                onRemoverAporte={(aporteId) => handleRemoverAporte(eco.id, aporteId)}
                 onRemove={() => handleRemoverEconomia(eco.id)}
               />
             ))

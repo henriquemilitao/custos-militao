@@ -9,14 +9,14 @@ export type Economia = {
   id: string;
   titulo: string;
   meta: number;
-  guardado: number;
+  aportes: { id: string; data: string; valor: number }[];
 };
 
 export default function ConfigEconomia({
   onAdicionar,
   triggerLabel = "Adicionar Economia",
 }: {
-  onAdicionar: (nova: Omit<Economia, "id" | "guardado">) => void;
+  onAdicionar: (nova: Omit<Economia, "id" | "aportes">) => void;
   triggerLabel?: string;
 }) {
   const [open, setOpen] = useState(false);
