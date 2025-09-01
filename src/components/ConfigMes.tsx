@@ -42,16 +42,6 @@ export default function ConfigMes({
               onChange={(e) => onUpdate({ saldoInicial: Number(e.target.value) || 0 })}
             />
           </label>
-          <label className="flex flex-col gap-1">
-            <span className="text-sm text-neutral-600">Meta do Aleatório</span>
-            <input
-              type="number"
-              inputMode="decimal"
-              className="border rounded-xl px-3 py-2 w-full"
-              value={String(estado.aleatorioMeta)}
-              onChange={(e) => onUpdate({ aleatorioMeta: Number(e.target.value) || 0 })}
-            />
-          </label>
         </div>
 
         {/* Adicionar nova categoria */}

@@ -117,7 +117,6 @@ export default function Aleatorio({
   semanas,
   fechadas,
   fixas,
-  onChangeMeta,
   onAddGasto,
   onRemoveGasto,
   onToggleFechar,
@@ -190,17 +189,12 @@ export default function Aleatorio({
     <Card className="rounded-2xl shadow-sm">
       <CardHeader className="pb-2">
         <CardTitle>Categoria Aleatório</CardTitle>
-      </CardHeader>
+      </CardHeader>        
       <CardContent className="space-y-3">
         <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
-          <label className="text-sm text-neutral-600">Meta do mês</label>
-          <input
-            type="number"
-            inputMode="decimal"
-            className="border rounded-xl px-3 py-2 w-full sm:w-40"
-            value={String(meta)}
-            onChange={(e) => onChangeMeta(Number(e.target.value) || 0)}
-          />
+          <div className="text-sm text-neutral-600">
+            Total disponível para Aleatório: <b>{moeda(meta)}</b>
+          </div>
           <div className="text-xs text-neutral-500">
             Cotas base: [{quotaBasePorSemana.map((q: number) => moeda(q)).join(", ")}]
           </div>

@@ -182,14 +182,15 @@ function handleAdicionarEconomia(nova: Omit<EconomiaType, "id" | "guardado">) {
 
   // ----- Cálculos Resumo -----
   const totalPlanejadoFixas = estado.categorias.reduce((s, c) => s + c.meta, 0);
-  const totalPlanejado = totalPlanejadoFixas + estado.aleatorioMeta;
+  const totalEconomias = economias.reduce((acc, e) => acc + e.meta, 0);
+
+  // agora o aleatório é calculado, não definido
+  const aleatorioMeta = estado.saldoInicial - totalEconomias - totalPlanejadoFixas;
 
   const gastoFixas = estado.categorias.reduce((s, c) => s + (c.pago ? c.meta : 0), 0);
   const gastoAleatorio = estado.aleatorioSemanas.flat().reduce((s, it) => s + it.valor, 0);
-  const totalGasto = gastoFixas + gastoAleatorio;
 
-  const saldoDisponivel = estado.saldoInicial - totalGasto;
-  const diferençaPlanejadoSaldo = estado.saldoInicial - totalPlanejado;
+  const totalGasto = gastoFixas + gastoAleatorio;
 
   return (
     <main className="min-h-screen bg-neutral-50">
@@ -275,46 +276,43 @@ function handleAdicionarEconomia(nova: Omit<EconomiaType, "id" | "guardado">) {
               ))}
             </CardContent>
           </Card>
-
-          {/* Aleatório */}
-          <Aleatorio
-            meta={estado.aleatorioMeta}
-            semanas={estado.aleatorioSemanas}
-            fechadas={estado.aleatorioFechadas}
-            fixas={estado.aleatorioQuotaFixas}
-            onChangeMeta={(v) => atualizarMes({ aleatorioMeta: v })}
-            onAddGasto={(semanaIndex, item) => {
-              const novo = estado.aleatorioSemanas.map((arr, i) =>
-                i === semanaIndex ? [...arr, item] : arr
-              ) as EstadoMes["aleatorioSemanas"];
-              atualizarMes({ aleatorioSemanas: novo });
-            }}
-            onRemoveGasto={(semanaIndex, itemId) => {
-              const novo = estado.aleatorioSemanas.map((arr, i) =>
-                i === semanaIndex ? arr.filter((g) => g.id !== itemId) : arr
-              ) as EstadoMes["aleatorioSemanas"];
-              atualizarMes({ aleatorioSemanas: novo });
-            }}
-            onToggleFechar={(semanaIndex, fixedQuota) => {
-              // fixedQuota === number when we are closing and want to fix the current quota
-              // fixedQuota === null/undefined when reopening
-              const novo = estado.aleatorioFechadas.map((f, i) => (i === semanaIndex ? !f : f)) as EstadoMes["aleatorioFechadas"];
-              const novoFixas = estado.aleatorioQuotaFixas.map((q, i) =>
-                i === semanaIndex ? (fixedQuota ?? null) : q
-              ) as EstadoMes["aleatorioQuotaFixas"];
-              atualizarMes({ aleatorioFechadas: novo, aleatorioQuotaFixas: novoFixas });
-            }}
-          />
         </div>
+        
+        <Aleatorio
+          meta={aleatorioMeta}
+          semanas={estado.aleatorioSemanas}
+          fechadas={estado.aleatorioFechadas}
+          fixas={estado.aleatorioQuotaFixas}
+          onAddGasto={(semanaIndex, item) => {
+            const novo = estado.aleatorioSemanas.map((arr, i) =>
+              i === semanaIndex ? [...arr, item] : arr
+            ) as EstadoMes["aleatorioSemanas"];
+            atualizarMes({ aleatorioSemanas: novo });
+          }}
+          onRemoveGasto={(semanaIndex, itemId) => {
+            const novo = estado.aleatorioSemanas.map((arr, i) =>
+              i === semanaIndex ? arr.filter((g) => g.id !== itemId) : arr
+            ) as EstadoMes["aleatorioSemanas"];
+            atualizarMes({ aleatorioSemanas: novo });
+          }}
+          onToggleFechar={(semanaIndex, fixedQuota) => {
+            const novo = estado.aleatorioFechadas.map((f, i) =>
+              i === semanaIndex ? !f : f
+            ) as EstadoMes["aleatorioFechadas"];
+            const novoFixas = estado.aleatorioQuotaFixas.map((q, i) =>
+              i === semanaIndex ? (fixedQuota ?? null) : q
+            ) as EstadoMes["aleatorioQuotaFixas"];
+            atualizarMes({ aleatorioFechadas: novo, aleatorioQuotaFixas: novoFixas });
+          }}
+        />
 
-        {/* Resumo */}
         <ResumoMes
           saldoInicial={estado.saldoInicial}
           economias={economias}
           gastoFixas={gastoFixas}
           gastoAleatorio={gastoAleatorio}
           totalPlanejadoFixas={totalPlanejadoFixas}
-          aleatorioMeta={estado.aleatorioMeta}
+          aleatorioMeta={aleatorioMeta}
         />
 
         <footer className="text-center text-xs text-neutral-500 py-8">
