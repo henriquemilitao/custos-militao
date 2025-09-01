@@ -33,7 +33,7 @@ export default function ResumoMes({
   const restanteAleatorio = aleatorioMeta - gastoAleatorio;
 
   return (
-    <Card className="rounded-2xl shadow-sm">
+    <Card className="rounded-2xl shadow-sm m-4">
       <CardHeader>
         <CardTitle>Resumo do Mês</CardTitle>
       </CardHeader>
@@ -57,9 +57,9 @@ export default function ResumoMes({
             <div className="text-lg font-semibold text-green-600">{moeda(totalRealParaGastar)}</div>
           </div>
 
-          {/* Categorias fixas */}
+          {/* Gastos fixos */}
           <div>
-            <div className="text-neutral-500">Total gasto com categorias fixas</div>
+            <div className="text-neutral-500">Total gasto com gastos fixos</div>
             <div className="text-lg font-semibold text-red-600">{moeda(gastoFixas)}</div>
             <div className="text-xs text-neutral-500">
               Planejado: {moeda(totalPlanejadoFixas)}

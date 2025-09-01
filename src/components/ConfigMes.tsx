@@ -34,7 +34,7 @@ export default function ConfigMes({
       <CardContent className="grid gap-4">
         <div className="grid gap-2 sm:grid-cols-2">
           <label className="flex flex-col gap-1">
-            <span className="text-sm text-neutral-600">Saldo inicial do mês</span>
+            <span className="text-sm text-neutral-600">Quanto recebo esse mes?</span>
             <input
               type="number"
               inputMode="decimal"
@@ -47,11 +47,11 @@ export default function ConfigMes({
 
         {/* Adicionar nova categoria */}
         <div className="rounded-xl border p-3">
-          <div className="text-sm font-medium mb-2">Adicionar categoria fixa</div>
+          <div className="text-sm font-medium mb-2">Adicionar gasto fixo</div>
           <div className="flex flex-col sm:flex-row gap-2">
             <input
               className="border rounded-xl px-3 py-2 flex-1 w-full"
-              placeholder="Nome (ex.: Roupas)"
+              placeholder="Nome (ex: Nutella :p)"
               value={novoNome}
               onChange={(e) => setNovoNome(e.target.value)}
             />
@@ -86,10 +86,10 @@ export default function ConfigMes({
 
         {/* Listagem de categorias p/ editar/remover */}
         <div className="rounded-xl border p-3">
-          <div className="text-sm font-medium mb-2">Categorias do mês</div>
+          <div className="text-sm font-medium mb-2">Gastos fixos do mês</div>
           <div className="space-y-2">
             {estado.categorias.length === 0 && (
-              <div className="text-sm text-neutral-500">Nenhuma categoria.</div>
+              <div className="text-sm text-neutral-500">Nenhum gasto fixo.</div>
             )}
             {estado.categorias.map((c) => (
               <div

@@ -209,6 +209,14 @@ function handleAdicionarEconomia(nova: Omit<EconomiaType, "id" | "guardado">) {
         </div>
       </header>
 
+      <ResumoMes
+          saldoInicial={estado.saldoInicial}
+          economias={economias}
+          gastoFixas={gastoFixas}
+          gastoAleatorio={gastoAleatorio}
+          totalPlanejadoFixas={totalPlanejadoFixas}
+          aleatorioMeta={aleatorioMeta}
+        />
 
       {/* Economias */}
       <Card className="rounded-2xl shadow-sm m-4">
@@ -247,14 +255,14 @@ function handleAdicionarEconomia(nova: Omit<EconomiaType, "id" | "guardado">) {
 
         {/* Grid principal responsivo */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {/* Categorias Fixas */}
+          {/* Gastos Fixas */}
           <Card className="rounded-2xl shadow-sm">
             <CardHeader>
-              <CardTitle>Categorias Fixas</CardTitle>
+              <CardTitle>Gastos Fixas</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               {estado.categorias.length === 0 && (
-                <div className="text-sm text-neutral-500">Nenhuma categoria adicionada.</div>
+                <div className="text-sm text-neutral-500">Nenhum gasto fixo adicionado.</div>
               )}
               {estado.categorias.map((c) => (
                 <CategoriaFixa
@@ -277,7 +285,7 @@ function handleAdicionarEconomia(nova: Omit<EconomiaType, "id" | "guardado">) {
             </CardContent>
           </Card>
         </div>
-        
+
         <Aleatorio
           meta={aleatorioMeta}
           semanas={estado.aleatorioSemanas}
@@ -304,15 +312,6 @@ function handleAdicionarEconomia(nova: Omit<EconomiaType, "id" | "guardado">) {
             ) as EstadoMes["aleatorioQuotaFixas"];
             atualizarMes({ aleatorioFechadas: novo, aleatorioQuotaFixas: novoFixas });
           }}
-        />
-
-        <ResumoMes
-          saldoInicial={estado.saldoInicial}
-          economias={economias}
-          gastoFixas={gastoFixas}
-          gastoAleatorio={gastoAleatorio}
-          totalPlanejadoFixas={totalPlanejadoFixas}
-          aleatorioMeta={aleatorioMeta}
         />
 
         <footer className="text-center text-xs text-neutral-500 py-8">
