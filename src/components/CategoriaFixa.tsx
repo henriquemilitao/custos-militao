@@ -40,12 +40,36 @@ export default function CategoriaFixa({
     });
   };
 
+  // Funções para categorias
+  const togglePago = () => {
+    atualizarEstado({
+      categorias: estado.categorias.map((c) =>
+        c.id === categoria.id ? { ...c, pago: !c.pago } : c
+      ),
+    });
+  };
+
+  const removerCategoria = () => {
+    atualizarEstado({
+      categorias: estado.categorias.filter((c) => c.id !== categoria.id),
+    });
+  };
+
   if (isGasolina) {
     return (
       <div className="p-4 border rounded-2xl shadow bg-white">
-        <h3 className="text-lg font-semibold text-gray-800 mb-2">
-          {categoria.nome} - Total gasto: R$ {totalGasto.toFixed(2)}
-        </h3>
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-lg font-semibold text-gray-800">
+            {categoria.nome} - Total gasto: R$ {totalGasto.toFixed(2)}
+          </h3>
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={removerCategoria}
+          >
+            Remover
+          </Button>
+        </div>
 
         <p
           className={`text-sm font-semibold mb-4 ${
@@ -90,10 +114,30 @@ export default function CategoriaFixa({
     );
   }
 
+  // Categoria normal
   return (
-    <div className="p-4 border rounded-2xl shadow bg-gray-50">
-      <h3 className="text-lg font-semibold text-gray-800">{categoria.nome}</h3>
-      <p className="text-sm text-gray-600">Valor: R$ {categoria.meta.toFixed(2)}</p>
+    <div
+      className={`p-4 border rounded-2xl shadow flex items-center justify-between transition-opacity duration-200 ${
+        categoria.pago ? "opacity-60 bg-gray-50" : "opacity-100 bg-white"
+      }`}
+    >
+      <div>
+        <h3 className="text-lg font-semibold text-gray-800">{categoria.nome}</h3>
+        <p className="text-sm text-gray-600">
+          Valor: R$ {categoria.meta.toFixed(2)}
+        </p>
+      </div>
+      <div className="flex items-center gap-2">
+        <Button
+          variant={categoria.pago ? "secondary" : "default"}
+          onClick={togglePago}
+        >
+          {categoria.pago ? "Desfazer" : "Pagar"}
+        </Button>
+        <Button variant="destructive" onClick={removerCategoria}>
+          Remover
+        </Button>
+      </div>
     </div>
   );
 }

@@ -55,7 +55,7 @@ export default function ResumoMes({
           <div>
             <div className="text-neutral-500">Economias</div>
             <div className="text-lg font-semibold text-blue-600">
-              Planejado: {moeda(totalEconomias)}
+              Meta: {moeda(totalEconomias)}
             </div>
             <div className="text-xs text-green-600">
               Já economizei: {moeda(totalEconomizado)}
@@ -81,9 +81,9 @@ export default function ResumoMes({
               Planejado: {moeda(totalPlanejadoFixas)}
             </div>
             <div
-              className={`text-xs ${restanteFixas < 0 ? "text-red-600" : "text-green-600"}`}
+              className={`text-xs ${restanteFixas < 0 ? "text-red-600" : "text-neutral-500"}`}
             >
-              Ainda vou gastar: {moeda(restanteFixas)}
+              Ainda tenho que gastar: {moeda(restanteFixas)}
             </div>
           </div>
 
