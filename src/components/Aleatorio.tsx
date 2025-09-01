@@ -35,43 +35,81 @@ function calcularQuotasDinamicas(
   metaMes: number,
   totaisPorSemana: number[],
   fechadas: [boolean, boolean, boolean, boolean],
-  fixas: [number | null, number | null, number | null, number | null],
-  semanaAtualIndex: number
+  fixas: [number | null, number | null, number | null, number | null]
 ): { base: number[]; quotas: number[] } {
-  const PESOS = [1, 1, 1, 1.5];
   const somaPesos = PESOS.reduce((a, b) => a + b, 0);
 
-  // quotas base
+  // Quotas base com pesos [1,1,1,1.5]
   const base = PESOS.map((p) => (metaMes / somaPesos) * p);
 
-  // quotas dinâmicas começam iguais à base
+  // Se nada foi gasto e nenhuma semana está marcada como fechada/fixa -> quotas = base
+  const anySpentOrClosedOrFixed =
+    totaisPorSemana.some((v) => (v || 0) > 0) ||
+    fechadas.some(Boolean) ||
+    fixas.some((v) => v != null);
+  if (!anySpentOrClosedOrFixed) {
+    return { base, quotas: [...base] };
+  }
+
+  // encontra o último índice que possui gasto / está fechado / tem quota fixa
+  let lastIdx = -1;
+  for (let i = 0; i < 4; i++) {
+    if ((totaisPorSemana[i] || 0) > 0 || fechadas[i] || fixas[i] != null) lastIdx = i;
+  }
+  if (lastIdx === -1) return { base, quotas: [...base] };
+
+  // quotas começam como base
   const quotas = [...base];
 
-  // aplica fixações
-  for (let i = 0; i < 4; i++) {
-    if (fixas[i] != null) quotas[i] = fixas[i] as number;
+  // para semanas já até lastIdx: aplicar quota fixa (se houver) ou base
+  for (let i = 0; i <= lastIdx; i++) {
+    quotas[i] = fixas[i] != null ? fixas[i]! : base[i];
   }
 
-  // calcula quanto já foi gasto e quanto resta no mês
-  const gastoTotal = totaisPorSemana.reduce((a, b) => a + b, 0);
-  const restanteTotal = metaMes - gastoTotal;
+  // resto real disponível = meta - soma(gastos até lastIdx)
+  const gastoAteLast = totaisPorSemana.slice(0, lastIdx + 1).reduce((s, v) => s + (v || 0), 0);
+  let restante = metaMes - gastoAteLast;
 
-  // índices das semanas futuras que **não estão fixas** e **não são a semana atual**
-  const indicesFuturasNaoFixas = [];
-  for (let i = semanaAtualIndex + 1; i < 4; i++) {
-    if (fixas[i] == null) indicesFuturasNaoFixas.push(i);
+  // semanas futuras (indices > lastIdx)
+  const futureIdxs: number[] = [];
+  for (let i = lastIdx + 1; i < 4; i++) futureIdxs.push(i);
+
+  if (futureIdxs.length === 0) return { base, quotas };
+
+  // soma de quotas fixas já definidas nas futuras
+  let fixedFutureSum = 0;
+  for (const i of futureIdxs) {
+    if (fixas[i] != null) fixedFutureSum += fixas[i]!;
   }
 
-  // soma dos pesos apenas das semanas futuras não fixas
-  const somaPesosFuturasNaoFixas = indicesFuturasNaoFixas.reduce((s, i) => s + PESOS[i], 0);
+  // pesos dos futuros que NÃO são fixos
+  const nonFixedWeights = futureIdxs.reduce((acc, i) => (fixas[i] == null ? acc + PESOS[i] : acc), 0);
 
-  // redistribui restante proporcionalmente apenas entre semanas futuras não fixas
-  for (const i of indicesFuturasNaoFixas) {
-    quotas[i] = (restanteTotal * PESOS[i]) / somaPesosFuturasNaoFixas;
+  // quanto sobra depois de reservar as quotas fixas futuras
+  const restanteDepoisFix = restante - fixedFutureSum;
+
+  // se não há quotas não-fixas (tudo futuro já fixo), só aplicamos as fixas
+  if (nonFixedWeights <= 0) {
+    for (const i of futureIdxs) {
+      quotas[i] = fixas[i] != null ? fixas[i]! : 0;
+    }
+    return { base, quotas };
+  }
+
+  // distribuir restanteDepoisFix proporcionalmente pelos pesos das semanas futuras não-fixas
+  for (const i of futureIdxs) {
+    if (fixas[i] != null) {
+      quotas[i] = fixas[i]!;
+    } else {
+      quotas[i] = (restanteDepoisFix * PESOS[i]) / nonFixedWeights;
+    }
   }
 
   return { base, quotas };
 }
+
+
+
 
 
 
@@ -97,12 +135,10 @@ export default function Aleatorio({
 }) {
   const totaisPorSemana = semanas.map((items) => items.reduce((s, it) => s + it.valor, 0));
 
- const semanaAtualIndex = semanas.findIndex((_, i) => !fechadas[i]) ?? 0;
-
-    const { base: quotaBasePorSemana, quotas: quotasDinamicas } = useMemo(
-    () => calcularQuotasDinamicas(meta, totaisPorSemana, fechadas, fixas, semanaAtualIndex),
-    [meta, totaisPorSemana, fechadas, fixas, semanaAtualIndex]
-    ); 
+  const { base: quotaBasePorSemana, quotas: quotasDinamicas } = useMemo(
+    () => calcularQuotasDinamicas(meta, totaisPorSemana, fechadas, fixas),
+    [meta, totaisPorSemana, fechadas, fixas]
+  );
 
   // UI de adicionar gasto (inline por semana)
   function AddForm({ index }: { index: number }) {
