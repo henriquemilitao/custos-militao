@@ -51,7 +51,7 @@ export default function ConfigMes({
           <div className="flex flex-col sm:flex-row gap-2">
             <input
               className="border rounded-xl px-3 py-2 flex-1 w-full"
-              placeholder="Nome (ex: Nutella :p)"
+              placeholder="Nome (ex: Academia)"
               value={novoNome}
               onChange={(e) => setNovoNome(e.target.value)}
             />
