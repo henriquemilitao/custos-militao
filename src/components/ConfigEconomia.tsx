@@ -3,6 +3,7 @@
 
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 
 export type Economia = {
   id: string;
@@ -32,9 +33,13 @@ export default function ConfigEconomia({
     <>
       {/* botão que abre o "modal" */}
       <div>
-        <Button onClick={() => setOpen(true)} className="px-3 py-1">
-          {triggerLabel}
+        <Button onClick={() => setOpen(true)} 
+        className="px-3 py-1 w-10 h-10 rounded-full border border-blue-400 text-blue-500 bg-white shadow-none hover:bg-blue-500 hover:text-white"        
+        >
+          {/* {triggerLabel} */}
+          <Plus className="w-5 h-5" />
         </Button>
+        
       </div>
 
       {/* modal simples */}

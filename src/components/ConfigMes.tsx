@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import type { CategoriaFixaType, EstadoMes } from "@/app/page";
 import { useState } from "react";
-import { Trash2 } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 
 function moeda(n: number) {
   return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(
@@ -64,7 +64,9 @@ export default function ConfigMes({
               onChange={(e) => setNovoValor(e.target.value)}
             />
             <Button
-              className="w-full sm:w-auto"
+              className="w-full sm:w-auto w-10 h-10 w-full sm:w-auto rounded-full bg-blue-500 text-white shadow hover:bg-blue-600 active:scale-95 transition"
+              // className="w-10 h-10 rounded-full border border-blue-400 text-blue-500 bg-white shadow-none hover:bg-blue-500 hover:text-white"
+
               onClick={() => {
                 const meta = Number(novoValor) || 0;
                 if (!novoNome.trim()) return;
@@ -79,7 +81,7 @@ export default function ConfigMes({
                 setNovoValor("0");
               }}
             >
-              Adicionar
+              <Plus className="w-5 h-5" />
             </Button>
           </div>
         </div>

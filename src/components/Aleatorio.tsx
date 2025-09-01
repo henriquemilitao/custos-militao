@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import type { GastoItem } from "@/app/page";
+import { Plus } from "lucide-react";
 
 const PESOS = [1, 1, 1, 1.5] as const;
 
@@ -163,7 +164,9 @@ export default function Aleatorio({
           disabled={semanaFechada}
         />
         <Button
-          className="w-full sm:w-auto"
+          // className="w-full sm:w-auto"
+          size="icon"
+          className="w-10 h-10 w-full sm:w-auto rounded-full bg-blue-500 text-white shadow hover:bg-blue-600 active:scale-95 transition"
           disabled={semanaFechada}
           onClick={() => {
             const v = Number(valor) || 0;
@@ -178,7 +181,8 @@ export default function Aleatorio({
             setValor("");
           }}
         >
-          Adicionar gasto
+          <Plus className="w-5 h-5" />
+
         </Button>
       </div>
     );
