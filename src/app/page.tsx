@@ -1,4 +1,3 @@
-// page.tsx
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -10,32 +9,35 @@ import Aleatorio from "@/components/Aleatorio";
 import ResumoMes from "@/components/ResumoMes";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-// ---- Tipos ----
 export type CategoriaFixaType = {
   id: string;
   nome: string;
-  meta: number; // valor planejado da categoria no mês
-  pago: boolean; // se foi pago (incrementa gasto igual à meta)
+  meta: number; // valor planejado
+  pago: boolean;
+};
+
+export type GastoGasolina = {
+  id: string;
+  data: string;
+  valor: number;
 };
 
 export type GastoItem = {
   id: string;
   descricao: string;
   valor: number;
-  dataPtBr: string; // capturada em America/Campo_Grande
+  dataPtBr: string;
 };
 
 export type EstadoMes = {
-  mesId: string; // YYYY-MM
-  saldoInicial: number; // quanto tenho disponível no mês
-  categorias: CategoriaFixaType[]; // exceto Aleatório
-  aleatorioMeta: number; // meta do "Aleatório" para o mês
-  // gastos aleatórios por semana (índices 0..3)
+  mesId: string;
+  saldoInicial: number;
+  categorias: CategoriaFixaType[];
+  aleatorioMeta: number;
   aleatorioSemanas: [GastoItem[], GastoItem[], GastoItem[], GastoItem[]];
-  // permite “fechar” / marcar uma semana (botão Finalizar)
   aleatorioFechadas: [boolean, boolean, boolean, boolean];
-  // NOVO: quotas travadas quando o usuário clica Finalizar (ou null se não travada)
   aleatorioQuotaFixas: [number | null, number | null, number | null, number | null];
+  gasolinaGastos: GastoGasolina[];
 };
 
 type MapMeses = Record<string, EstadoMes>;
@@ -46,12 +48,6 @@ function yyyymm(d: Date) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
 }
 
-// function moeda(n: number) {
-//   return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(
-//     isFinite(n) ? n : 0
-//   );
-// }
-
 function load(): MapMeses {
   try {
     const raw = localStorage.getItem(LS_KEY);
@@ -60,16 +56,16 @@ function load(): MapMeses {
 
     const migrated: MapMeses = {};
     for (const k of Object.keys(parsed)) {
-      const v = parsed[k] as Partial<EstadoMes>;
+      const v = parsed[k]!;
       migrated[k] = {
-        mesId: (v?.mesId as string) ?? k,
-        saldoInicial: Number(v?.saldoInicial ?? 1200),
-        categorias: (v?.categorias as CategoriaFixaType[]) ?? [],
-        aleatorioMeta: Number(v?.aleatorioMeta ?? 400),
-        aleatorioSemanas: (v?.aleatorioSemanas as EstadoMes["aleatorioSemanas"]) ?? [[], [], [], []],
-        aleatorioFechadas: (v?.aleatorioFechadas as EstadoMes["aleatorioFechadas"]) ?? [false, false, false, false],
-        aleatorioQuotaFixas:
-          (v?.aleatorioQuotaFixas as EstadoMes["aleatorioQuotaFixas"]) ?? [null, null, null, null],
+        mesId: v.mesId ?? k,
+        saldoInicial: Number(v.saldoInicial ?? 1200),
+        categorias: v.categorias ?? [],
+        aleatorioMeta: Number(v.aleatorioMeta ?? 400),
+        aleatorioSemanas: (v.aleatorioSemanas as EstadoMes["aleatorioSemanas"]) ?? [[], [], [], []],
+        aleatorioFechadas: (v.aleatorioFechadas as EstadoMes["aleatorioFechadas"]) ?? [false, false, false, false],
+        aleatorioQuotaFixas: (v.aleatorioQuotaFixas as EstadoMes["aleatorioQuotaFixas"]) ?? [null, null, null, null],
+        gasolinaGastos: (v.gasolinaGastos as GastoGasolina[]) ?? [],
       };
     }
     return migrated;
@@ -86,73 +82,46 @@ export default function Page() {
   const mesHoje = useMemo(() => yyyymm(new Date()), []);
   const [map, setMap] = useState<MapMeses>({});
   const [mes, setMes] = useState<string>(mesHoje);
-  // estado local de economias (pode persistir mais tarde se quiser)
   const [economias, setEconomias] = useState<EconomiaType[]>([]);
 
-  
-// chamada para adicionar vindo do ConfigEconomia (salva meta e titulo)
-function handleAdicionarEconomia(nova: Omit<EconomiaType, "id" | "guardado">) {
-  const e: EconomiaType = {
-    id: crypto.randomUUID(),
-    titulo: nova.titulo,
-    meta: nova.meta,
-    guardado: 0,
-  };
-  setEconomias((prev) => [e, ...prev]);
-}
+  function handleAdicionarEconomia(nova: Omit<EconomiaType, "id" | "guardado">) {
+    setEconomias((prev) => [
+      { id: crypto.randomUUID(), titulo: nova.titulo, meta: nova.meta, guardado: 0 },
+      ...prev,
+    ]);
+  }
 
   function handleRemoverEconomia(id: string) {
     setEconomias((prev) => prev.filter((e) => e.id !== id));
   }
 
-
-  // bootstrap localStorage
+  // carregar dados salvos
   useEffect(() => {
-    const m: MapMeses = load();
-
-    // cria estado inicial do mês, se não existir
+    const m = load();
     if (!m[mesHoje]) {
       m[mesHoje] = {
         mesId: mesHoje,
         saldoInicial: 1200,
         categorias: [
+          { id: crypto.randomUUID(), nome: "Gasolina", meta: 100, pago: false },
           { id: crypto.randomUUID(), nome: "Cabeleireiro", meta: 120, pago: false },
           { id: crypto.randomUUID(), nome: "Comida", meta: 600, pago: false },
-          { id: crypto.randomUUID(), nome: "Água", meta: 80, pago: false },
         ],
         aleatorioMeta: 400,
         aleatorioSemanas: [[], [], [], []],
         aleatorioFechadas: [false, false, false, false],
         aleatorioQuotaFixas: [null, null, null, null],
+        gasolinaGastos: [],
       };
-    } else {
-      // defensive: garantir estrutura consistente
-      const v = m[mesHoje]!;
-      if (!Array.isArray(v.aleatorioFechadas) || v.aleatorioFechadas.length !== 4) {
-        v.aleatorioFechadas = [false, false, false, false];
-      }
-      if (
-        !Array.isArray(v.aleatorioSemanas) ||
-        v.aleatorioSemanas.length !== 4 ||
-        !v.aleatorioSemanas.every((a) => Array.isArray(a))
-      ) {
-        v.aleatorioSemanas = [[], [], [], []];
-      }
-      if (!Array.isArray(v.aleatorioQuotaFixas) || v.aleatorioQuotaFixas.length !== 4) {
-        v.aleatorioQuotaFixas = [null, null, null, null];
-      }
     }
-
     setMap(m);
   }, [mesHoje]);
 
-  // persistir
   useEffect(() => {
     if (Object.keys(map).length) save(map);
   }, [map]);
 
-  // pega estado do mês atual
-  const estado = map[mes] as EstadoMes | undefined;
+  const estado = map[mes];
 
   function atualizarMes(patch: Partial<EstadoMes>) {
     setMap((old) => ({
@@ -166,6 +135,7 @@ function handleAdicionarEconomia(nova: Omit<EconomiaType, "id" | "guardado">) {
           aleatorioSemanas: [[], [], [], []],
           aleatorioFechadas: [false, false, false, false],
           aleatorioQuotaFixas: [null, null, null, null],
+          gasolinaGastos: [],
         }),
         ...patch,
       },
@@ -173,28 +143,17 @@ function handleAdicionarEconomia(nova: Omit<EconomiaType, "id" | "guardado">) {
   }
 
   if (!estado) {
-    return (
-      <main className="p-6">
-        <p>Carregando…</p>
-      </main>
-    );
+    return <main className="p-6">Carregando…</main>;
   }
 
-  // ----- Cálculos Resumo -----
   const totalPlanejadoFixas = estado.categorias.reduce((s, c) => s + c.meta, 0);
   const totalEconomias = economias.reduce((acc, e) => acc + e.meta, 0);
-
-  // agora o aleatório é calculado, não definido
   const aleatorioMeta = estado.saldoInicial - totalEconomias - totalPlanejadoFixas;
-
   const gastoFixas = estado.categorias.reduce((s, c) => s + (c.pago ? c.meta : 0), 0);
   const gastoAleatorio = estado.aleatorioSemanas.flat().reduce((s, it) => s + it.valor, 0);
 
-  const totalGasto = gastoFixas + gastoAleatorio;
-
   return (
     <main className="min-h-screen bg-neutral-50">
-      {/* Header simples */}
       <header className="sticky top-0 z-10 bg-white/80 backdrop-blur border-b">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center gap-3">
           <h1 className="text-lg font-semibold">Planejador Semanal de Gastos</h1>
@@ -210,78 +169,60 @@ function handleAdicionarEconomia(nova: Omit<EconomiaType, "id" | "guardado">) {
       </header>
 
       <ResumoMes
-          saldoInicial={estado.saldoInicial}
-          economias={economias}
-          gastoFixas={gastoFixas}
-          gastoAleatorio={gastoAleatorio}
-          totalPlanejadoFixas={totalPlanejadoFixas}
-          aleatorioMeta={aleatorioMeta}
-        />
+        saldoInicial={estado.saldoInicial}
+        economias={economias}
+        gastoFixas={gastoFixas}
+        gastoAleatorio={gastoAleatorio}
+        totalPlanejadoFixas={totalPlanejadoFixas}
+        aleatorioMeta={aleatorioMeta}
+      />
 
-      {/* Economias */}
       <Card className="rounded-2xl shadow-sm m-4">
         <CardHeader className="flex items-center justify-between">
           <CardTitle>Economias</CardTitle>
-
-          {/* botão que abre o modal para criar economia */}
-          <ConfigEconomia
-            onAdicionar={(nova) => handleAdicionarEconomia(nova)}
-          />
+          <ConfigEconomia onAdicionar={handleAdicionarEconomia} />
         </CardHeader>
-
         <CardContent className="space-y-3">
-          {economias.length === 0 && (
+          {economias.length === 0 ? (
             <div className="text-sm text-neutral-500">Nenhuma economia adicionada.</div>
+          ) : (
+            economias.map((eco) => (
+              <EconomiaItem
+                key={eco.id}
+                economia={eco}
+                onGuardar={() =>
+                  setEconomias((prev) =>
+                    prev.map((e) => (e.id === eco.id ? { ...e, guardado: e.meta } : e))
+                  )
+                }
+                onRemove={() => handleRemoverEconomia(eco.id)}
+              />
+            ))
           )}
-
-          {economias.map((eco) => (
-            <EconomiaItem
-              key={eco.id}
-              economia={eco}
-              onGuardar={() =>
-                // aqui eu escolho guardar tudo de uma vez (guardado = meta)
-                setEconomias((prev) => prev.map((e) => (e.id === eco.id ? { ...e, guardado: e.meta } : e)))
-              }
-              onRemove={() => handleRemoverEconomia(eco.id)}
-            />
-          ))}
         </CardContent>
       </Card>
 
-
       <div className="max-w-6xl mx-auto p-4 md:p-6 space-y-6">
-        {/* Configurações do mês */}
         <ConfigMes mes={mes} estado={estado} onUpdate={atualizarMes} />
 
-        {/* Grid principal responsivo */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {/* Gastos Fixas */}
           <Card className="rounded-2xl shadow-sm">
             <CardHeader>
-              <CardTitle>Gastos Fixas</CardTitle>
+              <CardTitle>Gastos Fixos</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              {estado.categorias.length === 0 && (
+              {estado.categorias.length === 0 ? (
                 <div className="text-sm text-neutral-500">Nenhum gasto fixo adicionado.</div>
+              ) : (
+                estado.categorias.map((c) => (
+                  <CategoriaFixa
+                    key={c.id}
+                    categoria={c}
+                    estado={estado}
+                    atualizarEstado={atualizarMes}
+                  />
+                ))
               )}
-              {estado.categorias.map((c) => (
-                <CategoriaFixa
-                  key={c.id}
-                  categoria={c}
-                  onToggle={() => {
-                    atualizarMes({
-                      categorias: estado.categorias.map((x) =>
-                        x.id === c.id ? { ...x, pago: !x.pago } : x
-                      ),
-                    });
-                  }}
-                  onRemove={() => {
-                    atualizarMes({
-                      categorias: estado.categorias.filter((x) => x.id !== c.id),
-                    });
-                  }}
-                />
-              ))}
             </CardContent>
           </Card>
         </div>

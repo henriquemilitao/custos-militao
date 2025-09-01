@@ -1,45 +1,99 @@
-"use client";
-import { Card } from "@/components/ui/card";
+import { useState } from "react";
+import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type { CategoriaFixaType } from "@/app/page";
+import { Input } from "@/components/ui/input";
+import { CategoriaFixaType, EstadoMes } from "@/app/page";
 
 export default function CategoriaFixa({
   categoria,
-  onToggle,
-  onRemove,
+  estado,
+  atualizarEstado,
 }: {
   categoria: CategoriaFixaType;
-  onToggle: () => void;
-  onRemove: () => void;
+  estado: EstadoMes;
+  atualizarEstado: (novoEstado: Partial<EstadoMes>) => void;
 }) {
-  return (
-    <Card className={`flex items-center justify-between p-4 rounded-2xl border shadow-sm transition-opacity duration-200 ${categoria.pago ? 'opacity-60' : 'opacity-100'}`}>
-      <div className="flex items-center gap-3 min-w-0">
-        <div className={`h-10 w-10 rounded-full flex items-center justify-center ${categoria.pago ? 'bg-green-100' : 'bg-neutral-100'}`}>
-          {categoria.pago ? (
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-          ) : (
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-          )}
+  const isGasolina = categoria.nome.toLowerCase() === "gasolina";
+  const [novoValor, setNovoValor] = useState("");
+
+  const formatarData = () => new Date().toLocaleDateString("pt-BR");
+  const totalGasto = estado.gasolinaGastos.reduce((sum, g) => sum + g.valor, 0);
+  const restante = categoria.meta - totalGasto;
+
+  const adicionarGasolina = () => {
+    const valor = parseFloat(novoValor);
+    if (!valor || valor <= 0) return;
+
+    atualizarEstado({
+      gasolinaGastos: [
+        ...estado.gasolinaGastos,
+        { id: crypto.randomUUID(), data: formatarData(), valor },
+      ],
+    });
+
+    setNovoValor("");
+  };
+
+  const removerGasolina = (id: string) => {
+    atualizarEstado({
+      gasolinaGastos: estado.gasolinaGastos.filter((g) => g.id !== id),
+    });
+  };
+
+  if (isGasolina) {
+    return (
+      <div className="p-4 border rounded-2xl shadow bg-white">
+        <h3 className="text-lg font-semibold text-gray-800 mb-2">
+          {categoria.nome} - Total gasto: R$ {totalGasto.toFixed(2)}
+        </h3>
+
+        <p
+          className={`text-sm font-semibold mb-4 ${
+            restante >= 0 ? "text-green-600" : "text-red-600"
+          }`}
+        >
+          Pode gastar ainda: R$ {restante.toFixed(2)}
+        </p>
+
+        <div className="flex items-center gap-2 mb-4">
+          <Input
+            type="number"
+            placeholder="Valor"
+            value={novoValor}
+            onChange={(e) => setNovoValor(e.target.value)}
+            className="flex-1"
+          />
+          <Button onClick={adicionarGasolina}>Adicionar</Button>
         </div>
 
-        <div className="min-w-0">
-          <p className="font-medium truncate">{categoria.nome}</p>
-          <p className="text-xs text-neutral-500">Meta: R$ {categoria.meta.toFixed(2)}</p>
-        </div>
+        <ul className="space-y-2">
+          {estado.gasolinaGastos.map((gasto) => (
+            <li
+              key={gasto.id}
+              className="flex justify-between items-center p-2 border rounded bg-gray-50 shadow-sm"
+            >
+              <span>
+                {gasto.data} - R$ {gasto.valor.toFixed(2)}
+              </span>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-red-500 hover:text-red-700"
+                onClick={() => removerGasolina(gasto.id)}
+              >
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            </li>
+          ))}
+        </ul>
       </div>
-      <div className="flex items-center gap-2">
-        <Button variant={categoria.pago ? "secondary" : "default"} onClick={onToggle} className="px-3 py-1">
-          {categoria.pago ? "Desfazer" : "Pagar"}
-        </Button>
-        <Button variant="destructive" onClick={onRemove} className="px-3 py-1">
-          Remover
-        </Button>
-      </div>
-    </Card>
+    );
+  }
+
+  return (
+    <div className="p-4 border rounded-2xl shadow bg-gray-50">
+      <h3 className="text-lg font-semibold text-gray-800">{categoria.nome}</h3>
+      <p className="text-sm text-gray-600">Valor: R$ {categoria.meta.toFixed(2)}</p>
+    </div>
   );
 }
