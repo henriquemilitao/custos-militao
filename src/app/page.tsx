@@ -3,6 +3,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import ConfigMes from "@/components/ConfigMes";
+import ConfigEconomia, { Economia as EconomiaType } from "@/components/ConfigEconomia";
+import EconomiaItem from "@/components/EconomiaItem";
 import CategoriaFixa from "@/components/CategoriaFixa";
 import Aleatorio from "@/components/Aleatorio";
 import ResumoMes from "@/components/ResumoMes";
@@ -84,6 +86,25 @@ export default function Page() {
   const mesHoje = useMemo(() => yyyymm(new Date()), []);
   const [map, setMap] = useState<MapMeses>({});
   const [mes, setMes] = useState<string>(mesHoje);
+  // estado local de economias (pode persistir mais tarde se quiser)
+  const [economias, setEconomias] = useState<EconomiaType[]>([]);
+
+  
+// chamada para adicionar vindo do ConfigEconomia (salva meta e titulo)
+function handleAdicionarEconomia(nova: Omit<EconomiaType, "id" | "guardado">) {
+  const e: EconomiaType = {
+    id: crypto.randomUUID(),
+    titulo: nova.titulo,
+    meta: nova.meta,
+    guardado: 0,
+  };
+  setEconomias((prev) => [e, ...prev]);
+}
+
+  function handleRemoverEconomia(id: string) {
+    setEconomias((prev) => prev.filter((e) => e.id !== id));
+  }
+
 
   // bootstrap localStorage
   useEffect(() => {
@@ -186,6 +207,38 @@ export default function Page() {
           </div>
         </div>
       </header>
+
+
+      {/* Economias */}
+      <Card className="rounded-2xl shadow-sm m-4">
+        <CardHeader className="flex items-center justify-between">
+          <CardTitle>Economias</CardTitle>
+
+          {/* botão que abre o modal para criar economia */}
+          <ConfigEconomia
+            onAdicionar={(nova) => handleAdicionarEconomia(nova)}
+          />
+        </CardHeader>
+
+        <CardContent className="space-y-3">
+          {economias.length === 0 && (
+            <div className="text-sm text-neutral-500">Nenhuma economia adicionada.</div>
+          )}
+
+          {economias.map((eco) => (
+            <EconomiaItem
+              key={eco.id}
+              economia={eco}
+              onGuardar={() =>
+                // aqui eu escolho guardar tudo de uma vez (guardado = meta)
+                setEconomias((prev) => prev.map((e) => (e.id === eco.id ? { ...e, guardado: e.meta } : e)))
+              }
+              onRemove={() => handleRemoverEconomia(eco.id)}
+            />
+          ))}
+        </CardContent>
+      </Card>
+
 
       <div className="max-w-6xl mx-auto p-4 md:p-6 space-y-6">
         {/* Configurações do mês */}
