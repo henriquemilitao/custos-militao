@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Trash2 } from "lucide-react";
+import { Trash2, CheckCircle, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CategoriaFixaType, EstadoMes } from "@/app/page";
@@ -40,7 +40,6 @@ export default function CategoriaFixa({
     });
   };
 
-  // Funções para categorias
   const togglePago = () => {
     atualizarEstado({
       categorias: estado.categorias.map((c) =>
@@ -62,12 +61,8 @@ export default function CategoriaFixa({
           <h3 className="text-lg font-semibold text-gray-800">
             {categoria.nome} - Total gasto: R$ {totalGasto.toFixed(2)}
           </h3>
-          <Button
-            variant="destructive"
-            size="sm"
-            onClick={removerCategoria}
-          >
-            Remover
+          <Button variant="destructive" size="icon" onClick={removerCategoria}>
+            <Trash2 className="w-4 h-4" />
           </Button>
         </div>
 
@@ -117,25 +112,41 @@ export default function CategoriaFixa({
   // Categoria normal
   return (
     <div
-      className={`p-4 border rounded-2xl shadow flex items-center justify-between transition-opacity duration-200 ${
-        categoria.pago ? "opacity-60 bg-gray-50" : "opacity-100 bg-white"
+      className={`p-4 border rounded-2xl shadow flex items-center justify-between transition duration-200 ${
+        categoria.pago ? "opacity-70 bg-gray-100" : "opacity-100 bg-white"
       }`}
     >
       <div>
-        <h3 className="text-lg font-semibold text-gray-800">{categoria.nome}</h3>
+        <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+          {categoria.nome}
+          {categoria.pago && (
+            <CheckCircle className="w-5 h-5 text-green-600" />
+          )}
+        </h3>
         <p className="text-sm text-gray-600">
           Valor: R$ {categoria.meta.toFixed(2)}
         </p>
       </div>
       <div className="flex items-center gap-2">
         <Button
-          variant={categoria.pago ? "secondary" : "default"}
+          variant="ghost"
+          size="icon"
           onClick={togglePago}
+          className={categoria.pago ? "text-blue-500" : "text-green-600"}
         >
-          {categoria.pago ? "Desfazer" : "Pagar"}
+          {categoria.pago ? (
+            <RotateCcw className="w-5 h-5" />
+          ) : (
+            <CheckCircle className="w-5 h-5" />
+          )}
         </Button>
-        <Button variant="destructive" onClick={removerCategoria}>
-          Remover
+        <Button
+          variant="ghost"
+          size="icon"
+          className="text-red-500 hover:text-red-700"
+          onClick={removerCategoria}
+        >
+          <Trash2 className="w-5 h-5" />
         </Button>
       </div>
     </div>
