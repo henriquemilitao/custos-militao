@@ -221,7 +221,7 @@ export default function Page() {
               placeholder="YYYY-MM"
             />
 
-            <Sheet>
+            {/* <Sheet>
               <SheetTrigger asChild>
                 <Button
                   variant="outline"
@@ -240,7 +240,7 @@ export default function Page() {
                   <ConfigMes mes={mes} estado={estado} onUpdate={atualizarMes} />
                 </div>
               </SheetContent>
-            </Sheet>
+            </Sheet> */}
           </div>
         </div>
       </header>

@@ -1,5 +1,6 @@
 "use client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import EditableCurrency from "./EditableCurrency";
 
 function moeda(n: number) {
   return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(
@@ -51,11 +52,9 @@ export default function ResumoMes({
           {/* Total recebido */}
           <div>
             <div className="text-neutral-500">Total recebido</div>
-            <input
-              type="number"
+            <EditableCurrency
               value={saldoInicial}
-              onChange={(e) => onUpdateSaldoInicial(Number(e.target.value) || 0)}
-              className="mt-1 block w-full border rounded-xl px-3 py-2"
+              onChange={(novo) => onUpdateSaldoInicial(novo)}
             />
           </div>
 
