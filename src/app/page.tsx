@@ -210,7 +210,7 @@ export default function Page() {
 
   return (
     <main className="min-h-screen bg-neutral-50">
-      <header className="sticky top-0 z-10 bg-white/80 backdrop-blur border-b">
+      {/* <header className="sticky top-0 z-10 bg-white/80 backdrop-blur border-b">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center gap-3">
           <h1 className="text-lg font-semibold">Planejador Semanal de Gastos</h1>
           <div className="ml-auto flex items-center gap-2">
@@ -219,7 +219,7 @@ export default function Page() {
               value={mes}
               onChange={(e) => setMes(e.target.value)}
               placeholder="YYYY-MM"
-            />
+            /> */}
 
             {/* <Sheet>
               <SheetTrigger asChild>
@@ -241,9 +241,11 @@ export default function Page() {
                 </div>
               </SheetContent>
             </Sheet> */}
-          </div>
+       
+       
+          {/* </div>
         </div>
-      </header>
+      </header> */}
 
       <ResumoMes
         saldoInicial={estado.saldoInicial}
