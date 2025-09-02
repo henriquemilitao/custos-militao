@@ -1,46 +1,34 @@
-// components/ConfigEconomia.tsx
 "use client";
 
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+import type { CategoriaFixaType } from "@/app/page";
 
-export type Economia = {
-  id: string;
-  titulo: string;
-  meta: number;
-  aportes: { id: string; data: string; valor: number }[];
-};
-
-export default function ConfigEconomia({
+export default function ConfigGastoFixo({
   onAdicionar,
-  triggerLabel = "Adicionar Economia",
 }: {
-  onAdicionar: (nova: Omit<Economia, "id" | "aportes">) => void;
-  triggerLabel?: string;
+  onAdicionar: (nova: Omit<CategoriaFixaType, "id" | "pago">) => void;
 }) {
   const [open, setOpen] = useState(false);
-  const [titulo, setTitulo] = useState("");
-  const [meta, setMeta] = useState<number | "">("");
+  const [nome, setNome] = useState("");
+  const [valor, setValor] = useState<number | "">("");
 
   function reset() {
-    setTitulo("");
-    setMeta("");
+    setNome("");
+    setValor("");
     setOpen(false);
   }
 
   return (
     <>
-      {/* botão que abre o "modal" */}
-      <div>
-        <Button onClick={() => setOpen(true)} 
-        className="px-3 py-1 w-10 h-10 rounded-full border border-blue-400 text-blue-500 bg-white shadow-none hover:bg-blue-500 hover:text-white"        
-        >
-          {/* {triggerLabel} */}
-          <Plus className="w-5 h-5" />
-        </Button>
-        
-      </div>
+      {/* botão que abre o modal */}
+      <Button
+        onClick={() => setOpen(true)}
+        className="px-3 py-1 w-10 h-10 rounded-full border border-blue-400 text-blue-500 bg-white shadow-none hover:bg-blue-500 hover:text-white"
+      >
+        <Plus className="w-5 h-5" />
+      </Button>
 
       {/* modal simples */}
       {open && (
@@ -51,29 +39,29 @@ export default function ConfigEconomia({
             onClick={() => setOpen(false)}
           />
           <div className="relative w-full max-w-md bg-white rounded-2xl shadow-lg p-6 z-10">
-            <h3 className="text-lg font-semibold mb-3">Nova Economia</h3>
+            <h3 className="text-lg font-semibold mb-3">Novo Gasto Fixo</h3>
 
             <label className="text-sm text-neutral-700 block mb-2">
               Nome
               <input
                 className="mt-1 block w-full border rounded-xl px-3 py-2"
-                placeholder="Ex.: Reserva"
-                value={titulo}
-                onChange={(e) => setTitulo(e.target.value)}
+                placeholder="Ex.: Academia"
+                value={nome}
+                onChange={(e) => setNome(e.target.value)}
               />
             </label>
 
             <label className="text-sm text-neutral-700 block mb-4">
-              Meta (R$)
+              Valor (R$)
               <input
                 type="number"
                 inputMode="decimal"
                 className="mt-1 block w-full border rounded-xl px-3 py-2"
                 placeholder="100"
-                value={meta === "" ? "" : String(meta)}
+                value={valor === "" ? "" : String(valor)}
                 onChange={(e) => {
                   const v = e.target.value;
-                  setMeta(v === "" ? "" : Number(v));
+                  setValor(v === "" ? "" : Number(v));
                 }}
               />
             </label>
@@ -81,7 +69,7 @@ export default function ConfigEconomia({
             <div className="flex justify-end gap-2">
               <button
                 className="px-3 py-1 rounded-xl border"
-                onClick={() => reset()}
+                onClick={reset}
               >
                 Cancelar
               </button>
@@ -91,12 +79,9 @@ export default function ConfigEconomia({
                 // className="w-10 h-10 w-full sm:w-auto rounded-full bg-blue-500 text-white shadow hover:bg-blue-600 active:scale-95 transition"
           
                 onClick={() => {
-                  const m = typeof meta === "number" ? meta : 0;
-                  if (!titulo.trim() || m <= 0) {
-                    // validação simples
-                    return;
-                  }
-                  onAdicionar({ titulo: titulo.trim(), meta: m });
+                  const m = typeof valor === "number" ? valor : 0;
+                  if (!nome.trim() || m <= 0) return;
+                  onAdicionar({ nome: nome.trim(), meta: m });
                   reset();
                 }}
               >

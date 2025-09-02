@@ -9,6 +9,11 @@ import Aleatorio from "@/components/Aleatorio";
 import ResumoMes from "@/components/ResumoMes";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Settings } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import ConfigGastoFixo from "@/components/ConfigGastoFixo";
+
 export type CategoriaFixaType = {
   id: string;
   nome: string;
@@ -83,6 +88,15 @@ export default function Page() {
   const [map, setMap] = useState<MapMeses>({});
   const [mes, setMes] = useState<string>(mesHoje);
   const [economias, setEconomias] = useState<EconomiaType[]>([]);
+
+  function handleAdicionarGastoFixo(nova: Omit<CategoriaFixaType, "id" | "pago">) {
+    atualizarMes({
+      categorias: [
+        ...estado.categorias,
+        { id: crypto.randomUUID(), nome: nova.nome, meta: nova.meta, pago: false },
+      ],
+    });
+  }
 
   function handleAdicionarEconomia(nova: Omit<EconomiaType, "id" | "aportes">) {
     setEconomias((prev) => [
@@ -206,6 +220,27 @@ export default function Page() {
               onChange={(e) => setMes(e.target.value)}
               placeholder="YYYY-MM"
             />
+
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="rounded-full border border-blue-400 text-blue-500 hover:bg-blue-500 hover:text-white"
+                >
+                  <Settings className="h-5 w-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-full sm:w-[480px] overflow-y-auto">
+                <SheetHeader>
+                  <SheetTitle>Configurações</SheetTitle>
+                </SheetHeader>
+
+                <div className="py-4">
+                  <ConfigMes mes={mes} estado={estado} onUpdate={atualizarMes} />
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
       </header>
@@ -220,6 +255,7 @@ export default function Page() {
         gastoAleatorio={gastoAleatorio}
         totalPlanejadoFixas={totalPlanejadoFixas}
         aleatorioMeta={aleatorioMeta}
+        onUpdateSaldoInicial={(novo) => atualizarMes({ saldoInicial: novo })}
       />
 
       <Card className="rounded-2xl shadow-sm m-4">
@@ -245,28 +281,30 @@ export default function Page() {
       </Card>
 
       <div className="max-w-6xl mx-auto p-4 md:p-6 space-y-6">
-        <ConfigMes mes={mes} estado={estado} onUpdate={atualizarMes} />
+        {/* <ConfigMes mes={mes} estado={estado} onUpdate={atualizarMes} /> */}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <Card className="rounded-2xl shadow-sm">
-            <CardHeader>
-              <CardTitle>Gastos Fixos</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {estado.categorias.length === 0 ? (
-                <div className="text-sm text-neutral-500">Nenhum gasto fixo adicionado.</div>
-              ) : (
-                estado.categorias.map((c) => (
-                  <CategoriaFixa
-                    key={c.id}
-                    categoria={c}
-                    estado={estado}
-                    atualizarEstado={atualizarMes}
-                  />
-                ))
-              )}
-            </CardContent>
-          </Card>
+          <CardHeader className="flex items-center justify-between">
+            <CardTitle>Gastos Fixos</CardTitle>
+            <ConfigGastoFixo onAdicionar={handleAdicionarGastoFixo} />
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {estado.categorias.length === 0 ? (
+              <div className="text-sm text-neutral-500">Nenhum gasto fixo adicionado.</div>
+            ) : (
+              estado.categorias.map((c) => (
+                <CategoriaFixa
+                  key={c.id}
+                  categoria={c}
+                  estado={estado}
+                  atualizarEstado={atualizarMes}
+                />
+              ))
+            )}
+          </CardContent>
+        </Card>
+
         </div>
 
         <Aleatorio

@@ -14,6 +14,7 @@ export default function ResumoMes({
   gastoAleatorio,
   totalPlanejadoFixas,
   aleatorioMeta,
+  onUpdateSaldoInicial,
 }: {
   saldoInicial: number;
   economias: { meta: number; guardado: number }[];
@@ -21,7 +22,9 @@ export default function ResumoMes({
   gastoAleatorio: number;
   totalPlanejadoFixas: number;
   aleatorioMeta: number;
+  onUpdateSaldoInicial: (novo: number) => void;
 }) {
+
   // total economias planejadas
   const totalEconomias = economias.reduce((acc, e) => acc + e.meta, 0);
 
@@ -48,7 +51,12 @@ export default function ResumoMes({
           {/* Total recebido */}
           <div>
             <div className="text-neutral-500">Total recebido</div>
-            <div className="text-lg font-semibold">{moeda(saldoInicial)}</div>
+            <input
+              type="number"
+              value={saldoInicial}
+              onChange={(e) => onUpdateSaldoInicial(Number(e.target.value) || 0)}
+              className="mt-1 block w-full border rounded-xl px-3 py-2"
+            />
           </div>
 
           {/* Economias */}

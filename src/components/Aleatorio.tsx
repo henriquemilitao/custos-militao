@@ -191,12 +191,12 @@ export default function Aleatorio({
   return (
     <Card className="rounded-2xl shadow-sm">
       <CardHeader className="pb-2">
-        <CardTitle>Categoria Aleatório</CardTitle>
+        <CardTitle>Gastos Variados (Aleatório)</CardTitle>
       </CardHeader>        
       <CardContent className="space-y-3">
         <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
           <div className="text-sm text-neutral-600">
-            Total disponível para Aleatório: <b>{moeda(meta)}</b>
+            Total disponível para usar: <b>{moeda(meta)}</b>
           </div>
           {/* <div className="text-xs text-neutral-500">
             Metas por semana: [{quotaBasePorSemana.map((q: number) => moeda(q)).join(", ")}]
@@ -215,7 +215,7 @@ export default function Aleatorio({
                 <div>
                   <div className="font-medium">Semana {i + 1}</div>
                   <div className="text-xs text-neutral-500">
-                    Meta de gasto: {moeda(quotaDin)} {fixas[i] != null ? "(fixa)" : ""}
+                    Meta de gasto: {moeda(quotaDin)} {fixas[i] != null ? "" : ""}
                   </div>
                 </div>
 
