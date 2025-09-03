@@ -135,7 +135,9 @@ export default function Aleatorio({
         />
         <Button
           size="icon"
-          className="w-10 h-10 rounded-full bg-blue-500 text-white shadow hover:bg-blue-600 active:scale-95 transition"
+          // className="w-10 h-10 rounded-full bg-blue-500 text-white shadow hover:bg-blue-600 active:scale-95 transition"
+          className="w-10 h-10 w-full sm:w-auto rounded-full bg-blue-500 text-white shadow hover:bg-blue-600 active:scale-95 transition"
+
           disabled={bloqueada}
           onClick={() => {
             const v = Number(valor) || 0;
