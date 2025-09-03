@@ -37,7 +37,7 @@ export default function EconomiaItem({
   return (
     <Card className="p-4 border rounded-2xl shadow bg-white">
       <div className="flex items-center justify-between mb-2">
-        <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+        <h3 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
           {economia.titulo}
           {concluida && <CheckCircle className="w-5 h-5 text-green-600" />}
         </h3>
@@ -50,7 +50,7 @@ export default function EconomiaItem({
         </Button>
       </div>
 
-      <p className="text-sm text-gray-600 mb-4">
+      <p className="text-base text-gray-600 mb-4">
         Meta: {moeda(economia.meta)} — Guardado: {moeda(guardado)}
       </p>
 

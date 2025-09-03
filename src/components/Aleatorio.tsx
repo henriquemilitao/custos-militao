@@ -162,7 +162,7 @@ export default function Aleatorio({
         <CardTitle>Gastos Variados (Aleatório)</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
-        <div className="text-sm text-neutral-600">
+        <div className="text-base text-neutral-600">
           Total disponível para usar: <b>{moeda(meta)}</b>
         </div>
 
@@ -184,7 +184,7 @@ export default function Aleatorio({
                 {/* Coluna esquerda */}
                 <div>
                   <div className="font-medium">Semana {i + 1}</div>
-                  <div className="text-xs text-neutral-500">
+                  <div className="text-sm text-neutral-500">
                     Meta de gasto: {moeda(metaSemana)}
                   </div>
                 </div>
@@ -192,7 +192,7 @@ export default function Aleatorio({
                 {/* Coluna direita */}
                 <div className="flex flex-col items-end gap-1">
                   <span
-                    className={`text-xs px-2 py-1 rounded-full border ${
+                    className={`text-sm px-2 py-1 rounded-full border ${
                       status === "finalizada"
                         ? "bg-green-50 border-green-200 text-green-700"
                         : status === "atual"
@@ -229,22 +229,22 @@ export default function Aleatorio({
               {/* Lista de gastos */}
               <div className="mt-2 space-y-1">
                 {semanas[i].length === 0 && (
-                  <div className="text-xs text-neutral-400">Nenhum gasto lançado.</div>
+                  <div className="text-sm text-neutral-400">Nenhum gasto lançado.</div>
                 )}
                 {semanas[i].map((g) => (
                   <div
                     key={g.id}
-                    className="flex items-center justify-between text-sm bg-neutral-50 rounded-lg px-2 py-2"
+                    className="flex items-center justify-between text-base bg-neutral-50 rounded-lg px-2 py-2"
                   >
                     <div className="flex flex-col">
-                      <span className="text-xs text-neutral-500">{g.dataPtBr}</span>
+                      <span className="text-sm text-neutral-500">{g.dataPtBr}</span>
                       <span className="font-medium break-words">{g.descricao}</span>
                     </div>
                     <div className="flex items-center gap-2 ml-2">
                       <span>{moeda(g.valor)}</span>
                       <button
                         onClick={() => onRemoveGasto(i, g.id)}
-                        className="text-red-600 text-xs hover:underline"
+                        className="text-red-600 text-sm hover:underline"
                         disabled={i < currentIdx && !fechadas[i]}
                       >
                         remover
@@ -258,7 +258,7 @@ export default function Aleatorio({
               <AddForm index={i} />
 
               {/* Rodapé da semana */}
-              <div className="mt-2 text-xs text-neutral-600 flex items-center justify-between">
+              <div className="mt-2 text-sm text-neutral-600 flex items-center justify-between">
                 <span>
                   Total gasto: <b>{moeda(totalSemana)}</b>
                 </span>

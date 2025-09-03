@@ -34,7 +34,7 @@ export default function ConfigMes({
       <CardContent className="grid gap-4">
         <div className="grid gap-2 sm:grid-cols-2">
           <label className="flex flex-col gap-1">
-            <span className="text-sm text-neutral-600">Quanto recebo esse mes?</span>
+            <span className="text-base text-neutral-600">Quanto recebo esse mes?</span>
             <input
               type="number"
               inputMode="decimal"
@@ -47,7 +47,7 @@ export default function ConfigMes({
 
         {/* Adicionar nova categoria */}
         <div className="rounded-xl border p-3">
-          <div className="text-sm font-medium mb-2">Adicionar gasto fixo</div>
+          <div className="text-base font-medium mb-2">Adicionar gasto fixo</div>
           <div className="flex flex-col sm:flex-row gap-2">
             <input
               className="border rounded-xl px-3 py-2 flex-1 w-full"
@@ -88,17 +88,17 @@ export default function ConfigMes({
 
         {/* Listagem de categorias p/ editar/remover */}
         <div className="rounded-xl border p-3">
-          <div className="text-sm font-medium mb-2">Gastos fixos do mês</div>
+          <div className="text-base font-medium mb-2">Gastos fixos do mês</div>
           <div className="space-y-2">
             {estado.categorias.length === 0 && (
-              <div className="text-sm text-neutral-500">Nenhum gasto fixo.</div>
+              <div className="text-base text-neutral-500">Nenhum gasto fixo.</div>
             )}
             {estado.categorias.map((c) => (
               <div
                 key={c.id}
                 className="flex items-center justify-between rounded-lg border px-3 py-2"
               >
-                <span className="text-sm font-medium break-words">
+                <span className="text-base font-medium break-words">
                   {c.nome} –{" "}
                   <span className="text-neutral-600">
                     {new Intl.NumberFormat("pt-BR", {
@@ -122,7 +122,7 @@ export default function ConfigMes({
           </div>
         </div>
 
-        <div className="text-xs text-neutral-600">
+        <div className="text-sm text-neutral-600">
           Planejado: <b>{moeda(totalPlanejado)}</b> — Fixas: {moeda(totalPlanejadoFixas)}, Aleatório: {moeda(estado.aleatorioMeta)}
         </div>
       </CardContent>

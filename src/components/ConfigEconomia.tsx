@@ -51,9 +51,9 @@ export default function ConfigEconomia({
             onClick={() => setOpen(false)}
           />
           <div className="relative w-full max-w-md bg-white rounded-2xl shadow-lg p-6 z-10">
-            <h3 className="text-lg font-semibold mb-3">Nova Economia</h3>
+            <h3 className="text-xl font-semibold mb-3">Nova Economia</h3>
 
-            <label className="text-sm text-neutral-700 block mb-2">
+            <label className="text-base text-neutral-700 block mb-2">
               Nome
               <input
                 className="mt-1 block w-full border rounded-xl px-3 py-2"
@@ -63,7 +63,7 @@ export default function ConfigEconomia({
               />
             </label>
 
-            <label className="text-sm text-neutral-700 block mb-4">
+            <label className="text-base text-neutral-700 block mb-4">
               Meta (R$)
               <input
                 type="number"

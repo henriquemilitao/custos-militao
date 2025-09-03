@@ -222,7 +222,7 @@ export default function Page() {
         </CardHeader>
         <CardContent className="space-y-3">
           {estado.economias.length === 0 ? (
-            <div className="text-sm text-neutral-500">Nenhuma economia adicionada.</div>
+            <div className="text-base text-neutral-500">Nenhuma economia adicionada.</div>
           ) : (
             estado.economias.map((eco) => (
               <EconomiaItem
@@ -246,7 +246,7 @@ export default function Page() {
             </CardHeader>
             <CardContent className="space-y-3">
               {estado.categorias.length === 0 ? (
-                <div className="text-sm text-neutral-500">Nenhum gasto fixo adicionado.</div>
+                <div className="text-base text-neutral-500">Nenhum gasto fixo adicionado.</div>
               ) : (
                 estado.categorias.map((c) => (
                   <CategoriaFixa
@@ -300,7 +300,7 @@ export default function Page() {
 
         />
 
-        <footer className="text-center text-xs text-neutral-500 py-8">
+        <footer className="text-center text-sm text-neutral-500 py-8">
           Feito com ❤️ para uso no celular — totalmente offline (localStorage).
         </footer>
       </div>

@@ -58,7 +58,7 @@ export default function CategoriaFixa({
     return (
       <div className="p-4 border rounded-2xl shadow bg-white">
         <div className="flex items-center justify-between mb-2">
-          <h3 className="text-lg font-semibold text-gray-800">
+          <h3 className="text-xl font-semibold text-gray-800">
             {categoria.nome} - Total gasto: R$ {totalGasto.toFixed(2)}
           </h3>
           <Button variant="ghost" onClick={removerCategoria} className="text-red-500 hover:text-red-700">
@@ -67,7 +67,7 @@ export default function CategoriaFixa({
         </div>
 
         <p
-          className={`text-sm font-semibold mb-4 ${
+          className={`text-base font-semibold mb-4 ${
             restante >= 0 ? "text-green-600" : "text-red-600"
           }`}
         >
@@ -124,13 +124,13 @@ export default function CategoriaFixa({
       }`}
     >
       <div>
-        <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+        <h3 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
           {categoria.nome}
           {categoria.pago && (
             <CheckCircle className="w-5 h-5 text-green-600" />
           )}
         </h3>
-        <p className="text-sm text-gray-600">
+        <p className="text-base text-gray-600">
           Valor: R$ {categoria.meta.toFixed(2)}
         </p>
       </div>
