@@ -279,8 +279,8 @@ export default function Page() {
             atualizarMes({ aleatorioSemanas: novo });
           }}
           onToggleFechar={(semanaIndex, fixedQuota) => {
-            let novasFechadas = [...estado.aleatorioFechadas];
-            let novasFixas = [...estado.aleatorioQuotaFixas];
+            const novasFechadas = [...estado.aleatorioFechadas];
+            const novasFixas = [...estado.aleatorioQuotaFixas];
 
             if (estado.aleatorioFechadas[semanaIndex]) {
               // 🔓 Reabrindo
