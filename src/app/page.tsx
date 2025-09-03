@@ -8,7 +8,6 @@ import CategoriaFixa from "@/components/CategoriaFixa";
 import Aleatorio from "@/components/Aleatorio";
 import ResumoMes from "@/components/ResumoMes";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -34,10 +33,13 @@ export type GastoItem = {
   dataPtBr: string;
 };
 
+export type Economia = EconomiaType;
+
 export type EstadoMes = {
   mesId: string;
   saldoInicial: number;
   categorias: CategoriaFixaType[];
+  economias: Economia[];
   aleatorioMeta: number;
   aleatorioSemanas: [GastoItem[], GastoItem[], GastoItem[], GastoItem[]];
   aleatorioFechadas: [boolean, boolean, boolean, boolean];
@@ -66,6 +68,7 @@ function load(): MapMeses {
         mesId: v.mesId ?? k,
         saldoInicial: Number(v.saldoInicial ?? 1200),
         categorias: v.categorias ?? [],
+        economias: v.economias ?? [],
         aleatorioMeta: Number(v.aleatorioMeta ?? 400),
         aleatorioSemanas: (v.aleatorioSemanas as EstadoMes["aleatorioSemanas"]) ?? [[], [], [], []],
         aleatorioFechadas: (v.aleatorioFechadas as EstadoMes["aleatorioFechadas"]) ?? [false, false, false, false],
@@ -87,69 +90,6 @@ export default function Page() {
   const mesHoje = useMemo(() => yyyymm(new Date()), []);
   const [map, setMap] = useState<MapMeses>({});
   const [mes, setMes] = useState<string>(mesHoje);
-  const [economias, setEconomias] = useState<EconomiaType[]>([]);
-
-  function handleAdicionarGastoFixo(nova: Omit<CategoriaFixaType, "id" | "pago">) {
-    atualizarMes({
-      categorias: [
-        ...estado.categorias,
-        { id: crypto.randomUUID(), nome: nova.nome, meta: nova.meta, pago: false },
-      ],
-    });
-  }
-
-  function handleAdicionarEconomia(nova: Omit<EconomiaType, "id" | "aportes">) {
-    setEconomias((prev) => [
-      { id: crypto.randomUUID(), titulo: nova.titulo, meta: nova.meta, aportes: [] },
-      ...prev,
-    ]);
-  }
-
-  function handleRemoverEconomia(id: string) {
-    setEconomias((prev) => prev.filter((e) => e.id !== id));
-  }
-
-  // function handleGuardarEconomia(id: string, valor: number) {
-  //   setEconomias((prev) =>
-  //     prev.map((e) =>
-  //       e.id === id ? { ...e, guardado: Math.min(e.guardado + valor, e.meta) } : e
-  //     )
-  //   );
-  // }
-
-  // function handleDesfazerEconomia(id: string) {
-  //   setEconomias((prev) =>
-  //     prev.map((e) =>
-  //       e.id === id ? { ...e, guardado: 0 } : e
-  //     )
-  //   );
-  // }
-
-  function handleAdicionarAporte(economiaId: string, valor: number) {
-    setEconomias((prev) =>
-      prev.map((e) =>
-        e.id === economiaId
-          ? {
-              ...e,
-              aportes: [
-                ...e.aportes,
-                { id: crypto.randomUUID(), data: new Date().toLocaleDateString("pt-BR"), valor },
-              ],
-            }
-          : e
-      )
-    );
-  }
-
-  function handleRemoverAporte(economiaId: string, aporteId: string) {
-    setEconomias((prev) =>
-      prev.map((e) =>
-        e.id === economiaId
-          ? { ...e, aportes: e.aportes.filter((a) => a.id !== aporteId) }
-          : e
-      )
-    );
-}
 
   // carregar dados salvos
   useEffect(() => {
@@ -163,6 +103,7 @@ export default function Page() {
           { id: crypto.randomUUID(), nome: "Cabeleireiro", meta: 120, pago: false },
           { id: crypto.randomUUID(), nome: "Comida", meta: 600, pago: false },
         ],
+        economias: [],
         aleatorioMeta: 400,
         aleatorioSemanas: [[], [], [], []],
         aleatorioFechadas: [false, false, false, false],
@@ -187,6 +128,7 @@ export default function Page() {
           mesId: mes,
           saldoInicial: 0,
           categorias: [],
+          economias: [],
           aleatorioMeta: 0,
           aleatorioSemanas: [[], [], [], []],
           aleatorioFechadas: [false, false, false, false],
@@ -202,54 +144,67 @@ export default function Page() {
     return <main className="p-6">Carregando…</main>;
   }
 
+  function handleAdicionarGastoFixo(nova: Omit<CategoriaFixaType, "id" | "pago">) {
+    atualizarMes({
+      categorias: [
+        ...estado.categorias,
+        { id: crypto.randomUUID(), nome: nova.nome, meta: nova.meta, pago: false },
+      ],
+    });
+  }
+
+  function handleAdicionarEconomia(nova: Omit<Economia, "id" | "aportes">) {
+    atualizarMes({
+      economias: [
+        { id: crypto.randomUUID(), titulo: nova.titulo, meta: nova.meta, aportes: [] },
+        ...estado.economias,
+      ],
+    });
+  }
+
+  function handleRemoverEconomia(id: string) {
+    atualizarMes({
+      economias: estado.economias.filter((e) => e.id !== id),
+    });
+  }
+
+  function handleAdicionarAporte(economiaId: string, valor: number) {
+    atualizarMes({
+      economias: estado.economias.map((e) =>
+        e.id === economiaId
+          ? {
+              ...e,
+              aportes: [
+                ...e.aportes,
+                { id: crypto.randomUUID(), data: new Date().toLocaleDateString("pt-BR"), valor },
+              ],
+            }
+          : e
+      ),
+    });
+  }
+
+  function handleRemoverAporte(economiaId: string, aporteId: string) {
+    atualizarMes({
+      economias: estado.economias.map((e) =>
+        e.id === economiaId
+          ? { ...e, aportes: e.aportes.filter((a) => a.id !== aporteId) }
+          : e
+      ),
+    });
+  }
+
   const totalPlanejadoFixas = estado.categorias.reduce((s, c) => s + c.meta, 0);
-  const totalEconomias = economias.reduce((acc, e) => acc + e.meta, 0);
+  const totalEconomias = estado.economias.reduce((acc, e) => acc + e.meta, 0);
   const aleatorioMeta = estado.saldoInicial - totalEconomias - totalPlanejadoFixas;
   const gastoFixas = estado.categorias.reduce((s, c) => s + (c.pago ? c.meta : 0), 0);
   const gastoAleatorio = estado.aleatorioSemanas.flat().reduce((s, it) => s + it.valor, 0);
 
   return (
     <main className="min-h-screen bg-neutral-50">
-      {/* <header className="sticky top-0 z-10 bg-white/80 backdrop-blur border-b">
-        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center gap-3">
-          <h1 className="text-lg font-semibold">Planejador Semanal de Gastos</h1>
-          <div className="ml-auto flex items-center gap-2">
-            <input
-              className="border rounded-xl px-3 py-1.5 w-[120px]"
-              value={mes}
-              onChange={(e) => setMes(e.target.value)}
-              placeholder="YYYY-MM"
-            /> */}
-
-            {/* <Sheet>
-              <SheetTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="rounded-full border border-blue-400 text-blue-500 hover:bg-blue-500 hover:text-white"
-                >
-                  <Settings className="h-5 w-5" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="right" className="w-full sm:w-[480px] overflow-y-auto">
-                <SheetHeader>
-                  <SheetTitle>Configurações</SheetTitle>
-                </SheetHeader>
-
-                <div className="py-4">
-                  <ConfigMes mes={mes} estado={estado} onUpdate={atualizarMes} />
-                </div>
-              </SheetContent>
-            </Sheet> */}
-       
-       
-          {/* </div>
-        </div>
-      </header> */}
-
       <ResumoMes
         saldoInicial={estado.saldoInicial}
-        economias={economias.map((e) => ({
+        economias={estado.economias.map((e) => ({
           meta: e.meta,
           guardado: e.aportes.reduce((s, a) => s + a.valor, 0),
         }))}
@@ -266,10 +221,10 @@ export default function Page() {
           <ConfigEconomia onAdicionar={handleAdicionarEconomia} />
         </CardHeader>
         <CardContent className="space-y-3">
-          {economias.length === 0 ? (
+          {estado.economias.length === 0 ? (
             <div className="text-sm text-neutral-500">Nenhuma economia adicionada.</div>
           ) : (
-            economias.map((eco) => (
+            estado.economias.map((eco) => (
               <EconomiaItem
                 key={eco.id}
                 economia={eco}
@@ -283,30 +238,27 @@ export default function Page() {
       </Card>
 
       <div className="max-w-6xl mx-auto p-4 md:p-6 space-y-6">
-        {/* <ConfigMes mes={mes} estado={estado} onUpdate={atualizarMes} /> */}
-
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <Card className="rounded-2xl shadow-sm">
-          <CardHeader className="flex items-center justify-between">
-            <CardTitle>Gastos Fixos</CardTitle>
-            <ConfigGastoFixo onAdicionar={handleAdicionarGastoFixo} />
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {estado.categorias.length === 0 ? (
-              <div className="text-sm text-neutral-500">Nenhum gasto fixo adicionado.</div>
-            ) : (
-              estado.categorias.map((c) => (
-                <CategoriaFixa
-                  key={c.id}
-                  categoria={c}
-                  estado={estado}
-                  atualizarEstado={atualizarMes}
-                />
-              ))
-            )}
-          </CardContent>
-        </Card>
-
+            <CardHeader className="flex items-center justify-between">
+              <CardTitle>Gastos Fixos</CardTitle>
+              <ConfigGastoFixo onAdicionar={handleAdicionarGastoFixo} />
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {estado.categorias.length === 0 ? (
+                <div className="text-sm text-neutral-500">Nenhum gasto fixo adicionado.</div>
+              ) : (
+                estado.categorias.map((c) => (
+                  <CategoriaFixa
+                    key={c.id}
+                    categoria={c}
+                    estado={estado}
+                    atualizarEstado={atualizarMes}
+                  />
+                ))
+              )}
+            </CardContent>
+          </Card>
         </div>
 
         <Aleatorio
@@ -344,4 +296,3 @@ export default function Page() {
     </main>
   );
 }
-
