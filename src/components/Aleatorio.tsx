@@ -19,105 +19,76 @@ function dataHojeCampoGrande(): string {
 }
 
 /**
- * Calcula quotas base e quotas dinâmicas.
- * - metaMes: número total para o mês
- * - totaisPorSemana: [n0,n1,n2,n3] soma de gastos por semana (number[])
- * - fechadas: flags de "finalizado" (boolean[])
- * - fixas: quotas travadas (number | null)[]
- *
- * Regras principais:
- * - Se não houve gasto e não há semanas fechadas/fixas => quotasDinamicas = quotasBase
- * - Se existe ao menos uma semana fechada/fixa => pivot = último índice fechado/fixo
- *   -> quotas até pivot = base (ou quota fixa se fixada)
- *   -> quotas futuras = distribuir (meta - gastoAtePivot) pelas semanas futuras proporcional ao peso
- * - Se NÃO há semanas fechadas/fixas e existe gasto -> pivot = último índice com gasto (comportamento dinâmico)
+ * Regra de ouro:
+ * 1) Concluída = tem gasto em alguma semana futura OU foi marcada como "fechada".
+ * 2) Para semanas concluídas, a distribuição é sequencial: a meta da semana i é
+ *    calculada sobre o orçamento restante naquele ponto; depois subtrai-se o que
+ *    FOI GASTO (não a meta) para redistribuir sobras/estouros para as próximas.
+ * 3) Para a semana atual + futuras, distribuímos o orçamento restante (após
+ *    as concluídas) pelos pesos remanescentes, sem “consumir” nada da semana atual.
  */
-function calcularQuotasDinamicas(
+function calcularMetasPorSemana(
   metaMes: number,
-  totaisPorSemana: number[],
-  fechadas: [boolean, boolean, boolean, boolean],
-  fixas: [number | null, number | null, number | null, number | null]
-): { base: number[]; quotas: number[] } {
-  const somaPesos = PESOS.reduce((a, b) => a + b, 0);
-  const base = PESOS.map((p) => (metaMes / somaPesos) * p);
+  totais: number[],
+  fechadas: [boolean, boolean, boolean, boolean]
+) {
+  const pesos = [...PESOS] as number[];
 
-  const anySpent = totaisPorSemana.some((v) => (v || 0) > 0);
-  const anyClosedOrFixed = fechadas.some(Boolean) || fixas.some((v) => v != null);
+  // atividade em cada semana (tem gasto ou foi fechada)
+  const atividade = [0, 1, 2, 3].map((i) => (totais[i] ?? 0) > 0 || !!fechadas[i]);
 
-  // sem nada acontecendo -> quotas = base
-  if (!anySpent && !anyClosedOrFixed) {
-    return { base, quotas: [...base] };
-  }
+  // concluída se existe atividade em alguma semana FUTURA OU se ela própria foi fechada
+  const concluida = [0, 1, 2, 3].map((i) => {
+    if (fechadas[i]) return true;
+    for (let j = i + 1; j < 4; j++) {
+      if (atividade[j]) return true;
+    }
+    return false;
+  });
 
-  // determina pivot:
-  // - se houver semanas fechadas/fixas: pivot = último índice fechado/fixo
-  // - senão (nenhuma fechada/fixa), pivot = último índice com gasto
-  let lastIdx = -1;
-  if (anyClosedOrFixed) {
+  // índice da primeira semana NÃO concluída (semana atual).
+  // se todas concluídas, usamos 4 para indicar "nenhuma atual".
+  const firstOpen = concluida.findIndex((c) => !c);
+  const currentIdx = firstOpen === -1 ? 4 : firstOpen;
+
+  const metas = [0, 0, 0, 0] as number[];
+
+  // Se não há nenhuma semana com gasto/fechada => ninguém concluído => base pura.
+  const somaPesosTotal = pesos.reduce((a, b) => a + b, 0);
+  if (currentIdx === 0) {
     for (let i = 0; i < 4; i++) {
-      if (fechadas[i] || fixas[i] != null) lastIdx = i;
+      metas[i] = (metaMes * pesos[i]) / somaPesosTotal;
     }
-  } else {
-    for (let i = 0; i < 4; i++) {
-      if ((totaisPorSemana[i] ?? 0) > 0) lastIdx = i;
-    }
+    return { metas, concluida, currentIdx };
   }
 
-  // se pivot não definido, retorna base
-  if (lastIdx === -1) return { base, quotas: [...base] };
+  // 1) Processa semanas concluídas sequencialmente (0 .. currentIdx-1)
+  let restante = metaMes;
+  for (let i = 0; i < Math.min(currentIdx, 4); i++) {
+    const somaPesosRestantes = pesos.slice(i).reduce((a, b) => a + b, 0);
+    metas[i] = (restante * pesos[i]) / somaPesosRestantes;
 
-  // quotas começam iguais à base
-  const quotas = [...base];
-
-  // aplica quotas até pivot: base ou quota fixa se houver
-  for (let i = 0; i <= lastIdx; i++) {
-    quotas[i] = fixas[i] != null ? fixas[i]! : base[i];
+    // subtrai o que de fato foi gasto para repassar sobras/estouros
+    const gasto = totais[i] ?? 0;
+    restante = restante - gasto;
   }
 
-  // gasto até pivot (somente gastos, NÃO subtrair quotas fixas)
-  const gastoAtePivot = totaisPorSemana.slice(0, lastIdx + 1).reduce((s, v) => s + (v || 0), 0);
-  const restante = metaMes - gastoAtePivot;
-
-  // indices futuros (> pivot)
-  const futureIdxs: number[] = [];
-  for (let i = lastIdx + 1; i < 4; i++) futureIdxs.push(i);
-  if (futureIdxs.length === 0) return { base, quotas };
-
-  // soma das quotas fixas já definidas nas futuras (reservas)
-  let fixedFutureSum = 0;
-  for (const i of futureIdxs) {
-    if (fixas[i] != null) fixedFutureSum += fixas[i]!;
-  }
-
-  // pesos das futuras não-fixas
-  const nonFixedWeights = futureIdxs.reduce((acc, i) => (fixas[i] == null ? acc + PESOS[i] : acc), 0);
-
-  // quanto sobra para distribuir entre as não-fixadas
-  const restanteDepoisFix = restante - fixedFutureSum;
-
-  if (nonFixedWeights <= 0) {
-    // todas as futuras já fixadas -> aplica fixas (ou 0)
-    for (const i of futureIdxs) quotas[i] = fixas[i] != null ? fixas[i]! : 0;
-    return { base, quotas };
-  }
-
-  // se restanteDepoisFix <= 0, então não há mais orçamento para distribuir -> quotas não-fixas = 0
-  for (const i of futureIdxs) {
-    if (fixas[i] != null) {
-      quotas[i] = fixas[i]!;
-    } else {
-      quotas[i] = restanteDepoisFix > 0 ? (restanteDepoisFix * PESOS[i]) / nonFixedWeights : 0;
+  // 2) Distribui o restante entre semana atual e futuras (currentIdx .. 3)
+  if (currentIdx <= 3) {
+    const somaPesosFuturos = pesos.slice(currentIdx).reduce((a, b) => a + b, 0);
+    for (let i = currentIdx; i < 4; i++) {
+      metas[i] = somaPesosFuturos > 0 ? (restante * pesos[i]) / somaPesosFuturos : 0;
     }
   }
 
-  return { base, quotas };
+  return { metas, concluida, currentIdx };
 }
 
 export default function Aleatorio({
   meta,
   semanas,
   fechadas,
-  fixas,
+  fixas, // mantido por compatibilidade, não usado nessa lógica
   onAddGasto,
   onRemoveGasto,
   onToggleFechar,
@@ -130,20 +101,19 @@ export default function Aleatorio({
   onRemoveGasto: (semanaIndex: number, itemId: string) => void;
   onToggleFechar: (semanaIndex: number, fixedQuota?: number | null) => void;
 }) {
-  // totais por semana (números)
   const totaisPorSemana = semanas.map((items) => items.reduce((s, it) => s + it.valor, 0));
 
-  // calcula quotas e base (useMemo para performance)
-  const { base: quotaBasePorSemana, quotas: quotasDinamicas } = useMemo(
-    () => calcularQuotasDinamicas(meta, totaisPorSemana, fechadas, fixas),
-    [meta, totaisPorSemana, fechadas, fixas]
+  const { metas, concluida, currentIdx } = useMemo(
+    () => calcularMetasPorSemana(meta, totaisPorSemana, fechadas),
+    [meta, totaisPorSemana, fechadas]
   );
 
-  // UI de adicionar gasto (inline por semana)
   function AddForm({ index }: { index: number }) {
     const [desc, setDesc] = useState("");
     const [valor, setValor] = useState("");
-    const semanaFechada = fechadas[index];
+
+    // bloquear adição em semana concluída (passada) ou fechada
+    const bloqueada = fechadas[index] || index < currentIdx;
 
     return (
       <div className="flex flex-col sm:flex-row gap-2 mt-2">
@@ -152,7 +122,7 @@ export default function Aleatorio({
           placeholder="Descrição (ex.: Sorvete)"
           value={desc}
           onChange={(e) => setDesc(e.target.value)}
-          disabled={semanaFechada}
+          disabled={bloqueada}
         />
         <input
           type="number"
@@ -161,13 +131,12 @@ export default function Aleatorio({
           placeholder="Valor"
           value={valor}
           onChange={(e) => setValor(e.target.value)}
-          disabled={semanaFechada}
+          disabled={bloqueada}
         />
         <Button
-          // className="w-full sm:w-auto"
           size="icon"
-          className="w-10 h-10 w-full sm:w-auto rounded-full bg-blue-500 text-white shadow hover:bg-blue-600 active:scale-95 transition"
-          disabled={semanaFechada}
+          className="w-10 h-10 rounded-full bg-blue-500 text-white shadow hover:bg-blue-600 active:scale-95 transition"
+          disabled={bloqueada}
           onClick={() => {
             const v = Number(valor) || 0;
             if (!desc.trim() || v <= 0) return;
@@ -182,7 +151,6 @@ export default function Aleatorio({
           }}
         >
           <Plus className="w-5 h-5" />
-
         </Button>
       </div>
     );
@@ -192,21 +160,23 @@ export default function Aleatorio({
     <Card className="rounded-2xl shadow-sm">
       <CardHeader className="pb-2">
         <CardTitle>Gastos Variados (Aleatório)</CardTitle>
-      </CardHeader>        
+      </CardHeader>
       <CardContent className="space-y-3">
-        <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
-          <div className="text-sm text-neutral-600">
-            Total disponível para usar: <b>{moeda(meta)}</b>
-          </div>
-          {/* <div className="text-xs text-neutral-500">
-            Metas por semana: [{quotaBasePorSemana.map((q: number) => moeda(q)).join(", ")}]
-          </div> */}
+        <div className="text-sm text-neutral-600">
+          Total disponível para usar: <b>{moeda(meta)}</b>
         </div>
 
         {Array.from({ length: 4 }, (_, i) => i).map((i) => {
           const totalSemana = totaisPorSemana[i] || 0;
-          const quotaDin = quotasDinamicas[i] || 0;
-          const restante = quotaDin - totalSemana; // pode ser negativo (estouro)
+          const metaSemana = metas[i] || 0;
+          const delta = metaSemana - totalSemana; // pode ser negativo
+
+          const status =
+            i < currentIdx
+              ? "finalizada"
+              : i === currentIdx
+              ? "atual"
+              : "futura";
 
           return (
             <div key={i} className="rounded-xl border p-3">
@@ -215,7 +185,7 @@ export default function Aleatorio({
                 <div>
                   <div className="font-medium">Semana {i + 1}</div>
                   <div className="text-xs text-neutral-500">
-                    Meta de gasto: {moeda(quotaDin)} {fixas[i] != null ? "" : ""}
+                    Meta de gasto: {moeda(metaSemana)}
                   </div>
                 </div>
 
@@ -223,21 +193,35 @@ export default function Aleatorio({
                 <div className="flex flex-col items-end gap-1">
                   <span
                     className={`text-xs px-2 py-1 rounded-full border ${
-                      fechadas[i]
+                      status === "finalizada"
                         ? "bg-green-50 border-green-200 text-green-700"
+                        : status === "atual"
+                        ? "bg-blue-50 border-blue-200 text-blue-700"
                         : "bg-neutral-50 border-neutral-200 text-neutral-600"
                     }`}
                   >
-                    {fechadas[i] ? "Semana finalizada" : "Semana aberta"}
+                    {status === "finalizada"
+                      ? "Semana finalizada"
+                      : status === "atual"
+                      ? "Semana atual"
+                      : "Semana futura"}
                   </span>
+
+                  {/* Botão de finalizar/reabrir:
+                      - Finalizar só faz sentido na semana atual
+                      - Reabrir só funciona se ela foi marcada como fechada manualmente
+                  */}
                   <Button
                     variant="secondary"
                     size="sm"
-                    onClick={() => {
-                      onToggleFechar(i, fechadas[i] ? null : quotasDinamicas[i]);
-                    }}
+                    disabled={i < currentIdx && !fechadas[i]}
+                    onClick={() => onToggleFechar(i, null)}
                   >
-                    {fechadas[i] ? "Reabrir" : "Finalizar semana"}
+                    {fechadas[i]
+                      ? "Reabrir"
+                      : i === currentIdx
+                      ? "Finalizar semana"
+                      : "Finalizar"}
                   </Button>
                 </div>
               </div>
@@ -261,22 +245,43 @@ export default function Aleatorio({
                       <button
                         onClick={() => onRemoveGasto(i, g.id)}
                         className="text-red-600 text-xs hover:underline"
+                        disabled={i < currentIdx && !fechadas[i]}
                       >
                         remover
                       </button>
                     </div>
                   </div>
-                    ))}
+                ))}
               </div>
 
               {/* Adicionar gasto */}
               <AddForm index={i} />
 
+              {/* Rodapé da semana */}
               <div className="mt-2 text-xs text-neutral-600 flex items-center justify-between">
-                <span>Total gasto: <b>{moeda(totalSemana)}</b></span>
-                <span className={`${restante < 0 ? "text-red-600" : "text-green-600"}`}>
-                  Posso gastar ainda: {moeda(restante)}
+                <span>
+                  Total gasto: <b>{moeda(totalSemana)}</b>
                 </span>
+
+                {i < currentIdx ? (
+                  delta >= 0 ? (
+                    <span className="text-green-600">
+                      Sobrou: {moeda(delta)} (repassado às próximas)
+                    </span>
+                  ) : (
+                    <span className="text-red-600">
+                      Excedeu: {moeda(-delta)} (descontado das próximas)
+                    </span>
+                  )
+                ) : i === currentIdx ? (
+                  <span className={delta < 0 ? "text-red-600" : "text-green-600"}>
+                    Posso gastar ainda: {moeda(delta)}
+                  </span>
+                ) : (
+                  <span className="text-neutral-600">
+                    Posso gastar ainda: {moeda(metaSemana - totalSemana)}
+                  </span>
+                )}
               </div>
             </div>
           );
