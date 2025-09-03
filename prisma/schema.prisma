@@ -1,0 +1,168 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+
+// prisma/schema.prisma
+// Banco Postgres + Prisma. Modelagem normalizada dos seus tipos atuais.
+// "Profile" permite uso anônimo (sem login) com uma apiKey. No futuro adicione User e relacione.
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+
+/// Representa um dono de dados sem login (anônimo) via apiKey compartilhável.
+model Profile {
+id String @id @default(uuid())
+createdAt DateTime @default(now())
+apiKey String @unique // chave que o front pode armazenar/circular para acessar em múltiplos devices
+
+
+// Futuro: vincular a um User quando houver autenticação
+// userId String?
+// user User? @relation(fields: [userId], references: [id])
+
+
+meses Mes[]
+}
+
+
+/// Cada mês orçamentário (ex.: "2025-09"). Único por Profile + mesId.
+model Mes {
+id String @id @default(uuid())
+createdAt DateTime @default(now())
+updatedAt DateTime @updatedAt
+
+
+mesId String // ex: "2025-09"
+saldoInicial Float
+aleatorioMeta Float // meta disponível para gastos aleatórios no mês
+
+
+// Relacionamento com Profile (anônimo) — obrigatório no cenário atual
+profileId String
+profile Profile @relation(fields: [profileId], references: [id])
+
+
+categorias Categoria[]
+economias Economia[]
+semanas AleatorioWeek[]
+gasolina GasolinaGasto[]
+
+
+@@unique([profileId, mesId])
+}
+
+
+/// Categorias fixas (ex.: "Gasolina", "Comida")
+model Categoria {
+id String @id @default(uuid())
+nome String
+meta Float
+pago Boolean @default(false)
+
+
+mesId String
+mes Mes @relation(fields: [mesId], references: [id])
+
+
+@@index([mesId])
+}
+
+/// Objetivos de economia (ex.: "Viagem"), com aportes históricos.
+model Economia {
+id String @id @default(uuid())
+titulo String
+meta Float
+
+
+mesId String
+mes Mes @relation(fields: [mesId], references: [id])
+
+
+aportes Aporte[]
+
+
+@@index([mesId])
+}
+
+
+model Aporte {
+id String @id @default(uuid())
+data DateTime // armazenar como UTC
+valor Float
+
+
+economiaId String
+economia Economia @relation(fields: [economiaId], references: [id])
+
+
+@@index([economiaId])
+}
+
+/// Planejamento/execução semanal dos gastos aleatórios.
+model AleatorioWeek {
+id String @id @default(uuid())
+index Int // 0..3
+fechada Boolean @default(false)
+quotaFixa Float? // quando o usuário "fixa" a quota da semana
+
+
+mesId String
+mes Mes @relation(fields: [mesId], references: [id])
+
+
+gastos AleatorioGasto[]
+
+
+@@unique([mesId, index])
+}
+
+
+model AleatorioGasto {
+id String @id @default(uuid())
+descricao String
+valor Float
+data DateTime // armazenar UTC
+
+
+weekId String
+week AleatorioWeek @relation(fields: [weekId], references: [id])
+
+
+@@index([weekId])
+}
+
+
+/// Gastos específicos de gasolina (se desejar segregá-los)
+model GasolinaGasto {
+id String @id @default(uuid())
+data DateTime
+valor Float
+
+
+mesId String
+mes Mes @relation(fields: [mesId], references: [id])
+
+
+@@index([mesId])
+}
+
+
+// Futuro (exemplo):
+// model User {
+// id String @id @default(uuid())
+// email String @unique
+// name String?
+// profiles Profile[]
+// }
