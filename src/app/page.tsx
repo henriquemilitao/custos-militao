@@ -279,14 +279,25 @@ export default function Page() {
             atualizarMes({ aleatorioSemanas: novo });
           }}
           onToggleFechar={(semanaIndex, fixedQuota) => {
-            const novo = estado.aleatorioFechadas.map((f, i) =>
-              i === semanaIndex ? !f : f
-            ) as EstadoMes["aleatorioFechadas"];
-            const novoFixas = estado.aleatorioQuotaFixas.map((q, i) =>
-              i === semanaIndex ? (fixedQuota ?? null) : q
-            ) as EstadoMes["aleatorioQuotaFixas"];
-            atualizarMes({ aleatorioFechadas: novo, aleatorioQuotaFixas: novoFixas });
+            let novasFechadas = [...estado.aleatorioFechadas];
+            let novasFixas = [...estado.aleatorioQuotaFixas];
+
+            if (estado.aleatorioFechadas[semanaIndex]) {
+              // 🔓 Reabrindo
+              novasFechadas[semanaIndex] = false;
+              novasFixas[semanaIndex] = null;
+            } else {
+              // ✅ Fechando
+              novasFechadas[semanaIndex] = true;
+              novasFixas[semanaIndex] = fixedQuota ?? null;
+            }
+
+            atualizarMes({
+              aleatorioFechadas: novasFechadas as [boolean, boolean, boolean, boolean],
+              aleatorioQuotaFixas: novasFixas as [number | null, number | null, number | null, number | null],
+            });
           }}
+
         />
 
         <footer className="text-center text-xs text-neutral-500 py-8">
