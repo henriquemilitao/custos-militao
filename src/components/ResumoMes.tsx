@@ -79,6 +79,7 @@ export default function ResumoMes({
   const totalEconomias = economias.reduce((acc, e) => acc + e.meta, 0);
   const totalEconomizado = economias.reduce((acc, e) => acc + e.guardado, 0);
   const restanteEconomias = totalEconomias - totalEconomizado;
+  const totalSemEconomias = saldoInicial - totalEconomias;
 
   // quanto sobra para gastar depois que eu já reservei as economias planejadas
   const totalRealParaGastar = saldoInicial - totalEconomias;
@@ -117,7 +118,7 @@ export default function ResumoMes({
           <div className="p-4 bg-white rounded-2xl border flex flex-col justify-between">
             <div>
               <div className="text-base text-neutral-500">Disponível após economias</div>
-              <div className="mt-2 text-2xl font-semibold text-green-600">
+              <div className={`mt-2 text-2xl font-semibold ${totalSemEconomias < 0 ? "text-red-600" : "text-green-600"}`}>
                 {moeda(totalRealParaGastar)}
               </div>
               <div className="text-sm text-neutral-500 mt-1">
