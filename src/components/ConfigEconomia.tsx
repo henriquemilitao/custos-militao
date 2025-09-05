@@ -76,7 +76,7 @@ export default function ConfigEconomia({
             <label className="text-base text-neutral-700 block mb-2">
               Nome
               <input
-                className="mt-1 block w-full border rounded-xl px-3 py-2"
+                className="mt-1 block w-full border rounded-xl px-3 py-2 disabled:bg-gray-100 disabled:text-gray-500"
                 value={titulo}
                 onChange={(e) => setTitulo(e.target.value)}
                 placeholder="Ex: Viagem, Curso, etc."
