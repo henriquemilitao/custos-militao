@@ -38,8 +38,8 @@ export default function EconomiaItem({
 
         {isReserva ? (
           <p className="text-base text-gray-600">
-            Valor: R$ {economia.meta.toFixed(2)} <span className="text-gray-400 text-sm">({percentual}% do que você ganha</span>
-            {isDefault ? ", por padrão" : ""}<span className="text-gray-400 text-sm">)</span>
+            Valor: R$ {economia.meta.toFixed(2)} <span className="text-gray-400 text-sm">({percentual}% do que você ganha
+            {isDefault ? ", por padrão" : ""})</span>
           </p>
         ) : (
           <p className="text-base text-gray-600">
