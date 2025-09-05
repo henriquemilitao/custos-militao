@@ -1,94 +1,72 @@
-import { useState } from "react";
-import { CheckCircle, Trash2 } from "lucide-react";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import type { Economia } from "./ConfigEconomia";
+"use client";
 
-function moeda(n: number) {
-  return new Intl.NumberFormat("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-  }).format(isFinite(n) ? n : 0);
-}
+import { CheckCircle, RotateCcw, Trash2, Edit3 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import ConfigEconomia, { Economia } from "./ConfigEconomia";
 
 export default function EconomiaItem({
   economia,
-  onAdicionarAporte,
-  onRemoverAporte,
+  onToggle,
   onRemove,
+  onSalvarEdit,
 }: {
   economia: Economia;
-  onAdicionarAporte: (valor: number) => void;
-  onRemoverAporte: (aporteId: string) => void;
+  onToggle: () => void;
   onRemove: () => void;
+  onSalvarEdit: (id: string, dados: { titulo: string; meta: number }) => void;
 }) {
-  const [novoValor, setNovoValor] = useState("");
-  const guardado = economia.aportes.reduce((s, a) => s + a.valor, 0);
-  const concluida = guardado >= economia.meta;
-
-  const adicionar = () => {
-    const valor = parseFloat(novoValor);
-    if (!valor || valor <= 0) return;
-    onAdicionarAporte(valor);
-    setNovoValor("");
-  };
-
   return (
-    <Card className="p-4 border rounded-2xl shadow bg-white">
-      <div className="flex items-center justify-between mb-2">
-        <h3 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
+    <div
+      className={`p-4 border rounded-2xl shadow flex items-center justify-between transition duration-200 ${
+        economia.economizado ? "opacity-80 bg-green-50 border-green-200" : "opacity-100 bg-white"
+      }`}
+    >
+      <div>
+        <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2 break-all whitespace-normal max-w-[200px]">
           {economia.titulo}
-          {concluida && <CheckCircle className="w-5 h-5 text-green-600" />}
+          {economia.economizado && <CheckCircle className="w-5 h-5 text-green-600" />}
         </h3>
+        <p className="text-base text-gray-600">
+          Meta: R$ {economia.meta.toFixed(2)}
+        </p>
+      </div>
+
+      <div className="flex items-center gap-1">
         <Button
           variant="ghost"
-          onClick={onRemove}
-          className="text-red-500 hover:text-red-700"
+          size="icon"
+          onClick={onToggle}
+          className={economia.economizado ? "text-blue-500" : "text-green-600"}
+          title={economia.economizado ? "Desmarcar como economizado" : "Marcar como economizado"}
         >
-          <Trash2 className="w-4 h-4" />
+          {economia.economizado ? <RotateCcw className="w-5 h-5" /> : <CheckCircle className="w-5 h-5" />}
         </Button>
-      </div>
 
-      <p className="text-base text-gray-600 mb-4">
-        Meta: {moeda(economia.meta)} — Guardado: {moeda(guardado)}
-      </p>
-
-      {/* adicionar valor */}
-      <div className="flex items-center gap-2 mb-4">
-        <Input
-          type="number"
-          placeholder="Valor"
-          value={novoValor}
-          onChange={(e) => setNovoValor(e.target.value)}
-          className="flex-1"
-        />
-        <Button onClick={adicionar} size="sm" className="bg-green-500 text-white hover:bg-green-600">
-          Guardar
-        </Button>
-      </div>
-
-      {/* lista de aportes */}
-      <ul className="space-y-2">
-        {economia.aportes.map((a) => (
-          <li
-            key={a.id}
-            className="flex justify-between items-center p-2 border rounded bg-gray-50 shadow-sm"
-          >
-            <span>
-              {a.data} — {moeda(a.valor)}
-            </span>
+        <ConfigEconomia
+          initial={{ id: economia.id, titulo: economia.titulo, meta: economia.meta }}
+          onSalvarEdit={onSalvarEdit}
+          trigger={
             <Button
               variant="ghost"
               size="icon"
-              className="text-red-500 hover:text-red-700"
-              onClick={() => onRemoverAporte(a.id)}
+              className="text-neutral-600 hover:text-neutral-800"
+              title="Editar"
             >
-              <Trash2 className="w-4 h-4" />
+              <Edit3 className="w-5 h-5" />
             </Button>
-          </li>
-        ))}
-      </ul>
-    </Card>
+          }
+        />
+
+        <Button
+          variant="ghost"
+          size="icon"
+          className="text-red-500 hover:text-red-700"
+          onClick={onRemove}
+          title="Remover economia"
+        >
+          <Trash2 className="w-5 h-5" />
+        </Button>
+      </div>
+    </div>
   );
 }

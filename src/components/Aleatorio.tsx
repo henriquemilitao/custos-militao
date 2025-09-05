@@ -187,7 +187,7 @@ export default function Aleatorio({
                 <div>
                   <div className="font-medium">Semana {i + 1}</div>
                   <div className="text-sm text-neutral-500">
-                    Devo gastar no máx: <span className="text-base font-medium text-gray-800">{moeda(metaSemana)}</span>
+                    Posso gastar no máx: <span className="text-base font-medium text-gray-800">{moeda(metaSemana)}</span>
                   </div>
                 </div>
 
@@ -222,7 +222,8 @@ export default function Aleatorio({
                     {fechadas[i]
                       ? "Reabrir"
                       : i === currentIdx
-                      ? "Finalizar semana"
+                      // ? "Finalizar semana"
+                      ? "Finalizar"
                       : "Finalizar"}
                   </Button>
                 </div>

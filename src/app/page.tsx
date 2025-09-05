@@ -8,15 +8,12 @@ import CategoriaFixa from "@/components/CategoriaFixa";
 import Aleatorio from "@/components/Aleatorio";
 import ResumoMes from "@/components/ResumoMes";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Settings } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import ConfigGastoFixo from "@/components/ConfigGastoFixo";
 
 export type CategoriaFixaType = {
   id: string;
   nome: string;
-  meta: number; // valor planejado
+  meta: number;
   pago: boolean;
 };
 
@@ -91,7 +88,6 @@ export default function Page() {
   const [map, setMap] = useState<MapMeses>({});
   const [mes, setMes] = useState<string>(mesHoje);
 
-  // carregar dados salvos
   useEffect(() => {
     const m = load();
     if (!m[mesHoje]) {
@@ -144,6 +140,7 @@ export default function Page() {
     return <main className="p-6">Carregando…</main>;
   }
 
+  // 🔹 Categorias Fixas
   function handleAdicionarGastoFixo(nova: Omit<CategoriaFixaType, "id" | "pago">) {
     atualizarMes({
       categorias: [
@@ -154,17 +151,28 @@ export default function Page() {
   }
 
   function handleEditarCategoria(id: string, dados: { nome: string; meta: number }) {
-  atualizarMes({
-    categorias: estado.categorias.map((c) => (c.id === id ? { ...c, nome: dados.nome, meta: dados.meta } : c)),
-  });
-}
+    atualizarMes({
+      categorias: estado.categorias.map((c) =>
+        c.id === id ? { ...c, nome: dados.nome, meta: dados.meta } : c
+      ),
+    });
+  }
 
-  function handleAdicionarEconomia(nova: Omit<Economia, "id" | "aportes">) {
+  // 🔹 Economias
+  function handleAdicionarEconomia(nova: Omit<Economia, "id" | "economizado">) {
     atualizarMes({
       economias: [
-        { id: crypto.randomUUID(), titulo: nova.titulo, meta: nova.meta, aportes: [] },
         ...estado.economias,
+        { id: crypto.randomUUID(), titulo: nova.titulo, meta: nova.meta, economizado: false },
       ],
+    });
+  }
+
+  function handleEditarEconomia(id: string, dados: { titulo: string; meta: number }) {
+    atualizarMes({
+      economias: estado.economias.map((e) =>
+        e.id === id ? { ...e, titulo: dados.titulo, meta: dados.meta } : e
+      ),
     });
   }
 
@@ -174,32 +182,15 @@ export default function Page() {
     });
   }
 
-  function handleAdicionarAporte(economiaId: string, valor: number) {
+  function handleToggleEconomia(id: string) {
     atualizarMes({
       economias: estado.economias.map((e) =>
-        e.id === economiaId
-          ? {
-              ...e,
-              aportes: [
-                ...e.aportes,
-                { id: crypto.randomUUID(), data: new Date().toLocaleDateString("pt-BR"), valor },
-              ],
-            }
-          : e
+        e.id === id ? { ...e, economizado: !e.economizado } : e
       ),
     });
   }
 
-  function handleRemoverAporte(economiaId: string, aporteId: string) {
-    atualizarMes({
-      economias: estado.economias.map((e) =>
-        e.id === economiaId
-          ? { ...e, aportes: e.aportes.filter((a) => a.id !== aporteId) }
-          : e
-      ),
-    });
-  }
-
+  // 🔹 Totais
   const totalPlanejadoFixas = estado.categorias.reduce((s, c) => s + c.meta, 0);
   const totalEconomias = estado.economias.reduce((acc, e) => acc + e.meta, 0);
   const aleatorioMeta = estado.saldoInicial - totalEconomias - totalPlanejadoFixas;
@@ -212,7 +203,7 @@ export default function Page() {
         saldoInicial={estado.saldoInicial}
         economias={estado.economias.map((e) => ({
           meta: e.meta,
-          guardado: e.aportes.reduce((s, a) => s + a.valor, 0),
+          guardado: e.economizado ? e.meta : 0,
         }))}
         gastoFixas={gastoFixas}
         gastoAleatorio={gastoAleatorio}
@@ -224,7 +215,7 @@ export default function Page() {
       <Card className="rounded-2xl shadow-sm m-4">
         <CardHeader className="flex items-center justify-between">
           <CardTitle>Economias</CardTitle>
-          <ConfigEconomia onAdicionar={handleAdicionarEconomia}/>
+          <ConfigEconomia onAdicionar={handleAdicionarEconomia} />
         </CardHeader>
         <CardContent className="space-y-3">
           {estado.economias.length === 0 ? (
@@ -234,9 +225,9 @@ export default function Page() {
               <EconomiaItem
                 key={eco.id}
                 economia={eco}
-                onAdicionarAporte={(valor) => handleAdicionarAporte(eco.id, valor)}
-                onRemoverAporte={(aporteId) => handleRemoverAporte(eco.id, aporteId)}
+                onToggle={() => handleToggleEconomia(eco.id)}
                 onRemove={() => handleRemoverEconomia(eco.id)}
+                onSalvarEdit={handleEditarEconomia}
               />
             ))
           )}
@@ -248,7 +239,10 @@ export default function Page() {
           <Card className="rounded-2xl shadow-sm">
             <CardHeader className="flex items-center justify-between">
               <CardTitle>Gastos Fixos</CardTitle>
-              <ConfigGastoFixo onAdicionar={handleAdicionarGastoFixo} onSalvarEdit={handleEditarCategoria}/>
+              <ConfigGastoFixo
+                onAdicionar={handleAdicionarGastoFixo}
+                onSalvarEdit={handleEditarCategoria}
+              />
             </CardHeader>
             <CardContent className="space-y-3">
               {estado.categorias.length === 0 ? (
@@ -289,11 +283,9 @@ export default function Page() {
             const novasFixas = [...estado.aleatorioQuotaFixas];
 
             if (estado.aleatorioFechadas[semanaIndex]) {
-              // 🔓 Reabrindo
               novasFechadas[semanaIndex] = false;
               novasFixas[semanaIndex] = null;
             } else {
-              // ✅ Fechando
               novasFechadas[semanaIndex] = true;
               novasFixas[semanaIndex] = fixedQuota ?? null;
             }
@@ -303,7 +295,6 @@ export default function Page() {
               aleatorioQuotaFixas: novasFixas as [number | null, number | null, number | null, number | null],
             });
           }}
-
         />
 
         <footer className="text-center text-sm text-neutral-500 py-8">
