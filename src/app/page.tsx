@@ -153,6 +153,12 @@ export default function Page() {
     });
   }
 
+  function handleEditarCategoria(id: string, dados: { nome: string; meta: number }) {
+  atualizarMes({
+    categorias: estado.categorias.map((c) => (c.id === id ? { ...c, nome: dados.nome, meta: dados.meta } : c)),
+  });
+}
+
   function handleAdicionarEconomia(nova: Omit<Economia, "id" | "aportes">) {
     atualizarMes({
       economias: [
@@ -218,7 +224,7 @@ export default function Page() {
       <Card className="rounded-2xl shadow-sm m-4">
         <CardHeader className="flex items-center justify-between">
           <CardTitle>Economias</CardTitle>
-          <ConfigEconomia onAdicionar={handleAdicionarEconomia} />
+          <ConfigEconomia onAdicionar={handleAdicionarEconomia}/>
         </CardHeader>
         <CardContent className="space-y-3">
           {estado.economias.length === 0 ? (
@@ -242,7 +248,7 @@ export default function Page() {
           <Card className="rounded-2xl shadow-sm">
             <CardHeader className="flex items-center justify-between">
               <CardTitle>Gastos Fixos</CardTitle>
-              <ConfigGastoFixo onAdicionar={handleAdicionarGastoFixo} />
+              <ConfigGastoFixo onAdicionar={handleAdicionarGastoFixo} onSalvarEdit={handleEditarCategoria}/>
             </CardHeader>
             <CardContent className="space-y-3">
               {estado.categorias.length === 0 ? (
