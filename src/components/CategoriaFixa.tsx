@@ -104,9 +104,10 @@ export default function CategoriaFixa({
         </div>
 
         {/* Valor estipulado */}
-        <div className="mt-2 text-sm text-neutral-600">
-          Valor estipulado:{" "}
-          <span className="font-medium text-gray-800">
+        <div className="mt-2 text-base text-neutral-600">
+          
+          Valor:{" "}
+          <span className="mt-2 text-base text-neutral-600">
             R$ {categoria.meta.toFixed(2)}
           </span>
         </div>
@@ -114,13 +115,13 @@ export default function CategoriaFixa({
         {/* Gastos e Disponível */}
         <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
           <div>
-            <div className="text-neutral-500">Valor gasto</div>
-            <div className="font-medium">R$ {totalGasto.toFixed(2)}</div>
+            <div className="text-neutral-500">Já gastei</div>
+            <div className="font-medium text-base">R$ {totalGasto.toFixed(2)}</div>
           </div>
           <div>
             <div className="text-neutral-500">Posso gastar ainda</div>
             <div
-              className={`font-medium ${
+              className={`font-medium text-base ${
                 restante >= 0 ? "text-green-600" : "text-red-600"
               }`}
             >
@@ -213,7 +214,7 @@ export default function CategoriaFixa({
         </p>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1">
         <Button
           variant="ghost"
           size="icon"

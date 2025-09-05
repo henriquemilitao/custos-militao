@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import type { GastoItem } from "@/app/page";
-import { Plus } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 
 const PESOS = [1, 1, 1, 1.5] as const;
 
@@ -119,7 +119,7 @@ export default function Aleatorio({
       <div className="flex flex-col sm:flex-row gap-2 mt-2">
         <input
           className="border rounded-xl px-3 py-1.5 flex-1 w-full"
-          placeholder="Descrição (ex.: Sorvete)"
+          placeholder="Com o que vc gastou?"
           value={desc}
           onChange={(e) => setDesc(e.target.value)}
           disabled={bloqueada}
@@ -187,7 +187,7 @@ export default function Aleatorio({
                 <div>
                   <div className="font-medium">Semana {i + 1}</div>
                   <div className="text-sm text-neutral-500">
-                    Meta de gasto: {moeda(metaSemana)}
+                    Devo gastar no máx: <span className="text-base font-medium text-gray-800">{moeda(metaSemana)}</span>
                   </div>
                 </div>
 
@@ -240,7 +240,7 @@ export default function Aleatorio({
                   >
                     <div className="flex flex-col">
                       <span className="text-sm text-neutral-500">{g.dataPtBr}</span>
-                      <span className="font-medium break-words">{g.descricao}</span>
+                      <span className="font-medium break-words break-all">{g.descricao}</span>
                     </div>
                     <div className="flex items-center gap-2 ml-2">
                       <span>{moeda(g.valor)}</span>
@@ -249,7 +249,7 @@ export default function Aleatorio({
                         className="text-red-600 text-sm hover:underline"
                         disabled={i < currentIdx && !fechadas[i]}
                       >
-                        remover
+                        <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
                   </div>
@@ -262,22 +262,22 @@ export default function Aleatorio({
               {/* Rodapé da semana */}
               <div className="mt-2 text-sm text-neutral-600 flex items-center justify-between">
                 <span>
-                  Total gasto: <b>{moeda(totalSemana)}</b>
+                  Total gasto: <b className="text-base font-medium text-gray-800">{moeda(totalSemana)}</b>
                 </span>
 
                 {i < currentIdx ? (
                   delta >= 0 ? (
-                    <span className="text-green-600">
-                      Sobrou: {moeda(delta)} (repassado às próximas)
+                    <span className="text-green-600 text-sm">
+                      Sobrou: <span className="text-base font-medium">{moeda(delta)}</span> (repassado às próximas)
                     </span>
                   ) : (
-                    <span className="text-red-600">
-                      Excedeu: {moeda(-delta)} (descontado das próximas)
+                    <span className="text-red-600 text-sm">
+                      Excedeu: <span className="text-base font-medium">{moeda(-delta)}</span> (descontado das próximas)
                     </span>
                   )
                 ) : i === currentIdx ? (
                   <span className={delta < 0 ? "text-red-600" : "text-green-600"}>
-                    Posso gastar ainda: {moeda(delta)}
+                    Posso gastar ainda: <span className="text-base font-medium">{moeda(delta)}</span>
                   </span>
                 ) : (
                   <span className="text-neutral-600">
