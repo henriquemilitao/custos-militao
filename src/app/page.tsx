@@ -75,6 +75,7 @@ function load(): MapMeses {
         });
       }
 
+      console.log(v)
       migrated[k] = {
         mesId: v.mesId ?? k,
         saldoInicial,
@@ -224,7 +225,9 @@ export default function Page() {
   // 🔹 Totais
   const totalPlanejadoFixas = estado.categorias.reduce((s, c) => s + c.meta, 0);
   const totalEconomias = estado.economias.reduce((acc, e) => acc + e.meta, 0);
-  const aleatorioMeta = estado.saldoInicial - totalEconomias - totalPlanejadoFixas;
+  const aleatorioMeta = (estado.saldoInicial - totalEconomias - totalPlanejadoFixas) <= 0
+    ? 0
+    : (estado.saldoInicial - totalEconomias - totalPlanejadoFixas);
 
   // soma os pagos "normais" (exceto gasolina)
   const gastoFixasNormais = estado.categorias

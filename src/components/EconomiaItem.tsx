@@ -18,7 +18,7 @@ export default function EconomiaItem({
   totalDisponivel: number;
 }) {
   const isReserva = economia.titulo === "Reserva de Emergência";
-  const percentual = ((economia.meta / totalDisponivel) * 100).toFixed(0);
+  const percentual = totalDisponivel <= 0 ? "0" : ((economia.meta / totalDisponivel) * 100).toFixed(0);
 
   // meta final da reserva = 10% inicial, se não foi editada
   const defaultMeta = totalDisponivel * 0.1;
