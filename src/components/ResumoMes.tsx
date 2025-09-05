@@ -141,11 +141,14 @@ export default function ResumoMes({
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Economias */}
           <div className="p-4 bg-white rounded-2xl border">
-            <div className="text-base text-neutral-500">Economias</div>
-            <div className="mt-2 flex items-baseline justify-between">
-              <div className="text-2xl font-semibold text-blue-600">{moeda(totalEconomias)}</div>
-              <div className="text-base text-neutral-500">Guardado: {moeda(totalEconomizado)}</div>
+            <div className="flex items-baseline justify-between mb-5">
+              <div className="mt-2 flex items-baseline flex-col">
+                <p className="text-base text-neutral-500">Economias</p>
+                <p className="text-2xl font-semibold text-blue-600">{moeda(totalEconomias)}</p>
+              </div>
+              <p className="text-base text-neutral-500">Guardado: <br />{moeda(totalEconomizado)}</p>
             </div>
+
 
             <ProgressBar
               percent={pctEconomias}
@@ -156,25 +159,29 @@ export default function ResumoMes({
 
           {/* Gastos Fixos */}
           <div className="p-4 bg-white rounded-2xl border">
-            <div className="text-base text-neutral-500">Gastos fixos</div>
-            <div className="mt-2 flex items-baseline justify-between">
-              <div className="text-2xl font-semibold text-red-600">{moeda(gastoFixas)}</div>
-              <div className="text-base text-neutral-500">Planejado: {moeda(totalPlanejadoFixas)}</div>
+            <div className="flex items-baseline justify-between mb-5">
+              <div className="mt-2 flex items-baseline flex-col">
+                <p className="text-base text-neutral-500">Gastos fixos</p>
+                <p className="text-2xl font-semibold text-red-600">{moeda(gastoFixas)}</p>
+              </div>
+              <p className="text-base text-neutral-500">Guardado: <br />{moeda(totalPlanejadoFixas)}</p>
             </div>
 
-            <ProgressBar
-              percent={pctFixas}
-              // warn={pctFixas > 65 && pctFixas <= 100}
-              label={restanteFixas < 0 ? `Ultrapassou ${moeda(Math.abs(restanteFixas))}` : `Disponível: ${moeda(restanteFixas)}`}
-            />
+              <ProgressBar
+                percent={pctFixas}
+                // warn={pctFixas > 65 && pctFixas <= 100}
+                label={restanteFixas < 0 ? `Ultrapassou ${moeda(Math.abs(restanteFixas))}` : `Disponível: ${moeda(restanteFixas)}`}
+              />
           </div>
 
           {/* Aleatório */}
           <div className="p-4 bg-white rounded-2xl border">
-            <div className="text-base text-neutral-500">Aleatório</div>
-            <div className="mt-2 flex items-baseline justify-between">
-              <div className="text-2xl font-semibold text-red-600">{moeda(gastoAleatorio)}</div>
-              <div className="text-base text-neutral-500">Planejado: {moeda(aleatorioMeta)}</div>
+            <div className="flex items-baseline justify-between mb-5">
+              <div className="mt-2 flex items-baseline flex-col">
+                <p className="text-base text-neutral-500">Aleatório</p>
+                <p className="text-2xl font-semibold text-red-600">{moeda(gastoAleatorio)}</p>
+              </div>
+              <p className="text-base text-neutral-500">Planejado: <br />{moeda(aleatorioMeta)}</p>
             </div>
 
             <ProgressBar

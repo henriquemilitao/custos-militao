@@ -266,7 +266,7 @@ export default function Aleatorio({
                   Total gasto: <b className="text-base font-medium text-gray-800">{moeda(totalSemana)}</b>
                 </span>
 
-                {i < currentIdx ? (
+                { i < currentIdx ? (
                   delta >= 0 ? (
                     <span className="text-green-600 text-sm">
                       Sobrou: <span className="text-base font-medium">{moeda(delta)}</span> (repassado às próximas)
@@ -277,9 +277,17 @@ export default function Aleatorio({
                     </span>
                   )
                 ) : i === currentIdx ? (
-                  <span className={delta < 0 ? "text-red-600" : "text-green-600"}>
-                    Posso gastar ainda: <span className="text-base font-medium">{moeda(delta)}</span>
-                  </span>
+                  delta < 0 ? (
+                    <span className="text-red-600">
+                      Ultrapassou:{" "}
+                      <span className="text-base font-medium">{moeda(-delta)}</span>
+                    </span>
+                  ) : (
+                    <span className="text-green-600">
+                      Posso gastar ainda:{" "}
+                      <span className="text-base font-medium">{moeda(delta)}</span>
+                    </span>
+                  )
                 ) : (
                   <span className="text-neutral-600">
                     Posso gastar ainda: {moeda(metaSemana - totalSemana)}

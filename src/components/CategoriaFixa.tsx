@@ -102,16 +102,30 @@ export default function CategoriaFixa({ categoria, estado, atualizarEstado }: Pr
             <div className="font-medium text-base">R$ {totalGasto.toFixed(2)}</div>
           </div>
           <div>
-            <div className="text-neutral-500">Disponível</div>
-            <div
-              className={`font-medium text-base ${
-                restante >= 0 ? "text-green-600" : "text-red-600"
-              }`}
-            >
-              R$ {restante.toFixed(2)}
-            </div>
+            {restante < 0 ? (
+              <div className="text-neutral-500">
+                <div>Ultrapassou</div>
+                <div className="text-red-600 font-medium text-base">
+                  {Math.abs(restante).toLocaleString("pt-BR", {
+                    style: "currency",
+                    currency: "BRL",
+                  })}
+                </div>
+              </div>
+            ) : (
+              <div className="text-neutral-500">
+                <div>Disponível</div>
+                <div className="text-green-600 font-medium text-base">
+                  {restante.toLocaleString("pt-BR", {
+                    style: "currency",
+                    currency: "BRL",
+                  })}
+                </div>
+              </div>
+            )}
           </div>
         </div>
+
 
         {/* Barrinha de progresso */}
         <div className="mt-3">
