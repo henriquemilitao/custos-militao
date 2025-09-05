@@ -164,7 +164,7 @@ export default function ResumoMes({
                 <p className="text-base text-neutral-500">Gastos fixos</p>
                 <p className="text-2xl font-semibold text-red-600">{moeda(gastoFixas)}</p>
               </div>
-              <p className="text-base text-neutral-500">Guardado: <br />{moeda(totalPlanejadoFixas)}</p>
+              <p className="text-base text-neutral-500">Planejado: <br />{moeda(totalPlanejadoFixas)}</p>
             </div>
 
               <ProgressBar
