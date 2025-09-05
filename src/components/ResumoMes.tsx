@@ -17,15 +17,28 @@ function clamp(n: number) {
 
 function ProgressBar({
   percent,
-  warn = false,
   label,
+  forceGreen = false,
 }: {
   percent: number;
-  warn?: boolean;
   label?: string;
+  forceGreen?: boolean;
 }) {
   const pct = Math.max(0, percent);
-  const colorClass = pct > 100 ? "bg-red-400" : warn ? "bg-yellow-500" : "bg-green-500";
+
+  const getColor = (p: number) => {
+    if (forceGreen) return "bg-green-500";
+    if (p > 100) return "bg-red-600";
+    if (p > 90) return "bg-red-500";
+    if (p > 85) return "bg-orange-500";
+    if (p > 80) return "bg-yellow-500";
+    if (p > 70) return "bg-yellow-400";
+    if (p > 60) return "bg-yellow-300";
+    return "bg-green-500";
+  };
+
+  const colorClass = getColor(pct);
+
   return (
     <div className="mt-2">
       <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
@@ -130,13 +143,14 @@ export default function ResumoMes({
           <div className="p-4 bg-white rounded-2xl border">
             <div className="text-sm text-neutral-500">Economias</div>
             <div className="mt-2 flex items-baseline justify-between">
-              <div className="text-lg font-semibold text-blue-600">{moeda(totalEconomias)}</div>
+              <div className="text-2xl font-semibold text-blue-600">{moeda(totalEconomias)}</div>
               <div className="text-sm text-neutral-500">Guardado: {moeda(totalEconomizado)}</div>
             </div>
 
             <ProgressBar
               percent={pctEconomias}
               label={restanteEconomias <= 0 ? `Meta atingida` : `Faltam ${moeda(restanteEconomias)}`}
+              forceGreen={true}
             />
           </div>
 
@@ -144,13 +158,13 @@ export default function ResumoMes({
           <div className="p-4 bg-white rounded-2xl border">
             <div className="text-sm text-neutral-500">Gastos fixos</div>
             <div className="mt-2 flex items-baseline justify-between">
-              <div className="text-lg font-semibold text-red-600">{moeda(gastoFixas)}</div>
+              <div className="text-2xl font-semibold text-red-600">{moeda(gastoFixas)}</div>
               <div className="text-sm text-neutral-500">Planejado: {moeda(totalPlanejadoFixas)}</div>
             </div>
 
             <ProgressBar
               percent={pctFixas}
-              warn={pctFixas > 65 && pctFixas <= 100}
+              // warn={pctFixas > 65 && pctFixas <= 100}
               label={restanteFixas < 0 ? `Ultrapassou ${moeda(Math.abs(restanteFixas))}` : `Disponível: ${moeda(restanteFixas)}`}
             />
           </div>
@@ -159,13 +173,13 @@ export default function ResumoMes({
           <div className="p-4 bg-white rounded-2xl border">
             <div className="text-sm text-neutral-500">Aleatório</div>
             <div className="mt-2 flex items-baseline justify-between">
-              <div className="text-lg font-semibold text-red-600">{moeda(gastoAleatorio)}</div>
+              <div className="text-2xl font-semibold text-red-600">{moeda(gastoAleatorio)}</div>
               <div className="text-sm text-neutral-500">Planejado: {moeda(aleatorioMeta)}</div>
             </div>
 
             <ProgressBar
               percent={pctAleatorio}
-              warn={pctAleatorio > 90 && pctAleatorio <= 100}
+              // warn={pctAleatorio > 90 && pctAleatorio <= 100}
               label={restanteAleatorio < 0 ? `Ultrapassou ${moeda(Math.abs(restanteAleatorio))}` : `Disponível: ${moeda(restanteAleatorio)}`}
             />
           </div>

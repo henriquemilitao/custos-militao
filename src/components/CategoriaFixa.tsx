@@ -119,7 +119,19 @@ export default function CategoriaFixa({ categoria, estado, atualizarEstado }: Pr
             <div
               style={{ width: `${Math.min(percentualUso, 100)}%` }}
               className={`h-2 ${
-                percentualUso > 100 ? "bg-red-400" : "bg-green-500"
+                percentualUso > 100
+                  ? "bg-red-600"
+                  : percentualUso > 90
+                  ? "bg-red-500"
+                  : percentualUso > 85
+                  ? "bg-orange-500"
+                  : percentualUso > 80
+                  ? "bg-yellow-500"
+                  : percentualUso > 70
+                  ? "bg-yellow-400"
+                  : percentualUso > 60
+                  ? "bg-yellow-300"
+                  : "bg-green-500"
               } transition-all`}
             />
           </div>
