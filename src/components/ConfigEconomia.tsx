@@ -79,18 +79,20 @@ export default function ConfigEconomia({
                 className="mt-1 block w-full border rounded-xl px-3 py-2"
                 value={titulo}
                 onChange={(e) => setTitulo(e.target.value)}
+                placeholder="Ex: Viagem, Curso, etc."
                 disabled={isReserva} // 👈 bloqueia edição do nome
               />
             </label>
 
             <label className="text-base text-neutral-700 block mb-4">
-              Meta (R$)
+              Valor (R$)
               <input
                 type="number"
                 inputMode="decimal"
                 step="0.01"
                 className="mt-1 block w-full border rounded-xl px-3 py-2"
                 value={meta === "" ? "" : String(meta)}
+                placeholder="Quanto você quer guardar?"
                 onChange={(e) => {
                   const v = e.target.value;
                   setMeta(v === "" ? "" : Number(v));

@@ -109,7 +109,7 @@ export default function Page() {
         mesId: mesHoje,
         saldoInicial: 1200,
         categorias: [
-          { id: crypto.randomUUID(), nome: "Gasolina", meta: 100, pago: false },
+          { id: crypto.randomUUID(), nome: "Gasolina", meta: 0, pago: false },
           { id: crypto.randomUUID(), nome: "Cabeleireiro", meta: 120, pago: false },
           { id: crypto.randomUUID(), nome: "Comida", meta: 600, pago: false },
         ],

@@ -91,7 +91,7 @@ export default function CategoriaFixa({
                 </Button>
               }
             />
-            <Button
+            {/* <Button
               variant="ghost"
               size="icon"
               onClick={removerCategoria}
@@ -99,7 +99,7 @@ export default function CategoriaFixa({
               title="Remover categoria"
             >
               <Trash2 className="w-4 h-4" />
-            </Button>
+            </Button> */}
           </div>
         </div>
 
