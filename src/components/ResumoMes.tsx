@@ -50,7 +50,7 @@ function ProgressBar({
         />
       </div>
       {label && (
-        <div className="text-xs text-neutral-500 mt-1">
+        <div className="text-sm text-neutral-500 mt-1">
           {label} — {Math.round(pct)}%
         </div>
       )}
@@ -96,7 +96,7 @@ export default function ResumoMes({
   const pctAleatorio = aleatorioMeta > 0 ? (gastoAleatorio / aleatorioMeta) * 100 : gastoAleatorio > 0 ? 100 : 0;
 
   return (
-    <Card className="rounded-2xl shadow-sm m-4">
+    <Card className="rounded-2xl shadow-sm m-4 mb-10">
       <CardHeader>
         <CardTitle>Resumo do Mês</CardTitle>
       </CardHeader>
@@ -105,34 +105,34 @@ export default function ResumoMes({
         {/* Top: saldo + destaque do disponível */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <div className="p-4 bg-white rounded-2xl border">
-            <div className="text-sm text-neutral-500">Total recebido no Mês</div>
+            <div className="text-base text-neutral-500">Total recebido no Mês</div>
             <div className="mt-2 flex items-end justify-between gap-4">
               <div>
                 <EditableCurrency value={saldoInicial} onChange={(v) => onUpdateSaldoInicial(v)} />
-                <div className="text-xs text-neutral-500">Valor mensal (edite se necessário)</div>
+                <div className="text-sm text-neutral-500">Valor mensal (edite se necessário)</div>
               </div>
             </div>
           </div>
 
           <div className="p-4 bg-white rounded-2xl border flex flex-col justify-between">
             <div>
-              <div className="text-sm text-neutral-500">Disponível após economias</div>
+              <div className="text-base text-neutral-500">Disponível após economias</div>
               <div className="mt-2 text-2xl font-semibold text-green-600">
                 {moeda(totalRealParaGastar)}
               </div>
-              <div className="text-xs text-neutral-500 mt-1">
+              <div className="text-sm text-neutral-500 mt-1">
                 Saldo estimado após economias planejadas
               </div>
             </div>
 
             <div className="mt-4">
-              <div className={`text-sm ${saldoEstimadoPosGastos < 0 ? "text-red-600" : "text-neutral-500"}`}>
+              <div className={`text-base ${saldoEstimadoPosGastos < 0 ? "text-red-600" : "text-neutral-500"}`}>
                 Saldo final estimado
               </div>
               <div className={`text-xl font-semibold ${saldoEstimadoPosGastos < 0 ? "text-red-600" : "text-gray-800"}`}>
                 {moeda(saldoEstimadoPosGastos)}
               </div>
-              <div className="text-xs text-neutral-400 mt-1">Após gastos fixos e aleatórios já registrados</div>
+              <div className="text-sm text-neutral-400 mt-1">Após gastos fixos e aleatórios já registrados</div>
             </div>
           </div>
         </div>
@@ -141,10 +141,10 @@ export default function ResumoMes({
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Economias */}
           <div className="p-4 bg-white rounded-2xl border">
-            <div className="text-sm text-neutral-500">Economias</div>
+            <div className="text-base text-neutral-500">Economias</div>
             <div className="mt-2 flex items-baseline justify-between">
               <div className="text-2xl font-semibold text-blue-600">{moeda(totalEconomias)}</div>
-              <div className="text-sm text-neutral-500">Guardado: {moeda(totalEconomizado)}</div>
+              <div className="text-base text-neutral-500">Guardado: {moeda(totalEconomizado)}</div>
             </div>
 
             <ProgressBar
@@ -156,10 +156,10 @@ export default function ResumoMes({
 
           {/* Gastos Fixos */}
           <div className="p-4 bg-white rounded-2xl border">
-            <div className="text-sm text-neutral-500">Gastos fixos</div>
+            <div className="text-base text-neutral-500">Gastos fixos</div>
             <div className="mt-2 flex items-baseline justify-between">
               <div className="text-2xl font-semibold text-red-600">{moeda(gastoFixas)}</div>
-              <div className="text-sm text-neutral-500">Planejado: {moeda(totalPlanejadoFixas)}</div>
+              <div className="text-base text-neutral-500">Planejado: {moeda(totalPlanejadoFixas)}</div>
             </div>
 
             <ProgressBar
@@ -171,10 +171,10 @@ export default function ResumoMes({
 
           {/* Aleatório */}
           <div className="p-4 bg-white rounded-2xl border">
-            <div className="text-sm text-neutral-500">Aleatório</div>
+            <div className="text-base text-neutral-500">Aleatório</div>
             <div className="mt-2 flex items-baseline justify-between">
               <div className="text-2xl font-semibold text-red-600">{moeda(gastoAleatorio)}</div>
-              <div className="text-sm text-neutral-500">Planejado: {moeda(aleatorioMeta)}</div>
+              <div className="text-base text-neutral-500">Planejado: {moeda(aleatorioMeta)}</div>
             </div>
 
             <ProgressBar
@@ -185,9 +185,9 @@ export default function ResumoMes({
           </div>
         </div>
 
-        <div className="mt-4 text-xs text-neutral-500">
+        {/* <div className="mt-4 text-sm text-neutral-500">
           Dica: se uma barra ficar vermelha, significa que você já gastou mais que o planejado — reveja suas categorias ou ajuste o saldo/meta.
-        </div>
+        </div> */}
       </CardContent>
     </Card>
   );

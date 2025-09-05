@@ -63,7 +63,7 @@ export default function CategoriaFixa({ categoria, estado, atualizarEstado }: Pr
   };
 
   const paidClasses = categoria.pago
-    ? "opacity-80 bg-green-50 border-green-200"
+    ? "opacity-0 bg-green-50 border-green-200"
     : "opacity-100 bg-white";
 
   // 🔹 Categoria especial: Gasolina
@@ -198,7 +198,7 @@ export default function CategoriaFixa({ categoria, estado, atualizarEstado }: Pr
   return (
     <div
       className={`p-4 border rounded-2xl shadow flex items-center justify-between transition duration-200 ${
-        categoria.pago ? "opacity-70 bg-green-100 border-green-300" : "opacity-100 bg-white"
+        categoria.pago ? "opacity-60 bg-green-50 border-green-300" : "opacity-100 bg-white"
       }`}
     >
       <div>
@@ -211,7 +211,7 @@ export default function CategoriaFixa({ categoria, estado, atualizarEstado }: Pr
         </p>
       </div>
 
-      <div className="flex items-center gap-1">
+      <div className="flex items-center">
         <Button
           variant="ghost"
           size="icon"

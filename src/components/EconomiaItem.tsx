@@ -28,7 +28,7 @@ export default function EconomiaItem({
     <div
       className={`p-4 border rounded-2xl shadow flex items-center justify-between transition duration-200 ${
         // economia.economizado ? "opacity-80 bg-green-50 border-green-200" : "opacity-100 bg-white"
-        economia.economizado ? "opacity-70 bg-green-100 border-green-300" : "opacity-100 bg-white"
+        economia.economizado ? "opacity-60 bg-green-50 border-green-300" : "opacity-100 bg-white"
       }`}
     >
       <div>
@@ -49,7 +49,7 @@ export default function EconomiaItem({
         )}
       </div>
 
-      <div className="flex items-center gap-1">
+      <div className="flex items-center">
         <Button
           variant="ghost"
           size="icon"
