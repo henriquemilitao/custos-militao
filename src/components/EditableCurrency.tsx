@@ -23,7 +23,7 @@ export default function EditableCurrency({
     <input
       autoFocus
       type="number"
-      className="border rounded-xl px-3 py-1 text-xl font-semibold"
+      className=""
       value={draft}
       onChange={(e) => setDraft(e.target.value)}
       onBlur={() => {
@@ -43,7 +43,7 @@ export default function EditableCurrency({
         setDraft(String(value));
         setEditing(true);
       }}
-      className="text-xl font-semibold hover:underline"
+      className="text-2xl font-semibold hover:underline"
     >
       {format(value)}
     </button>

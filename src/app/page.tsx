@@ -225,7 +225,18 @@ export default function Page() {
   const totalPlanejadoFixas = estado.categorias.reduce((s, c) => s + c.meta, 0);
   const totalEconomias = estado.economias.reduce((acc, e) => acc + e.meta, 0);
   const aleatorioMeta = estado.saldoInicial - totalEconomias - totalPlanejadoFixas;
-  const gastoFixas = estado.categorias.reduce((s, c) => s + (c.pago ? c.meta : 0), 0);
+
+  // soma os pagos "normais" (exceto gasolina)
+  const gastoFixasNormais = estado.categorias
+    .filter((c) => c.nome.toLowerCase() !== "gasolina")
+    .reduce((s, c) => s + (c.pago ? c.meta : 0), 0);
+
+  // soma os abastecimentos de gasolina
+  const gastoGasolina = estado.gasolinaGastos.reduce((s, g) => s + g.valor, 0);
+
+  // total final
+  const gastoFixas = gastoFixasNormais + gastoGasolina;
+
   const gastoAleatorio = estado.aleatorioSemanas.flat().reduce((s, it) => s + it.valor, 0);
 
   return (

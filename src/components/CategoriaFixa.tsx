@@ -7,40 +7,36 @@ import { Input } from "@/components/ui/input";
 import type { CategoriaFixaType, EstadoMes, GastoGasolina } from "@/app/page";
 import ConfigGastoFixo from "./ConfigGastoFixo";
 
-export default function CategoriaFixa({
-  categoria,
-  estado,
-  atualizarEstado,
-}: {
+type Props = {
   categoria: CategoriaFixaType;
   estado: EstadoMes;
-  atualizarEstado: (novoEstado: Partial<EstadoMes>) => void;
-}) {
+  atualizarEstado: (patch: Partial<EstadoMes>) => void;
+};
+
+export default function CategoriaFixa({ categoria, estado, atualizarEstado }: Props) {
   const isGasolina = categoria.nome.toLowerCase() === "gasolina";
   const [novoValor, setNovoValor] = useState("");
 
-  const formatarData = () => new Date().toLocaleDateString("pt-BR");
-
-  const totalGasto = estado.gasolinaGastos.reduce((sum, g) => sum + g.valor, 0);
+  // total já gasto em gasolina
+  const totalGasto = (estado.gasolinaGastos ?? []).reduce((sum, g) => sum + g.valor, 0);
   const restante = categoria.meta - totalGasto;
-  const percentualUso =
-    Math.max(0, Math.min(100, (totalGasto / Math.max(1, categoria.meta)) * 100));
+  const percentualUso = (totalGasto / Math.max(1, categoria.meta)) * 100;
 
   const adicionarGasolina = () => {
     const valor = parseFloat(novoValor);
     if (!valor || valor <= 0) return;
     const novoGasto: GastoGasolina = {
       id: crypto.randomUUID(),
-      data: formatarData(),
+      data: new Date().toISOString(),
       valor,
     };
-    atualizarEstado({ gasolinaGastos: [...estado.gasolinaGastos, novoGasto] });
+    atualizarEstado({ gasolinaGastos: [...(estado.gasolinaGastos ?? []), novoGasto] });
     setNovoValor("");
   };
 
   const removerGasolina = (id: string) => {
     atualizarEstado({
-      gasolinaGastos: estado.gasolinaGastos.filter((g) => g.id !== id),
+      gasolinaGastos: (estado.gasolinaGastos ?? []).filter((g) => g.id !== id),
     });
   };
 
@@ -70,46 +66,33 @@ export default function CategoriaFixa({
     ? "opacity-80 bg-green-50 border-green-200"
     : "opacity-100 bg-white";
 
+  // 🔹 Categoria especial: Gasolina
   if (isGasolina) {
     return (
       <div className={`p-4 border rounded-2xl shadow ${paidClasses}`}>
         {/* Cabeçalho */}
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold text-gray-800">{categoria.nome}</h3>
-          <div className="flex items-center gap-2">
-            <ConfigGastoFixo
-              initial={{ id: categoria.id, nome: categoria.nome, meta: categoria.meta }}
-              onSalvarEdit={handleSalvarEdit}
-              trigger={
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="text-neutral-600 hover:text-neutral-800"
-                  title="Editar valor estipulado"
-                >
-                  <Edit3 className="w-4 h-4" />
-                </Button>
-              }
-            />
-            {/* <Button
-              variant="ghost"
-              size="icon"
-              onClick={removerCategoria}
-              className="text-red-500 hover:text-red-700"
-              title="Remover categoria"
-            >
-              <Trash2 className="w-4 h-4" />
-            </Button> */}
-          </div>
+          <ConfigGastoFixo
+            initial={{ id: categoria.id, nome: categoria.nome, meta: categoria.meta }}
+            onSalvarEdit={handleSalvarEdit}
+            trigger={
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-neutral-600 hover:text-neutral-800"
+                title="Editar valor estipulado"
+              >
+                <Edit3 className="w-4 h-4" />
+              </Button>
+            }
+          />
         </div>
 
         {/* Valor estipulado */}
         <div className="mt-2 text-base text-neutral-600">
-          
-          Valor:{" "}
-          <span className="mt-2 text-base text-neutral-600">
-            R$ {categoria.meta.toFixed(2)}
-          </span>
+          Meta:{" "}
+          <span className="font-medium">R$ {categoria.meta.toFixed(2)}</span>
         </div>
 
         {/* Gastos e Disponível */}
@@ -119,7 +102,7 @@ export default function CategoriaFixa({
             <div className="font-medium text-base">R$ {totalGasto.toFixed(2)}</div>
           </div>
           <div>
-            <div className="text-neutral-500">Posso gastar ainda</div>
+            <div className="text-neutral-500">Disponível</div>
             <div
               className={`font-medium text-base ${
                 restante >= 0 ? "text-green-600" : "text-red-600"
@@ -134,7 +117,7 @@ export default function CategoriaFixa({
         <div className="mt-3">
           <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
             <div
-              style={{ width: `${percentualUso}%` }}
+              style={{ width: `${Math.min(percentualUso, 100)}%` }}
               className={`h-2 ${
                 percentualUso > 100 ? "bg-red-400" : "bg-green-500"
               } transition-all`}
@@ -151,7 +134,7 @@ export default function CategoriaFixa({
             type="number"
             inputMode="decimal"
             step="0.01"
-            placeholder="Gastou quanto?"
+            placeholder="Valor abastecido"
             value={novoValor}
             onChange={(e) => setNovoValor(e.target.value)}
             className="w-40"
@@ -168,16 +151,18 @@ export default function CategoriaFixa({
 
         {/* Lista de gastos */}
         <ul className="space-y-2 mt-4">
-          {estado.gasolinaGastos.length === 0 ? (
+          {(estado.gasolinaGastos ?? []).length === 0 ? (
             <li className="text-sm text-neutral-500">Nenhum gasto registrado.</li>
           ) : (
-            estado.gasolinaGastos.map((gasto) => (
+            estado.gasolinaGastos!.map((gasto) => (
               <li
                 key={gasto.id}
                 className="flex justify-between items-center p-2 border rounded bg-gray-50"
               >
                 <div className="text-sm">
-                  <div className="text-neutral-500 text-xs">{gasto.data}</div>
+                  <div className="text-neutral-500 text-xs">
+                    {new Date(gasto.data).toLocaleDateString("pt-BR")}
+                  </div>
                   <div className="font-medium">R$ {gasto.valor.toFixed(2)}</div>
                 </div>
                 <Button
@@ -197,11 +182,11 @@ export default function CategoriaFixa({
     );
   }
 
-// Categoria comum
+  // 🔹 Categoria comum
   return (
     <div
       className={`p-4 border rounded-2xl shadow flex items-center justify-between transition duration-200 ${
-        categoria.pago ? "opacity-80 bg-green-50 border-green-200" : "opacity-100 bg-white"
+        categoria.pago ? "opacity-70 bg-green-100 border-green-300" : "opacity-100 bg-white"
       }`}
     >
       <div>
@@ -222,7 +207,11 @@ export default function CategoriaFixa({
           className={categoria.pago ? "text-blue-500" : "text-green-600"}
           title={categoria.pago ? "Desmarcar como pago" : "Marcar como pago"}
         >
-          {categoria.pago ? <RotateCcw className="w-5 h-5" /> : <CheckCircle className="w-5 h-5" />}
+          {categoria.pago ? (
+            <RotateCcw className="w-5 h-5" />
+          ) : (
+            <CheckCircle className="w-5 h-5" />
+          )}
         </Button>
 
         <ConfigGastoFixo

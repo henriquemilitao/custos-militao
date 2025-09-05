@@ -27,7 +27,8 @@ export default function EconomiaItem({
   return (
     <div
       className={`p-4 border rounded-2xl shadow flex items-center justify-between transition duration-200 ${
-        economia.economizado ? "opacity-80 bg-green-50 border-green-200" : "opacity-100 bg-white"
+        // economia.economizado ? "opacity-80 bg-green-50 border-green-200" : "opacity-100 bg-white"
+        economia.economizado ? "opacity-70 bg-green-100 border-green-300" : "opacity-100 bg-white"
       }`}
     >
       <div>
