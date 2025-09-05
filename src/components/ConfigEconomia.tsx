@@ -3,6 +3,8 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus, Edit3 } from "lucide-react";
+import { toast } from "sonner"; // 🔔 precisa instalar: npm i sonner
+
 
 export type Economia = {
   id: string;
@@ -16,6 +18,7 @@ type Props = {
   onSalvarEdit?: (id: string, dados: { titulo: string; meta: number }) => void;
   initial?: { id: string; titulo: string; meta: number } | null;
   trigger?: React.ReactNode;
+  isReserva?: boolean; // 👈 novo
 };
 
 export default function ConfigEconomia({
@@ -23,6 +26,7 @@ export default function ConfigEconomia({
   onSalvarEdit,
   initial = null,
   trigger,
+  isReserva = false,
 }: Props) {
   const [open, setOpen] = useState(false);
   const [titulo, setTitulo] = useState("");
@@ -73,9 +77,9 @@ export default function ConfigEconomia({
               Nome
               <input
                 className="mt-1 block w-full border rounded-xl px-3 py-2"
-                placeholder="Ex.: Reserva"
                 value={titulo}
                 onChange={(e) => setTitulo(e.target.value)}
+                disabled={isReserva} // 👈 bloqueia edição do nome
               />
             </label>
 
@@ -86,7 +90,6 @@ export default function ConfigEconomia({
                 inputMode="decimal"
                 step="0.01"
                 className="mt-1 block w-full border rounded-xl px-3 py-2"
-                placeholder="100"
                 value={meta === "" ? "" : String(meta)}
                 onChange={(e) => {
                   const v = e.target.value;
@@ -103,13 +106,34 @@ export default function ConfigEconomia({
               <button
                 className="px-4 py-2 rounded-xl bg-blue-500 text-white shadow hover:bg-blue-600 active:scale-95 transition"
                 onClick={() => {
+                  console.log(">>> Salvando economia...");
                   const m = typeof meta === "number" ? meta : 0;
-                  if (!titulo.trim() || m <= 0) return;
+                  if (!titulo.trim()) return;
+
+                  if (isReserva) {
+                    if (m < 0) {
+                      toast("A meta da Reserva de Emergência não pode ser negativa.", {
+                        description: "Defina um valor maior que zero.",
+                        style: { background: "#fee2e2", color: "#b91c1c" },
+                      });
+                      return;
+                    }
+                    if (m === 0) {
+                      console.log(">>> Chamando toast de meta zero");
+                      toast("Você precisa guardar pelo menos alguma coisa na Reserva.", {
+                        description: "Digite um valor maior que zero.",
+                        style: { background: "#fee2e2", color: "#b91c1c" },
+                      });
+                      return;
+                    }
+                  }
+
+                  const valorFinal = m;
 
                   if (isEditMode && onSalvarEdit && initial) {
-                    onSalvarEdit(initial.id, { titulo: titulo.trim(), meta: m });
+                    onSalvarEdit(initial.id, { titulo: titulo.trim(), meta: valorFinal });
                   } else if (!isEditMode && onAdicionar) {
-                    onAdicionar({ titulo: titulo.trim(), meta: m });
+                    onAdicionar({ titulo: titulo.trim(), meta: valorFinal });
                   }
                   reset();
                 }}

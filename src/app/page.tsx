@@ -55,17 +55,31 @@ function yyyymm(d: Date) {
 function load(): MapMeses {
   try {
     const raw = localStorage.getItem(LS_KEY);
-    if (!raw) return {};
-    const parsed = JSON.parse(raw) as Record<string, Partial<EstadoMes>>;
+    const parsed = raw ? (JSON.parse(raw) as Record<string, Partial<EstadoMes>>) : {};
 
     const migrated: MapMeses = {};
     for (const k of Object.keys(parsed)) {
       const v = parsed[k]!;
+
+      const saldoInicial = Number(v.saldoInicial ?? 1200);
+      const economias = (v.economias ?? []) as Economia[];
+
+      // 🔹 garante que a reserva exista com 10% do saldo inicial
+      const hasReserva = economias.some((e) => e.titulo === "Reserva de Emergência");
+      if (!hasReserva) {
+        economias.unshift({
+          id: crypto.randomUUID(),
+          titulo: "Reserva de Emergência",
+          meta: saldoInicial * 0.1,
+          economizado: false,
+        });
+      }
+
       migrated[k] = {
         mesId: v.mesId ?? k,
-        saldoInicial: Number(v.saldoInicial ?? 1200),
+        saldoInicial,
         categorias: v.categorias ?? [],
-        economias: v.economias ?? [],
+        economias,
         aleatorioMeta: Number(v.aleatorioMeta ?? 400),
         aleatorioSemanas: (v.aleatorioSemanas as EstadoMes["aleatorioSemanas"]) ?? [[], [], [], []],
         aleatorioFechadas: (v.aleatorioFechadas as EstadoMes["aleatorioFechadas"]) ?? [false, false, false, false],
@@ -99,7 +113,14 @@ export default function Page() {
           { id: crypto.randomUUID(), nome: "Cabeleireiro", meta: 120, pago: false },
           { id: crypto.randomUUID(), nome: "Comida", meta: 600, pago: false },
         ],
-        economias: [],
+        economias: [
+          {
+            id: crypto.randomUUID(),
+            titulo: "Reserva de Emergência",
+            meta: 120, // 10% de 1200
+            economizado: false,
+          },
+        ],
         aleatorioMeta: 400,
         aleatorioSemanas: [[], [], [], []],
         aleatorioFechadas: [false, false, false, false],
@@ -160,18 +181,28 @@ export default function Page() {
 
   // 🔹 Economias
   function handleAdicionarEconomia(nova: Omit<Economia, "id" | "economizado">) {
+    const isReserva = nova.titulo === "Reserva de Emergência";
+    const metaCorrigida = isReserva
+      ? (estado.saldoInicial > 0 ? estado.saldoInicial * 0.1 : 0)
+      : nova.meta;
+
     atualizarMes({
       economias: [
         ...estado.economias,
-        { id: crypto.randomUUID(), titulo: nova.titulo, meta: nova.meta, economizado: false },
+        { id: crypto.randomUUID(), titulo: nova.titulo, meta: metaCorrigida, economizado: false },
       ],
     });
   }
 
   function handleEditarEconomia(id: string, dados: { titulo: string; meta: number }) {
+    const isReserva = dados.titulo === "Reserva de Emergência";
+    const metaCorrigida = isReserva
+      ? (estado.saldoInicial > 0 ? dados.meta : 0)
+      : dados.meta;
+
     atualizarMes({
       economias: estado.economias.map((e) =>
-        e.id === id ? { ...e, titulo: dados.titulo, meta: dados.meta } : e
+        e.id === id ? { ...e, titulo: dados.titulo, meta: metaCorrigida } : e
       ),
     });
   }
@@ -212,7 +243,7 @@ export default function Page() {
         onUpdateSaldoInicial={(novo) => atualizarMes({ saldoInicial: novo })}
       />
 
-      <Card className="rounded-2xl shadow-sm m-4">
+      <Card className="rounded-2xl shadow-sm mx-4">
         <CardHeader className="flex items-center justify-between">
           <CardTitle>Economias</CardTitle>
           <ConfigEconomia onAdicionar={handleAdicionarEconomia} />
@@ -228,6 +259,7 @@ export default function Page() {
                 onToggle={() => handleToggleEconomia(eco.id)}
                 onRemove={() => handleRemoverEconomia(eco.id)}
                 onSalvarEdit={handleEditarEconomia}
+                totalDisponivel={estado.saldoInicial}
               />
             ))
           )}

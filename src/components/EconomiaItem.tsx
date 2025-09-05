@@ -9,12 +9,21 @@ export default function EconomiaItem({
   onToggle,
   onRemove,
   onSalvarEdit,
+  totalDisponivel,
 }: {
   economia: Economia;
   onToggle: () => void;
   onRemove: () => void;
   onSalvarEdit: (id: string, dados: { titulo: string; meta: number }) => void;
+  totalDisponivel: number;
 }) {
+  const isReserva = economia.titulo === "Reserva de Emergência";
+  const percentual = ((economia.meta / totalDisponivel) * 100).toFixed(0);
+
+  // meta final da reserva = 10% inicial, se não foi editada
+  const defaultMeta = totalDisponivel * 0.1;
+  const isDefault = isReserva && Math.abs(economia.meta - defaultMeta) < 0.01;
+
   return (
     <div
       className={`p-4 border rounded-2xl shadow flex items-center justify-between transition duration-200 ${
@@ -22,13 +31,21 @@ export default function EconomiaItem({
       }`}
     >
       <div>
-        <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2 break-all whitespace-normal max-w-[200px]">
+        <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2 break-words whitespace-normal max-w-[200px]">
           {economia.titulo}
           {economia.economizado && <CheckCircle className="w-5 h-5 text-green-600" />}
         </h3>
-        <p className="text-base text-gray-600">
-          Meta: R$ {economia.meta.toFixed(2)}
-        </p>
+
+        {isReserva ? (
+          <p className="text-base text-gray-600">
+            Valor: R$ {economia.meta.toFixed(2)} <span className="text-gray-400 text-sm">({percentual}% do que você ganha</span>
+            {isDefault ? ", por padrão" : ""}<span className="text-gray-400 text-sm">)</span>
+          </p>
+        ) : (
+          <p className="text-base text-gray-600">
+            Valor: R$ {economia.meta.toFixed(2)}
+          </p>
+        )}
       </div>
 
       <div className="flex items-center gap-1">
@@ -45,6 +62,7 @@ export default function EconomiaItem({
         <ConfigEconomia
           initial={{ id: economia.id, titulo: economia.titulo, meta: economia.meta }}
           onSalvarEdit={onSalvarEdit}
+          isReserva={isReserva}
           trigger={
             <Button
               variant="ghost"
@@ -57,15 +75,17 @@ export default function EconomiaItem({
           }
         />
 
-        <Button
-          variant="ghost"
-          size="icon"
-          className="text-red-500 hover:text-red-700"
-          onClick={onRemove}
-          title="Remover economia"
-        >
-          <Trash2 className="w-5 h-5" />
-        </Button>
+        {!isReserva && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-red-500 hover:text-red-700"
+            onClick={onRemove}
+            title="Remover economia"
+          >
+            <Trash2 className="w-5 h-5" />
+          </Button>
+        )}
       </div>
     </div>
   );

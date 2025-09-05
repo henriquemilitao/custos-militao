@@ -128,7 +128,7 @@ export default function Aleatorio({
           type="number"
           inputMode="decimal"
           className="border rounded-xl px-3 py-1.5 w-32"
-          placeholder="Valor"
+          placeholder="R$ 0,00"
           value={valor}
           onChange={(e) => setValor(e.target.value)}
           disabled={bloqueada}

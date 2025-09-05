@@ -141,7 +141,7 @@ export default function CategoriaFixa({
             />
           </div>
           <div className="text-xs text-neutral-500 mt-1">
-            {percentualUso.toFixed(0)}% da meta usada
+            Gastei {percentualUso.toFixed(0)}%
           </div>
         </div>
 
@@ -151,10 +151,10 @@ export default function CategoriaFixa({
             type="number"
             inputMode="decimal"
             step="0.01"
-            placeholder="Valor"
+            placeholder="Gastou quanto?"
             value={novoValor}
             onChange={(e) => setNovoValor(e.target.value)}
-            className="w-32"
+            className="w-40"
           />
           <Button
             onClick={adicionarGasolina}
