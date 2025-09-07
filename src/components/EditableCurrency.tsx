@@ -10,7 +10,7 @@ export default function EditableCurrency({
   onChange: (novo: number) => void;
 }) {
   const [editing, setEditing] = useState(false);
-  const [draft, setDraft] = useState(String(value));
+  const [draft, setDraft] = useState(format(value));
 
   function format(n: number) {
     return new Intl.NumberFormat("pt-BR", {
@@ -19,20 +19,31 @@ export default function EditableCurrency({
     }).format(isFinite(n) ? n : 0);
   }
 
+  function parseCurrency(str: string) {
+    const onlyDigits = str.replace(/\D/g, "");
+    const number = Number(onlyDigits) / 100;
+    return number;
+  }
+
   return editing ? (
     <input
       autoFocus
-      type="number"
-      className=""
+      type="text"
+      className="text-2xl font-semibold bg-transparent focus:outline-none w-full"
       value={draft}
-      onChange={(e) => setDraft(e.target.value)}
+      onChange={(e) => {
+        const parsed = parseCurrency(e.target.value);
+        setDraft(format(parsed));
+      }}
       onBlur={() => {
-        onChange(Number(draft) || 0);
+        const parsed = parseCurrency(draft);
+        onChange(parsed);
         setEditing(false);
       }}
       onKeyDown={(e) => {
         if (e.key === "Enter") {
-          onChange(Number(draft) || 0);
+          const parsed = parseCurrency(draft);
+          onChange(parsed);
           setEditing(false);
         }
       }}
@@ -40,10 +51,10 @@ export default function EditableCurrency({
   ) : (
     <button
       onClick={() => {
-        setDraft(String(value));
+        setDraft(format(value));
         setEditing(true);
       }}
-      className="text-2xl font-semibold hover:underline"
+      className="text-2xl font-semibold text-left w-full"
     >
       {format(value)}
     </button>
