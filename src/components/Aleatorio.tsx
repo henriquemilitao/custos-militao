@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import type { GastoItem } from "@/app/page";
 import { Plus, Trash2 } from "lucide-react";
+import ConfigGastoAleatorio from "./ConfigGastoAleatorio";
 
 const PESOS = [1, 1, 1, 1.5] as const;
 
@@ -258,7 +259,11 @@ export default function Aleatorio({
               </div>
 
               {/* Adicionar gasto */}
-              <AddForm index={i} />
+              <ConfigGastoAleatorio
+                semanaIndex={i}
+                bloqueada={fechadas[i] || i < currentIdx}
+                onAddGasto={onAddGasto}
+              />
 
               {/* Rodapé da semana */}
               <div className="mt-2 text-sm text-neutral-600 flex items-center justify-between">
