@@ -10,6 +10,7 @@ type Props = {
   onSalvarEdit?: (id: string, dados: { nome: string; meta: number }) => void;
   initial?: { id: string; nome: string; meta: number } | null;
   trigger?: React.ReactNode;
+  onOpenChange?: (open: boolean) => void; // 🔹 NOVO
 };
 
 export default function ConfigGastoFixo({
@@ -17,6 +18,7 @@ export default function ConfigGastoFixo({
   onSalvarEdit,
   initial = null,
   trigger,
+  onOpenChange,
 }: Props) {
   const [open, setOpen] = useState(false);
   const [nome, setNome] = useState("");
@@ -26,7 +28,6 @@ export default function ConfigGastoFixo({
   const isEditMode = Boolean(initial && onSalvarEdit);
 
   function openModal() {
-    // preenche os campos quando abrir
     if (isEditMode && initial) {
       setNome(initial.nome);
       setValor(initial.meta);
@@ -35,13 +36,15 @@ export default function ConfigGastoFixo({
       setValor("");
     }
     setOpen(true);
+    onOpenChange?.(true); // 🔹 avisa que abriu
   }
 
   function reset() {
     setNome("");
     setValor("");
     setOpen(false);
-  }
+    onOpenChange?.(false); // 🔹 avisa que fechou
+}
 
   return (
     <>

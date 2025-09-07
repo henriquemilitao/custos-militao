@@ -16,6 +16,7 @@ type Props = {
 export default function CategoriaFixa({ categoria, estado, atualizarEstado }: Props) {
   const isGasolina = categoria.nome.toLowerCase() === "gasolina";
   const [novoValor, setNovoValor] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
 
   // total já gasto em gasolina
   const totalGasto = (estado.gasolinaGastos ?? []).reduce((sum, g) => sum + g.valor, 0);
@@ -76,14 +77,15 @@ export default function CategoriaFixa({ categoria, estado, atualizarEstado }: Pr
           <ConfigGastoFixo
             initial={{ id: categoria.id, nome: categoria.nome, meta: categoria.meta }}
             onSalvarEdit={handleSalvarEdit}
+            onOpenChange={setIsEditing} // 🔹 controla se o modal tá aberto
             trigger={
               <Button
                 variant="ghost"
                 size="icon"
                 className="text-neutral-600 hover:text-neutral-800"
-                title="Editar valor estipulado"
+                title="Editar"
               >
-                <Edit3 className="w-4 h-4" />
+                <Edit3 className="w-5 h-5" />
               </Button>
             }
           />
@@ -212,7 +214,9 @@ export default function CategoriaFixa({ categoria, estado, atualizarEstado }: Pr
   return (
     <div
       className={`p-4 border rounded-2xl shadow flex items-center justify-between transition duration-200 ${
-        categoria.pago ? "opacity-60 bg-green-50 border-green-300" : "opacity-100 bg-white"
+        categoria.pago && !isEditing
+          ? "opacity-60 bg-green-50 border-green-300"
+          : "opacity-100 bg-white"
       }`}
     >
       <div>
@@ -243,6 +247,7 @@ export default function CategoriaFixa({ categoria, estado, atualizarEstado }: Pr
         <ConfigGastoFixo
           initial={{ id: categoria.id, nome: categoria.nome, meta: categoria.meta }}
           onSalvarEdit={handleSalvarEdit}
+          onOpenChange={setIsEditing} // 🔹 controla se o modal tá aberto
           trigger={
             <Button
               variant="ghost"

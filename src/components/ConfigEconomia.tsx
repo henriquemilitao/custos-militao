@@ -18,7 +18,8 @@ type Props = {
   onSalvarEdit?: (id: string, dados: { titulo: string; meta: number }) => void;
   initial?: { id: string; titulo: string; meta: number } | null;
   trigger?: React.ReactNode;
-  isReserva?: boolean; // 👈 novo
+  isReserva?: boolean;
+  onOpenChange?: (open: boolean) => void; // 👈 NOVO
 };
 
 export default function ConfigEconomia({
@@ -27,6 +28,7 @@ export default function ConfigEconomia({
   initial = null,
   trigger,
   isReserva = false,
+  onOpenChange,
 }: Props) {
   const [open, setOpen] = useState(false);
   const [titulo, setTitulo] = useState("");
@@ -43,12 +45,14 @@ export default function ConfigEconomia({
       setMeta("");
     }
     setOpen(true);
+    onOpenChange?.(true); // 🔹 avisa que abriu
   }
 
   function reset() {
     setTitulo("");
     setMeta("");
     setOpen(false);
+    onOpenChange?.(false); // 🔹 avisa que fechou
   }
 
   return (

@@ -3,6 +3,7 @@
 import { CheckCircle, RotateCcw, Trash2, Edit3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ConfigEconomia, { Economia } from "./ConfigEconomia";
+import { useState } from "react";
 
 export default function EconomiaItem({
   economia,
@@ -17,18 +18,19 @@ export default function EconomiaItem({
   onSalvarEdit: (id: string, dados: { titulo: string; meta: number }) => void;
   totalDisponivel: number;
 }) {
+  const [isEditing, setIsEditing] = useState(false); // 👈 controla modal
   const isReserva = economia.titulo === "Reserva de Emergência";
   const percentual = totalDisponivel <= 0 ? "0" : ((economia.meta / totalDisponivel) * 100).toFixed(0);
 
-  // meta final da reserva = 10% inicial, se não foi editada
   const defaultMeta = totalDisponivel * 0.1;
   const isDefault = isReserva && Math.abs(economia.meta - defaultMeta) < 0.01;
 
   return (
     <div
       className={`p-4 border rounded-2xl shadow flex items-center justify-between transition duration-200 ${
-        // economia.economizado ? "opacity-80 bg-green-50 border-green-200" : "opacity-100 bg-white"
-        economia.economizado ? "opacity-60 bg-green-50 border-green-300" : "opacity-100 bg-white"
+        economia.economizado && !isEditing
+          ? "opacity-60 bg-green-50 border-green-300"
+          : "opacity-100 bg-white"
       }`}
     >
       <div>
@@ -39,13 +41,13 @@ export default function EconomiaItem({
 
         {isReserva ? (
           <p className="text-base text-gray-600">
-            Valor: R$ {economia.meta.toFixed(2)} <span className="text-gray-400 text-sm">({percentual}% do que você ganha
-            {isDefault ? ", por padrão" : ""})</span>
+            Valor: R$ {economia.meta.toFixed(2)}{" "}
+            <span className="text-gray-400 text-sm">
+              ({percentual}% do que você ganha {isDefault ? ", por padrão" : ""})
+            </span>
           </p>
         ) : (
-          <p className="text-base text-gray-600">
-            Valor: R$ {economia.meta.toFixed(2)}
-          </p>
+          <p className="text-base text-gray-600">Valor: R$ {economia.meta.toFixed(2)}</p>
         )}
       </div>
 
@@ -64,6 +66,7 @@ export default function EconomiaItem({
           initial={{ id: economia.id, titulo: economia.titulo, meta: economia.meta }}
           onSalvarEdit={onSalvarEdit}
           isReserva={isReserva}
+          onOpenChange={setIsEditing} // 👈 controla opacidade
           trigger={
             <Button
               variant="ghost"
@@ -91,3 +94,4 @@ export default function EconomiaItem({
     </div>
   );
 }
+
