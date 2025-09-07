@@ -1,7 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { Plus, Edit3 } from "lucide-react";
 import type { CategoriaFixaType } from "@/app/page";
 
@@ -10,7 +12,7 @@ type Props = {
   onSalvarEdit?: (id: string, dados: { nome: string; meta: number }) => void;
   initial?: { id: string; nome: string; meta: number } | null;
   trigger?: React.ReactNode;
-  onOpenChange?: (open: boolean) => void; // 🔹 NOVO
+  onOpenChange?: (open: boolean) => void;
 };
 
 export default function ConfigGastoFixo({
@@ -24,7 +26,6 @@ export default function ConfigGastoFixo({
   const [nome, setNome] = useState("");
   const [valor, setValor] = useState<number | "">("");
 
-  // Modo edição apenas quando vier "initial" E tivermos "onSalvarEdit"
   const isEditMode = Boolean(initial && onSalvarEdit);
 
   function openModal() {
@@ -36,15 +37,27 @@ export default function ConfigGastoFixo({
       setValor("");
     }
     setOpen(true);
-    onOpenChange?.(true); // 🔹 avisa que abriu
+    onOpenChange?.(true);
   }
 
   function reset() {
     setNome("");
     setValor("");
     setOpen(false);
-    onOpenChange?.(false); // 🔹 avisa que fechou
-}
+    onOpenChange?.(false);
+  }
+
+  function handleSalvar() {
+    const v = typeof valor === "number" ? valor : 0;
+    if (!nome.trim() || v <= 0) return;
+
+    if (isEditMode && onSalvarEdit && initial) {
+      onSalvarEdit(initial.id, { nome: nome.trim(), meta: v });
+    } else if (!isEditMode && onAdicionar) {
+      onAdicionar({ nome: nome.trim(), meta: v });
+    }
+    reset();
+  }
 
   return (
     <>
@@ -60,66 +73,45 @@ export default function ConfigGastoFixo({
         </Button>
       )}
 
-      {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/40" onClick={reset} />
-          <div className="relative w-full max-w-md bg-white rounded-2xl shadow-lg p-6 z-10">
-            <h3 className="text-xl font-semibold mb-3">
-              {isEditMode ? "Editar Gasto Fixo" : "Novo Gasto Fixo"}
-            </h3>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>{isEditMode ? "Editar Gasto Fixo" : "Novo Gasto Fixo"}</DialogTitle>
+          </DialogHeader>
 
-            <label className="text-base text-neutral-700 block mb-2">
+          <div className="space-y-3">
+             <label className="text-base text-neutral-700 block mb-2">
               Nome
               <input
-                className="mt-1 block w-full border rounded-xl px-3 py-2 disabled:bg-gray-100 disabled:text-gray-500"
-                placeholder="Ex.: Academia"
+                placeholder="Ex: Internet, Netflix..."
                 value={nome}
                 onChange={(e) => setNome(e.target.value)}
-                disabled={isEditMode && initial?.nome.toLowerCase() === "gasolina"}
-              />
-            </label>
-
+                className="mt-1 block w-full border rounded-xl px-3 py-2"
+                />
+              </label>
             <label className="text-base text-neutral-700 block mb-4">
               Valor (R$)
               <input
                 type="number"
                 inputMode="decimal"
-                step="0.01"
-                className="mt-1 block w-full border rounded-xl px-3 py-2"
-                placeholder="100"
+                placeholder="R$ 0,00"
                 value={valor === "" ? "" : String(valor)}
-                onChange={(e) => {
-                  const v = e.target.value;
-                  setValor(v === "" ? "" : Number(v));
-                }}
-              />
-            </label>
-
-            <div className="flex justify-end gap-2">
-              <button className="px-3 py-1 rounded-xl border" onClick={reset}>
-                Cancelar
-              </button>
-
-              <button
-                className="px-4 py-2 rounded-xl bg-blue-500 text-white shadow hover:bg-blue-600 active:scale-95 transition"
-                onClick={() => {
-                  const m = typeof valor === "number" ? valor : 0;
-                  if (!nome.trim() || m <= 0) return;
-
-                  if (isEditMode && onSalvarEdit && initial) {
-                    onSalvarEdit(initial.id, { nome: nome.trim(), meta: m });
-                  } else if (!isEditMode && onAdicionar) {
-                    onAdicionar({ nome: nome.trim(), meta: m });
-                  }
-                  reset();
-                }}
-              >
-                Salvar
-              </button>
-            </div>
+                onChange={(e) => setValor(e.target.value === "" ? "" : Number(e.target.value))}
+                className="mt-1 block w-full border rounded-xl px-3 py-2"
+                />
+              </label>
           </div>
-        </div>
-      )}
+
+          <DialogFooter className="mt-2 flex flex-row justify-end gap-2">
+            <Button variant="outline" className="px-3 py-1 rounded-xl border" onClick={() => setOpen(false)}>Cancelar</Button>
+            <Button onClick={handleSalvar}
+                // className="w-10 h-10 w-full sm:w-auto rounded-full bg-blue-500 text-white shadow hover:bg-blue-600 active:scale-95 transition"
+                className="px-4 py-2 rounded-xl bg-blue-500 text-white shadow hover:bg-blue-600 active:scale-95 transition">
+                    Salvar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

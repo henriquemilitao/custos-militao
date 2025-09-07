@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus, Edit3 } from "lucide-react";
 import { toast } from "sonner"; // 🔔 precisa instalar: npm i sonner
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog";
 
 
 export type Economia = {
@@ -55,6 +56,39 @@ export default function ConfigEconomia({
     onOpenChange?.(false); // 🔹 avisa que fechou
   }
 
+  function handleSalvar() {
+    console.log(">>> Salvando economia...");
+    const m = typeof meta === "number" ? meta : 0;
+    if (!titulo.trim()) return;
+
+    if (isReserva) {
+      if (m < 0) {
+        toast("A meta da Reserva de Emergência não pode ser negativa.", {
+          description: "Defina um valor maior que zero.",
+          style: { background: "#fee2e2", color: "#b91c1c" },
+        });
+        return;
+      }
+      if (m === 0) {
+        console.log(">>> Chamando toast de meta zero");
+        toast("Você precisa guardar pelo menos alguma coisa na Reserva.", {
+          description: "Digite um valor maior que zero.",
+          style: { background: "#fee2e2", color: "#b91c1c" },
+        });
+        return;
+      }
+    }
+
+    const valorFinal = m;
+
+    if (isEditMode && onSalvarEdit && initial) {
+      onSalvarEdit(initial.id, { titulo: titulo.trim(), meta: valorFinal });
+    } else if (!isEditMode && onAdicionar) {
+      onAdicionar({ titulo: titulo.trim(), meta: valorFinal });
+    }
+    reset();
+  }
+
   return (
     <>
       {trigger ? (
@@ -69,87 +103,45 @@ export default function ConfigEconomia({
         </Button>
       )}
 
-      {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/40" onClick={reset} />
-          <div className="relative w-full max-w-md bg-white rounded-2xl shadow-lg p-6 z-10">
-            <h3 className="text-xl font-semibold mb-3">
-              {isEditMode ? "Editar Economia" : "Nova Economia"}
-            </h3>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>{isEditMode ? "Editar Economia" : "Nova Economia"}</DialogTitle>
+          </DialogHeader>
 
-            <label className="text-base text-neutral-700 block mb-2">
+          <div className="space-y-3">
+             <label className="text-base text-neutral-700 block mb-2">
               Nome
               <input
-                className="mt-1 block w-full border rounded-xl px-3 py-2 disabled:bg-gray-100 disabled:text-gray-500"
+                placeholder="Ex: Viagem, Carro..."
                 value={titulo}
                 onChange={(e) => setTitulo(e.target.value)}
-                placeholder="Ex: Viagem, Curso, etc."
-                disabled={isReserva} // 👈 bloqueia edição do nome
-              />
-            </label>
-
+                className="mt-1 block w-full border rounded-xl px-3 py-2"
+                />
+              </label>
             <label className="text-base text-neutral-700 block mb-4">
               Valor (R$)
               <input
                 type="number"
                 inputMode="decimal"
-                step="0.01"
-                className="mt-1 block w-full border rounded-xl px-3 py-2"
+                placeholder="R$ 0,00"
                 value={meta === "" ? "" : String(meta)}
-                placeholder="Quanto você quer guardar?"
-                onChange={(e) => {
-                  const v = e.target.value;
-                  setMeta(v === "" ? "" : Number(v));
-                }}
-              />
-            </label>
-
-            <div className="flex justify-end gap-2">
-              <button className="px-3 py-1 rounded-xl border" onClick={reset}>
-                Cancelar
-              </button>
-
-              <button
-                className="px-4 py-2 rounded-xl bg-blue-500 text-white shadow hover:bg-blue-600 active:scale-95 transition"
-                onClick={() => {
-                  console.log(">>> Salvando economia...");
-                  const m = typeof meta === "number" ? meta : 0;
-                  if (!titulo.trim()) return;
-
-                  if (isReserva) {
-                    if (m < 0) {
-                      toast("A meta da Reserva de Emergência não pode ser negativa.", {
-                        description: "Defina um valor maior que zero.",
-                        style: { background: "#fee2e2", color: "#b91c1c" },
-                      });
-                      return;
-                    }
-                    if (m === 0) {
-                      console.log(">>> Chamando toast de meta zero");
-                      toast("Você precisa guardar pelo menos alguma coisa na Reserva.", {
-                        description: "Digite um valor maior que zero.",
-                        style: { background: "#fee2e2", color: "#b91c1c" },
-                      });
-                      return;
-                    }
-                  }
-
-                  const valorFinal = m;
-
-                  if (isEditMode && onSalvarEdit && initial) {
-                    onSalvarEdit(initial.id, { titulo: titulo.trim(), meta: valorFinal });
-                  } else if (!isEditMode && onAdicionar) {
-                    onAdicionar({ titulo: titulo.trim(), meta: valorFinal });
-                  }
-                  reset();
-                }}
-              >
-                Salvar
-              </button>
-            </div>
+                onChange={(e) => setMeta(e.target.value === "" ? "" : Number(e.target.value))}
+                className="mt-1 block w-full border rounded-xl px-3 py-2"
+                />
+              </label>
           </div>
-        </div>
-      )}
+
+          <DialogFooter className="mt-2 flex flex-row justify-end gap-2">
+            <Button variant="outline" className="px-3 py-1 rounded-xl border" onClick={() => setOpen(false)}>Cancelar</Button>
+            <Button onClick={handleSalvar}
+                // className="w-10 h-10 w-full sm:w-auto rounded-full bg-blue-500 text-white shadow hover:bg-blue-600 active:scale-95 transition"
+                className="px-4 py-2 rounded-xl bg-blue-500 text-white shadow hover:bg-blue-600 active:scale-95 transition">
+                    Salvar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
