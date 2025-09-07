@@ -263,10 +263,16 @@ export default function Page() {
           <ConfigEconomia onAdicionar={handleAdicionarEconomia} />
         </CardHeader>
         <CardContent className="space-y-3">
-          {estado.economias.length === 0 ? (
-            <div className="text-base text-neutral-500">Nenhuma economia adicionada.</div>
-          ) : (
-            estado.economias.map((eco) => (
+        {estado.economias.length === 0 ? (
+          <div className="text-base text-neutral-500">Nenhuma economia adicionada.</div>
+        ) : (
+          [...estado.economias]
+            .sort((a, b) => {
+              if (a.titulo === "Reserva de Emergência") return -1; // a vai para o início
+              if (b.titulo === "Reserva de Emergência") return 1;  // b fica depois
+              return 0; // mantém ordem original
+            })
+            .map((eco) => (
               <EconomiaItem
                 key={eco.id}
                 economia={eco}
@@ -276,8 +282,9 @@ export default function Page() {
                 totalDisponivel={estado.saldoInicial}
               />
             ))
-          )}
-        </CardContent>
+        )}
+      </CardContent>
+
       </Card>
 
       <div className="max-w-6xl mx-auto p-4 md:p-6 space-y-6">
@@ -294,7 +301,12 @@ export default function Page() {
               {estado.categorias.length === 0 ? (
                 <div className="text-base text-neutral-500">Nenhum gasto fixo adicionado.</div>
               ) : (
-                estado.categorias.map((c) => (
+                // reordenando categorias: Gasolina por último
+                [...estado.categorias].sort((a, b) => {
+                  if (a.nome === "Gasolina") return 1; // a vai para o final
+                  if (b.nome === "Gasolina") return -1; // b vai para o final
+                  return 0; // mantém ordem original
+                }).map((c) => (
                   <CategoriaFixa
                     key={c.id}
                     categoria={c}
@@ -304,6 +316,7 @@ export default function Page() {
                 ))
               )}
             </CardContent>
+
           </Card>
         </div>
 
