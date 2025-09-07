@@ -165,15 +165,15 @@ export default function CategoriaFixa({ categoria, estado, atualizarEstado }: Pr
             placeholder="Valor abastecido"
             value={novoValor}
             onChange={(e) => setNovoValor(e.target.value)}
-            className="w-40"
+            // className="w-40"
           />
           <Button
             onClick={adicionarGasolina}
             size="icon"
-            className="w-10 h-10 rounded-full border border-blue-400 text-blue-500 bg-white shadow-none hover:bg-blue-500 hover:text-white"
+            className="px-9 py-2 rounded-xl bg-blue-500 text-white shadow hover:bg-blue-600 active:scale-95 transition"
             title="Adicionar gasto"
           >
-            <Plus className="w-4 h-4" />
+            Salvar
           </Button>
         </div>
 
