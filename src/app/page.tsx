@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import ConfigMes from "@/components/ConfigMes";
 import ConfigEconomia, { Economia as EconomiaType } from "@/components/ConfigEconomia";
 import EconomiaItem from "@/components/EconomiaItem";
 import CategoriaFixa from "@/components/CategoriaFixa";
