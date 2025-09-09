@@ -6,14 +6,9 @@ import { Button } from "@/components/ui/button";
 import type { GastoItem } from "@/types/budget";
 import { Plus, Trash2 } from "lucide-react";
 import ConfigGastoAleatorio from "./ConfigGastoAleatorio";
+import { moedaBRL } from "@/lib/currency";
 
 const PESOS = [1, 1, 1, 1.5] as const;
-
-function moeda(n: number) {
-  return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(
-    isFinite(n) ? n : 0
-  );
-}
 
 function dataHojeCampoGrande(): string {
   return new Date().toLocaleDateString("pt-BR", { timeZone: "America/Campo_Grande" });
@@ -166,7 +161,7 @@ export default function Aleatorio({
       </CardHeader>
       <CardContent className="space-y-3">
         <div className="text-base text-neutral-600">
-          Total disponível para usar: <b>{moeda(meta)}</b>
+          Total disponível para usar: <b>{moedaBRL(meta)}</b>
         </div>
 
         {Array.from({ length: 4 }, (_, i) => i).map((i) => {
@@ -188,7 +183,7 @@ export default function Aleatorio({
                 <div>
                   <div className="font-medium">Semana {i + 1}</div>
                   <div className="text-sm text-neutral-500">
-                    Posso gastar no máx: <span className="text-base font-medium text-gray-800">{moeda(metaSemana)}</span>
+                    Posso gastar no máx: <span className="text-base font-medium text-gray-800">{moedaBRL(metaSemana)}</span>
                   </div>
                 </div>
 
@@ -245,7 +240,7 @@ export default function Aleatorio({
                       <span className="font-medium break-words break-all">{g.descricao}</span>
                     </div>
                     <div className="flex items-center gap-2 ml-2">
-                      <span>{moeda(g.valor)}</span>
+                      <span>{moedaBRL(g.valor)}</span>
                       <button
                         onClick={() => onRemoveGasto(i, g.id)}
                         className="text-red-600 text-sm hover:underline"
@@ -268,34 +263,34 @@ export default function Aleatorio({
               {/* Rodapé da semana */}
               <div className="mt-2 text-sm text-neutral-600 flex items-center justify-between">
                 <span>
-                  Total gasto: <b className="text-base font-medium text-gray-800">{moeda(totalSemana)}</b>
+                  Total gasto: <b className="text-base font-medium text-gray-800">{moedaBRL(totalSemana)}</b>
                 </span>
 
                 { i < currentIdx ? (
                   delta >= 0 ? (
                     <span className="text-green-600 text-sm">
-                      Sobrou: <span className="text-base font-medium">{moeda(delta)}</span> (repassado às próximas)
+                      Sobrou: <span className="text-base font-medium">{moedaBRL(delta)}</span> (repassado às próximas)
                     </span>
                   ) : (
                     <span className="text-red-600 text-sm">
-                      Excedeu: <span className="text-base font-medium">{moeda(-delta)}</span> (descontado das próximas)
+                      Excedeu: <span className="text-base font-medium">{moedaBRL(-delta)}</span> (descontado das próximas)
                     </span>
                   )
                 ) : i === currentIdx ? (
                   delta < 0 ? (
                     <span className="text-red-600">
                       Ultrapassou:{" "}
-                      <span className="text-base font-medium">{moeda(-delta)}</span>
+                      <span className="text-base font-medium">{moedaBRL(-delta)}</span>
                     </span>
                   ) : (
                     <span className="text-green-600">
                       Posso gastar ainda:{" "}
-                      <span className="text-base font-medium">{moeda(delta)}</span>
+                      <span className="text-base font-medium">{moedaBRL(delta)}</span>
                     </span>
                   )
                 ) : (
                   <span className="text-neutral-600">
-                    Posso gastar ainda: {moeda(metaSemana - totalSemana)}
+                    Posso gastar ainda: {moedaBRL(metaSemana - totalSemana)}
                   </span>
                 )}
               </div>

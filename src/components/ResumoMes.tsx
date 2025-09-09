@@ -3,12 +3,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import EditableCurrency from "./EditableCurrency";
-
-function moeda(n: number) {
-  return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(
-    isFinite(n) ? n : 0
-  );
-}
+import { moedaBRL } from "@/lib/currency";
 
 function clamp(n: number) {
   if (!isFinite(n)) return 0;
@@ -119,7 +114,7 @@ export default function ResumoMes({
             <div>
               <div className="text-base text-neutral-500">Disponível após economias</div>
               <div className={`mt-2 text-2xl font-semibold ${totalSemEconomias < 0 ? "text-red-600" : "text-green-600"}`}>
-                {moeda(totalRealParaGastar)}
+                {moedaBRL(totalRealParaGastar)}
               </div>
               <div className="text-sm text-neutral-500 mt-1">
                 Saldo estimado após economias planejadas
@@ -131,7 +126,7 @@ export default function ResumoMes({
                 Saldo final estimado
               </div>
               <div className={`text-xl font-semibold ${saldoEstimadoPosGastos < 0 ? "text-red-600" : "text-gray-800"}`}>
-                {moeda(saldoEstimadoPosGastos)}
+                {moedaBRL(saldoEstimadoPosGastos)}
               </div>
               <div className="text-sm text-neutral-400 mt-1">Após gastos fixos e aleatórios já registrados</div>
             </div>
@@ -145,15 +140,15 @@ export default function ResumoMes({
             <div className="flex items-baseline justify-between mb-5">
               <div className="mt-2 flex items-baseline flex-col">
                 <p className="text-base text-neutral-500">Economias</p>
-                <p className="text-2xl font-semibold text-blue-600">{moeda(totalEconomias)}</p>
+                <p className="text-2xl font-semibold text-blue-600">{moedaBRL(totalEconomias)}</p>
               </div>
-              <p className="text-base text-neutral-500">Guardado: <br />{moeda(totalEconomizado)}</p>
+              <p className="text-base text-neutral-500">Guardado: <br />{moedaBRL(totalEconomizado)}</p>
             </div>
 
 
             <ProgressBar
               percent={pctEconomias}
-              label={restanteEconomias <= 0 ? `Meta atingida` : `Faltam ${moeda(restanteEconomias)}`}
+              label={restanteEconomias <= 0 ? `Meta atingida` : `Faltam ${moedaBRL(restanteEconomias)}`}
               forceGreen={true}
             />
           </div>
@@ -163,15 +158,15 @@ export default function ResumoMes({
             <div className="flex items-baseline justify-between mb-5">
               <div className="mt-2 flex items-baseline flex-col">
                 <p className="text-base text-neutral-500">Gastos fixos</p>
-                <p className="text-2xl font-semibold text-red-600">{moeda(gastoFixas)}</p>
+                <p className="text-2xl font-semibold text-red-600">{moedaBRL(gastoFixas)}</p>
               </div>
-              <p className="text-base text-neutral-500">Planejado: <br />{moeda(totalPlanejadoFixas)}</p>
+              <p className="text-base text-neutral-500">Planejado: <br />{moedaBRL(totalPlanejadoFixas)}</p>
             </div>
 
               <ProgressBar
                 percent={pctFixas}
                 // warn={pctFixas > 65 && pctFixas <= 100}
-                label={restanteFixas < 0 ? `Ultrapassou ${moeda(Math.abs(restanteFixas))}` : `Disponível: ${moeda(restanteFixas)}`}
+                label={restanteFixas < 0 ? `Ultrapassou ${moedaBRL(Math.abs(restanteFixas))}` : `Disponível: ${moedaBRL(restanteFixas)}`}
               />
           </div>
 
@@ -180,15 +175,15 @@ export default function ResumoMes({
             <div className="flex items-baseline justify-between mb-5">
               <div className="mt-2 flex items-baseline flex-col">
                 <p className="text-base text-neutral-500">Aleatório</p>
-                <p className="text-2xl font-semibold text-red-600">{moeda(gastoAleatorio)}</p>
+                <p className="text-2xl font-semibold text-red-600">{moedaBRL(gastoAleatorio)}</p>
               </div>
-              <p className="text-base text-neutral-500">Planejado: <br />{moeda(aleatorioMeta)}</p>
+              <p className="text-base text-neutral-500">Planejado: <br />{moedaBRL(aleatorioMeta)}</p>
             </div>
 
             <ProgressBar
               percent={pctAleatorio}
               // warn={pctAleatorio > 90 && pctAleatorio <= 100}
-              label={restanteAleatorio < 0 ? `Ultrapassou ${moeda(Math.abs(restanteAleatorio))}` : `Disponível: ${moeda(restanteAleatorio)}`}
+              label={restanteAleatorio < 0 ? `Ultrapassou ${moedaBRL(Math.abs(restanteAleatorio))}` : `Disponível: ${moedaBRL(restanteAleatorio)}`}
             />
           </div>
         </div>
