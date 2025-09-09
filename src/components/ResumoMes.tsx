@@ -4,53 +4,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import EditableCurrency from "./EditableCurrency";
 import { moedaBRL } from "@/lib/currency";
+import ProgressBar from "@/components/ui/progress-bar";
 
 function clamp(n: number) {
   if (!isFinite(n)) return 0;
   return Math.max(0, n);
-}
-
-function ProgressBar({
-  percent,
-  label,
-  forceGreen = false,
-}: {
-  percent: number;
-  label?: string;
-  forceGreen?: boolean;
-}) {
-  const pct = Math.max(0, percent);
-
-  const getColor = (p: number) => {
-    if (forceGreen) return "bg-green-500";
-    if (p > 100) return "bg-red-600";
-    if (p > 90) return "bg-red-500";
-    if (p > 85) return "bg-orange-500";
-    if (p > 80) return "bg-yellow-500";
-    if (p > 70) return "bg-yellow-400";
-    if (p > 60) return "bg-yellow-300";
-    return "bg-green-500";
-  };
-
-  const colorClass = getColor(pct);
-
-  return (
-    <div className="mt-2">
-      <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
-        <div
-          style={{ width: `${Math.min(100, pct)}%` }}
-          className={`h-2 ${colorClass} transition-all`}
-          role="progressbar"
-          aria-valuenow={Math.round(pct)}
-        />
-      </div>
-      {label && (
-        <div className="text-sm text-neutral-500 mt-1">
-          {label} — {Math.round(pct)}%
-        </div>
-      )}
-    </div>
-  );
 }
 
 export default function ResumoMes({
