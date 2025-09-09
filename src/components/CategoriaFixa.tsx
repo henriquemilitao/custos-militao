@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { CategoriaFixaType, EstadoMes, GastoGasolina } from "@/types/budget";
 import ConfigGastoFixo from "./ConfigGastoFixo";
+import ProgressBar from "./ui/progress-bar";
 
 type Props = {
   categoria: CategoriaFixaType;
@@ -99,7 +100,7 @@ export default function CategoriaFixa({ categoria, estado, atualizarEstado }: Pr
         </div>
 
         {/* Gastos e Disponível */}
-        <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
+        <div className="mt-3 mb-4 grid grid-cols-2 gap-3 text-sm">
           <div>
             <div className="text-neutral-500">Já gastei</div>
             <div className="font-medium text-base">R$ {totalGasto.toFixed(2)}</div>
@@ -131,30 +132,9 @@ export default function CategoriaFixa({ categoria, estado, atualizarEstado }: Pr
 
 
         {/* Barrinha de progresso */}
-        <div className="mt-3">
-          <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
-            <div
-              style={{ width: `${Math.min(percentualUso, 100)}%` }}
-              className={`h-2 ${
-                percentualUso > 100
-                  ? "bg-red-600"
-                  : percentualUso > 90
-                  ? "bg-red-500"
-                  : percentualUso > 85
-                  ? "bg-orange-500"
-                  : percentualUso > 80
-                  ? "bg-yellow-500"
-                  : percentualUso > 70
-                  ? "bg-yellow-400"
-                  : percentualUso > 60
-                  ? "bg-yellow-300"
-                  : "bg-green-500"
-              } transition-all`}
-            />
-          </div>
-          <div className="text-xs text-neutral-500 mt-1">
+        <ProgressBar percent={Math.min(percentualUso, 100)} />
+        <div className="text-xs text-neutral-500 mt-1">
             Gastei {percentualUso.toFixed(0)}%
-          </div>
         </div>
 
         {/* Input + botão */}
