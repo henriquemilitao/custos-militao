@@ -88,6 +88,7 @@ export default function CategoriaFixa({ categoria, estado, atualizarEstado }: Pr
                 <Edit3 className="w-5 h-5" />
               </Button>
             }
+            readOnly={isGasolina} // não deixa editar o nome
           />
         </div>
 

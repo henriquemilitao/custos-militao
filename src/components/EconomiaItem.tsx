@@ -77,6 +77,7 @@ export default function EconomiaItem({
               <Edit3 className="w-5 h-5" />
             </Button>
           }
+          readOnly={isReserva} // não deixa editar a reserva
         />
 
         {!isReserva && (

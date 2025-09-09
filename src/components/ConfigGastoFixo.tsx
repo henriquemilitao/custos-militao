@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Input } from "@/components/ui/input";
 import { Plus, Edit3 } from "lucide-react";
 import type { CategoriaFixaType } from "@/app/page";
+import { on } from "events";
 
 type Props = {
   onAdicionar?: (nova: Omit<CategoriaFixaType, "id" | "pago">) => void;
@@ -13,6 +14,7 @@ type Props = {
   initial?: { id: string; nome: string; meta: number } | null;
   trigger?: React.ReactNode;
   onOpenChange?: (open: boolean) => void;
+  readOnly?: boolean; // 👈 NOVO
 };
 
 export default function ConfigGastoFixo({
@@ -21,6 +23,7 @@ export default function ConfigGastoFixo({
   initial = null,
   trigger,
   onOpenChange,
+  readOnly
 }: Props) {
   const [open, setOpen] = useState(false);
   const [nome, setNome] = useState("");
@@ -73,7 +76,13 @@ export default function ConfigGastoFixo({
         </Button>
       )}
 
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog
+        open={open}
+        onOpenChange={(nextOpen) => {
+          setOpen(nextOpen);
+          onOpenChange?.(nextOpen); // 🔹 garante que o pai saiba se tá aberto ou não
+        }}
+      >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>{isEditMode ? "Editar Gasto Fixo" : "Novo Gasto Fixo"}</DialogTitle>
@@ -86,9 +95,10 @@ export default function ConfigGastoFixo({
                 placeholder="Ex: Internet, Netflix..."
                 value={nome}
                 onChange={(e) => setNome(e.target.value)}
-                className="mt-1 block w-full border rounded-xl px-3 py-2"
-                />
-              </label>
+                className={`mt-1 block w-full border rounded-xl px-3 py-2 ${readOnly && 'bg-gray-100 cursor-not-allowed'}`}
+                disabled={readOnly}
+              />
+            </label>
             <label className="text-base text-neutral-700 block mb-4">
               Valor (R$)
               <input
@@ -103,7 +113,10 @@ export default function ConfigGastoFixo({
           </div>
 
           <DialogFooter className="mt-2 flex flex-row justify-end gap-2">
-            <Button variant="outline" className="px-3 py-1 rounded-xl border" onClick={() => setOpen(false)}>Cancelar</Button>
+            <Button variant="outline" className="px-3 py-1 rounded-xl border" onClick={() => {
+              setOpen(false);
+              onOpenChange?.(false);
+            }}>Cancelar</Button>
             <Button onClick={handleSalvar}
                 // className="w-10 h-10 w-full sm:w-auto rounded-full bg-blue-500 text-white shadow hover:bg-blue-600 active:scale-95 transition"
                 className="px-4 py-2 rounded-xl bg-blue-500 text-white shadow hover:bg-blue-600 active:scale-95 transition">
