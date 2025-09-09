@@ -85,7 +85,7 @@ export default function ConfigGastoFixo({
       >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>{isEditMode ? "Editar Gasto Fixo" : "Novo Gasto Fixo"}</DialogTitle>
+            <DialogTitle className="text-xl font-semibold text-gray-800">{isEditMode ? "Editar Gasto Fixo" : "Novo Gasto Fixo"}</DialogTitle>
           </DialogHeader>
 
           <div className="space-y-3">

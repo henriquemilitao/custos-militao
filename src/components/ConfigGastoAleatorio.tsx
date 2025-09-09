@@ -1,14 +1,16 @@
-"use client";
-
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Plus } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { CalendarIcon, Plus } from "lucide-react";
+import { cn } from "@/lib/utils"; // se já tiver util do shadcn
 import type { GastoItem } from "@/app/page";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
-function dataHojeCampoGrande(): string {
-  return new Date().toLocaleDateString("pt-BR", { timeZone: "America/Campo_Grande" });
+function dataHojeCampoGrande(): Date {
+  return new Date(new Date().toLocaleString("en-US", { timeZone: "America/Campo_Grande" }));
 }
 
 export default function ConfigGastoAleatorio({
@@ -23,20 +25,22 @@ export default function ConfigGastoAleatorio({
   const [open, setOpen] = useState(false);
   const [desc, setDesc] = useState("");
   const [valor, setValor] = useState("");
+  const [data, setData] = useState<Date>(dataHojeCampoGrande());
 
   const handleSalvar = () => {
     const v = Number(valor) || 0;
-    if (!desc.trim() || v <= 0) return;
+    if (!desc.trim() || v <= 0 || !data) return;
 
     onAddGasto(semanaIndex, {
       id: crypto.randomUUID(),
       descricao: desc.trim(),
       valor: v,
-      dataPtBr: dataHojeCampoGrande(),
+      dataPtBr: data.toLocaleDateString("pt-BR", { timeZone: "America/Campo_Grande" }),
     });
 
     setDesc("");
     setValor("");
+    setData(dataHojeCampoGrande());
     setOpen(false);
   };
 
@@ -44,7 +48,6 @@ export default function ConfigGastoAleatorio({
     <>
       <Button
         size="icon"
-        // className="w-10 h-10 rounded-full bg-blue-500 text-white shadow hover:bg-blue-600 active:scale-95 transition mt-2"
         className="w-10 h-10 w-full sm:w-auto rounded-full bg-blue-500 text-white shadow hover:bg-blue-600 active:scale-95 transition mt-2"
         disabled={bloqueada}
         onClick={() => setOpen(true)}
@@ -55,32 +58,83 @@ export default function ConfigGastoAleatorio({
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Adicionar gasto</DialogTitle>
+            <DialogTitle className="text-xl font-semibold text-gray-800">Adicionar gasto</DialogTitle>
           </DialogHeader>
 
-          <div className="space-y-3">
+          <div className="space-y-4">
+            {/* Descrição */}
+            <div className="space-y-1">
+            <label className="text-base text-neutral-700">Descrição</label>
             <input
               placeholder="Com o que você gastou?"
               value={desc}
               onChange={(e) => setDesc(e.target.value)}
-              className="mt-1 block w-full border rounded-xl px-3 py-2"
+              className="block w-full border rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
-            <input
-              type="number"
-              inputMode="decimal"
-              placeholder="R$ 0,00"
-              value={valor}
-              onChange={(e) => setValor(e.target.value)}
-              className="mt-1 block w-full border rounded-xl px-3 py-2"
-            />
+            </div>
+            {/* Valor + Data */}
+            <div className="flex gap-3">
+              {/* Valor */}
+              <div className="flex-1 space-y-1">
+                <label className="text-base text-neutral-700">Valor</label>
+                <input
+                  type="number"
+                  inputMode="decimal"
+                  placeholder="R$ 0,00"
+                  value={valor}
+                  onChange={(e) => setValor(e.target.value)}
+                  className="block w-full border rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              {/* Data */}
+              <div className="flex-1 space-y-1">
+                <label className="text-base text-neutral-700">Data</label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal rounded-xl py-5",
+                        !data && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {data ? (
+                        data.toDateString() === dataHojeCampoGrande().toDateString()
+                          ? "Hoje"
+                          : format(data, "dd/MM/yyyy", { locale: ptBR })
+                      ) : (
+                        <span>Escolha</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <Calendar
+                      mode="single"
+                      selected={data}
+                      onSelect={(d) => d && setData(d)}
+                      month={dataHojeCampoGrande()}
+                      fromDate={new Date(data.getFullYear(), data.getMonth(), 1)}
+                      toDate={new Date(data.getFullYear(), data.getMonth() + 1, 0)}
+                      locale={ptBR}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
           </div>
 
           <DialogFooter className="mt-4 flex flex-row justify-end gap-2">
-            <Button variant="outline" className="px-3 py-1 rounded-xl border" onClick={() => setOpen(false)}>Cancelar</Button>
-            <Button onClick={handleSalvar}
-                // className="w-10 h-10 w-full sm:w-auto rounded-full bg-blue-500 text-white shadow hover:bg-blue-600 active:scale-95 transition"
-                className="px-4 py-2 rounded-xl bg-blue-500 text-white shadow hover:bg-blue-600 active:scale-95 transition">
-                    Salvar
+            <Button variant="outline" className="px-3 py-1 rounded-xl border" onClick={() => setOpen(false)}>
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleSalvar}
+              className="px-4 py-2 rounded-xl bg-blue-500 text-white shadow hover:bg-blue-600 active:scale-95 transition"
+            >
+              Salvar
             </Button>
           </DialogFooter>
         </DialogContent>

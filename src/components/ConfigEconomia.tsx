@@ -111,7 +111,7 @@ export default function ConfigEconomia({
       }}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>{isEditMode ? "Editar Economia" : "Nova Economia"}</DialogTitle>
+            <DialogTitle className="text-xl font-semibold text-gray-800">{isEditMode ? "Editar Economia" : "Nova Economia"}</DialogTitle>
           </DialogHeader>
 
           <div className="space-y-3">
