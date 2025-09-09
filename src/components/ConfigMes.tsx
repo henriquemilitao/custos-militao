@@ -1,7 +1,7 @@
 "use client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import type { CategoriaFixaType, EstadoMes } from "@/app/page";
+import type { CategoriaFixaType, EstadoMes } from "@/types/budget";
 import { useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
 

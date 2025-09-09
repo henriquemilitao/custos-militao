@@ -3,10 +3,8 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { Plus, Edit3 } from "lucide-react";
-import type { CategoriaFixaType } from "@/app/page";
-import { on } from "events";
+import type { CategoriaFixaType } from "@/types/budget";
 
 type Props = {
   onAdicionar?: (nova: Omit<CategoriaFixaType, "id" | "pago">) => void;

@@ -9,42 +9,7 @@ import Aleatorio from "@/components/Aleatorio";
 import ResumoMes from "@/components/ResumoMes";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ConfigGastoFixo from "@/components/ConfigGastoFixo";
-
-export type CategoriaFixaType = {
-  id: string;
-  nome: string;
-  meta: number;
-  pago: boolean;
-};
-
-export type GastoGasolina = {
-  id: string;
-  data: string;
-  valor: number;
-};
-
-export type GastoItem = {
-  id: string;
-  descricao: string;
-  valor: number;
-  dataPtBr: string;
-};
-
-export type Economia = EconomiaType;
-
-export type EstadoMes = {
-  mesId: string;
-  saldoInicial: number;
-  categorias: CategoriaFixaType[];
-  economias: Economia[];
-  aleatorioMeta: number;
-  aleatorioSemanas: [GastoItem[], GastoItem[], GastoItem[], GastoItem[]];
-  aleatorioFechadas: [boolean, boolean, boolean, boolean];
-  aleatorioQuotaFixas: [number | null, number | null, number | null, number | null];
-  gasolinaGastos: GastoGasolina[];
-};
-
-type MapMeses = Record<string, EstadoMes>;
+import { CategoriaFixaType, Economia, EstadoMes, GastoGasolina, MapMeses } from "@/types/budget";
 
 const LS_KEY = "budget-planner-v2";
 

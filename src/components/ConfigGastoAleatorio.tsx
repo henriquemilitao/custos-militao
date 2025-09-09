@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CalendarIcon, Plus } from "lucide-react";
-import type { GastoItem } from "@/app/page";
+import type { GastoItem } from "@/types/budget";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Trash2, CheckCircle, RotateCcw, Plus, Edit3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import type { CategoriaFixaType, EstadoMes, GastoGasolina } from "@/app/page";
+import type { CategoriaFixaType, EstadoMes, GastoGasolina } from "@/types/budget";
 import ConfigGastoFixo from "./ConfigGastoFixo";
 
 type Props = {

@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import type { GastoItem } from "@/app/page";
+import type { GastoItem } from "@/types/budget";
 import { Plus, Trash2 } from "lucide-react";
 import ConfigGastoAleatorio from "./ConfigGastoAleatorio";
 
