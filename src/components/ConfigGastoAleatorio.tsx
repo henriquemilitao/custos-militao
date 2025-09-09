@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CalendarIcon, Plus } from "lucide-react";
-import { cn } from "@/lib/utils"; // se já tiver util do shadcn
 import type { GastoItem } from "@/app/page";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -26,6 +25,14 @@ export default function ConfigGastoAleatorio({
   const [desc, setDesc] = useState("");
   const [valor, setValor] = useState("");
   const [data, setData] = useState<Date>(dataHojeCampoGrande());
+
+  const hoje = dataHojeCampoGrande();
+  const ontem = new Date(hoje);
+  ontem.setDate(hoje.getDate() - 1);
+  const amanha = new Date(hoje);
+  amanha.setDate(hoje.getDate() + 1);
+  const anteontem = new Date(hoje);
+  anteontem.setDate(hoje.getDate() - 2);
 
   const handleSalvar = () => {
     const v = Number(valor) || 0;
@@ -92,22 +99,23 @@ export default function ConfigGastoAleatorio({
                 <label className="text-base text-neutral-700">Data</label>
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal rounded-xl py-5",
-                        !data && "text-muted-foreground"
-                      )}
-                    >
+                    <Button variant="outline" className="w-full justify-start rounded-xl">
                       <CalendarIcon className="mr-2 h-4 w-4" />
                       {data ? (
-                        data.toDateString() === dataHojeCampoGrande().toDateString()
+                        data.toDateString() === hoje.toDateString()
                           ? "Hoje"
+                          : data.toDateString() === ontem.toDateString()
+                          ? "Ontem"
+                          : data.toDateString() === anteontem.toDateString()
+                          ? "Anteontem"
+                          : data.toDateString() === amanha.toDateString()
+                          ? "Amanhã"
                           : format(data, "dd/MM/yyyy", { locale: ptBR })
                       ) : (
                         <span>Escolha</span>
                       )}
                     </Button>
+
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0">
                     <Calendar
@@ -119,6 +127,7 @@ export default function ConfigGastoAleatorio({
                       toDate={new Date(data.getFullYear(), data.getMonth() + 1, 0)}
                       locale={ptBR}
                       initialFocus
+                      showOutsideDays={false}
                     />
                   </PopoverContent>
                 </Popover>
