@@ -6,15 +6,19 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from "@/components/ui/sheet";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ChevronLeft, ChevronRight, Settings, LogOut, User } from "lucide-react";
+import { ChevronLeft, ChevronRight, Settings, LogOut, CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { Calendar } from "./ui/calendar";
 
 export default function HeaderSistema() {
   const [configOpen, setConfigOpen] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [mesAtual, setMesAtual] = useState(new Date());
-  const [diaInicio, setDiaInicio] = useState<number>(1);
+  const [tipoCiclo, setTipoCiclo] = useState<"mensal" | "personalizado">("mensal");
+  const [dataInicio, setDataInicio] = useState<Date | undefined>(undefined);
+  const [dataFim, setDataFim] = useState<Date | undefined>(undefined);
+
 
   const handleMesAnterior = () => {
     const novo = new Date(mesAtual);
@@ -28,13 +32,6 @@ export default function HeaderSistema() {
     setMesAtual(novo);
   };
 
-  const handleSelectMesAno = (mes: number, ano: number) => {
-    const novo = new Date(mesAtual);
-    novo.setMonth(mes);
-    novo.setFullYear(ano);
-    setMesAtual(novo);
-  };
-
   return (
     <div className="flex items-center justify-between px-4 py-3 bg-white shadow-sm rounded-2xl mb-4">
       {/* Navegação de mês */}
@@ -43,7 +40,6 @@ export default function HeaderSistema() {
           <ChevronLeft className="h-4 w-4" />
         </Button>
 
-        {/* Popover para selecionar mês/ano */}
         <Popover>
           <PopoverTrigger asChild>
             <Button variant="ghost" className="font-medium text-gray-700">
@@ -52,11 +48,8 @@ export default function HeaderSistema() {
           </PopoverTrigger>
           <PopoverContent className="w-60">
             <div className="flex gap-2">
-              {/* Select de mês */}
-              <Select
-                onValueChange={(mes) => handleSelectMesAno(Number(mes), mesAtual.getFullYear())}
-                defaultValue={String(mesAtual.getMonth())}
-              >
+              {/* Mês */}
+              <Select defaultValue={String(mesAtual.getMonth())} onValueChange={() => {}}>
                 <SelectTrigger>
                   <SelectValue placeholder="Mês" />
                 </SelectTrigger>
@@ -69,11 +62,8 @@ export default function HeaderSistema() {
                 </SelectContent>
               </Select>
 
-              {/* Select de ano */}
-              <Select
-                onValueChange={(ano) => handleSelectMesAno(mesAtual.getMonth(), Number(ano))}
-                defaultValue={String(mesAtual.getFullYear())}
-              >
+              {/* Ano */}
+              <Select defaultValue={String(mesAtual.getFullYear())} onValueChange={() => {}}>
                 <SelectTrigger>
                   <SelectValue placeholder="Ano" />
                 </SelectTrigger>
@@ -97,7 +87,7 @@ export default function HeaderSistema() {
         </Button>
       </div>
 
-      {/* Avatar do usuário (abre sheet) */}
+      {/* Avatar fake */}
       <Button variant="ghost" size="sm" className="rounded-full" onClick={() => setSheetOpen(true)}>
         <img
           src="https://ui-avatars.com/api/?name=Lucy+Vizotto"
@@ -106,7 +96,7 @@ export default function HeaderSistema() {
         />
       </Button>
 
-      {/* Sheet do usuário */}
+      {/* Sheet lateral */}
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
         <SheetContent side="right" className="w-72">
           <SheetHeader>
@@ -144,51 +134,107 @@ export default function HeaderSistema() {
         </SheetContent>
       </Sheet>
 
-      {/* Modal de configuração */}
+      {/* Modal Configuração */}
       <Dialog open={configOpen} onOpenChange={setConfigOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Configurar mês</DialogTitle>
+            <DialogTitle>Configurar ciclo financeiro</DialogTitle>
           </DialogHeader>
+
           <div className="space-y-4">
             <p className="text-sm text-gray-600">
-              Escolha o dia que representa o <b>início do mês</b>. 
-              O fim será o dia anterior do mês seguinte.
+              Escolha se deseja usar ciclo mensal padrão ou definir suas próprias datas.
             </p>
-            <div>
-              <label className="text-sm text-gray-700 mb-1 block">Dia de início</label>
-              <select
-                value={diaInicio}
-                onChange={(e) => setDiaInicio(Number(e.target.value))}
-                className="w-full border rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                {Array.from({ length: 28 }, (_, i) => i + 1).map((dia) => (
-                  <option key={dia} value={dia}>
-                    Dia {dia}
-                  </option>
-                ))}
-              </select>
+
+            {/* Tipo de ciclo */}
+            <div className="flex flex-col gap-2">
+              <label className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="tipoCiclo"
+                  value="mensal"
+                  checked={tipoCiclo === "mensal"}
+                  onChange={() => setTipoCiclo("mensal")}
+                />
+                <span className="text-sm text-neutral-700">Mensal (1º até fim do mês)</span>
+              </label>
+
+              <label className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="tipoCiclo"
+                  value="personalizado"
+                  checked={tipoCiclo === "personalizado"}
+                  onChange={() => setTipoCiclo("personalizado")}
+                />
+                <span className="text-sm text-neutral-700">Personalizado (definir datas)</span>
+              </label>
             </div>
-            <div className="p-3 bg-gray-50 rounded-xl text-sm text-gray-600">
-              Exemplo: início em <b>dia {diaInicio}</b> → fim em{" "}
-              <b>
-                {diaInicio - 1 <= 0 ? "último dia do mês" : `dia ${diaInicio - 1}`}
-              </b>{" "}
-              do próximo mês
-            </div>
+
+            {/* Datas só aparecem se for personalizado */}
+            {tipoCiclo === "personalizado" && (
+              <div className="flex gap-3 mt-3">
+                {/* Início */}
+                <div className="flex-1 space-y-1">
+                  <label className="text-base text-neutral-700">Início do ciclo</label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className="w-full justify-start rounded-xl">
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {dataInicio ? format(dataInicio, "dd/MM/yyyy", { locale: ptBR }) : <span>Escolha</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={dataInicio}
+                        onSelect={(d) => d && setDataInicio(d)}
+                        locale={ptBR}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+
+                {/* Fim */}
+                <div className="flex-1 space-y-1">
+                  <label className="text-base text-neutral-700">Fim do ciclo</label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className="w-full justify-start rounded-xl">
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {dataFim ? format(dataFim, "dd/MM/yyyy", { locale: ptBR }) : <span>Escolha</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={dataFim}
+                        onSelect={(d) => d && setDataFim(d)}
+                        locale={ptBR}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </div>
+            )}
+
           </div>
-          <DialogFooter>
+
+          <DialogFooter className="flex flex-col gap-2">
             <Button
-                variant="outline"
-                className="w-full px-4 py-2 rounded-xl border text-gray-700 hover:bg-gray-100 transition"
-                onClick={() => setConfigOpen(false)}
-                >
-                Cancelar
+              variant="outline"
+              className="w-full rounded-xl"
+              onClick={() => setConfigOpen(false)}
+            >
+              Cancelar
             </Button>
-            <Button 
-                onClick={() => setConfigOpen(false)}
-                className="w-full px-4 py-2 rounded-xl bg-blue-500 text-white shadow hover:bg-blue-600 active:scale-95 transition">
-                Salvar
+            <Button
+              className="w-full rounded-xl bg-blue-500 text-white shadow hover:bg-blue-600"
+              onClick={() => setConfigOpen(false)}
+            >
+              Salvar
             </Button>
           </DialogFooter>
         </DialogContent>

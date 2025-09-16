@@ -52,7 +52,7 @@ export default function ResumoMes({
   return (
     <Card className="rounded-2xl shadow-sm m-4 mb-10">
       <CardHeader>
-        <CardTitle>Resumo do Mês</CardTitle>
+        <CardTitle>Resumo do Mês/Ciclo</CardTitle>
       </CardHeader>
 
       <CardContent>

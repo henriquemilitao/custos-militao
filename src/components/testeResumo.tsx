@@ -14,7 +14,7 @@ export default function ResumoMesCard() {
       <div className="bg-white rounded-2xl shadow-sm p-5">
         {/* Título */}
         <h2 className="text-xl font-semibold text-gray-800 mb-5">
-          Resumo do Mês
+          Resumo do Mês/Ciclo
         </h2>
 
         {/* Gráfico */}
