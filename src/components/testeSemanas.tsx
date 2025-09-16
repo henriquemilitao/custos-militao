@@ -58,8 +58,11 @@ export default function ControleSemanal() {
       {/* Card principal */}
       <div className="bg-white rounded-2xl shadow-md p-4 mb-4 flex flex-col">
         {/* Cabeçalho com select da semana */}
-        <div className="flex justify-between items-center mb-3">
-          <h2 className="text-lg font-semibold text-gray-800">Controle Semanal</h2>
+        <div className="flex justify-between items-center mb-4">
+          <div>
+            <h2 className="text-lg font-semibold text-gray-800">Controle Semanal</h2>
+            <p className="text-xs text-gray-500">01/09 - 07/09</p>
+          </div>
           <select
             value={semanaSelecionada}
             onChange={(e) => setSemanaSelecionada(e.target.value)}
@@ -74,9 +77,9 @@ export default function ControleSemanal() {
         </div>
 
         {/* Resumo valores */}
-        <div className="grid grid-cols-3 gap-2 text-center mb-3">
+        <div className="grid grid-cols-3 gap-2 text-center mb-6">
           <div>
-            <p className="text-sm text-gray-500">Semana</p>
+            <p className="text-sm text-gray-500">Total Semana</p>
             <p className="text-sm font-medium">R$ 157,50</p>
           </div>
           <div>
@@ -91,7 +94,7 @@ export default function ControleSemanal() {
 
         {/* Gastos por Meta */}
         <div className="space-y-3 mb-7">
-          <p className="text-sm font-medium text-gray-700">Gastos por Meta</p>
+          {/* <p className="text-sm font-medium text-gray-700">Gastos por Meta</p> */}
           {gastosMeta.map((item, idx) => {
             const porcentagem = (item.gasto / item.total) * 100;
             return (
@@ -202,7 +205,7 @@ export default function ControleSemanal() {
                       onSelect={(d) => d && setData(d)}
                       locale={ptBR}
                       initialFocus
-                      showOutsideDays={false}
+                      // showOutsideDays={false}
                     />
                   </PopoverContent>
                 </Popover>

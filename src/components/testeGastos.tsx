@@ -39,8 +39,22 @@ export default function GastosCard() {
     {
       id: 2,
       nome: "Gasolina",
-      meta: 400,
-      gasto: 250,
+      meta: 200,
+      gasto: 50,
+      tipo: "meta",
+    },
+    {
+      id: 3,
+      nome: "Futebol",
+      meta: 150,
+      gasto: 100,
+      tipo: "meta",
+    },
+    {
+      id: 4,
+      nome: "Aleatorios",
+      meta: 300,
+      gasto: 120,
       tipo: "meta",
     },
   ]);
