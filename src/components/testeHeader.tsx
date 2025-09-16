@@ -136,7 +136,8 @@ export default function HeaderSistema() {
 
       {/* Modal Configuração */}
       <Dialog open={configOpen} onOpenChange={setConfigOpen}>
-        <DialogContent className="sm:max-w-md">
+        {/* limitei a largura com max-w-md + padding, mobile-first */}
+        <DialogContent className="w-[92%] max-w-md rounded-2xl p-6">
           <DialogHeader>
             <DialogTitle>Configurar ciclo financeiro</DialogTitle>
           </DialogHeader>
@@ -173,9 +174,10 @@ export default function HeaderSistema() {
 
             {/* Datas só aparecem se for personalizado */}
             {tipoCiclo === "personalizado" && (
-              <div className="flex gap-3 mt-3">
+              // mantenho os inputs sempre inline: flex sem wrap, cada filho com min-w-0 pra encolher corretamente
+              <div className="flex gap-3 mt-3 flex-nowrap">
                 {/* Início */}
-                <div className="flex-1 space-y-1">
+                <div className="flex-1 min-w-0 space-y-1">
                   <label className="text-base text-neutral-700">Início do ciclo</label>
                   <Popover>
                     <PopoverTrigger asChild>
@@ -197,7 +199,7 @@ export default function HeaderSistema() {
                 </div>
 
                 {/* Fim */}
-                <div className="flex-1 space-y-1">
+                <div className="flex-1 min-w-0 space-y-1">
                   <label className="text-base text-neutral-700">Fim do ciclo</label>
                   <Popover>
                     <PopoverTrigger asChild>
@@ -222,16 +224,20 @@ export default function HeaderSistema() {
 
           </div>
 
-          <DialogFooter className="flex flex-col gap-2">
+          {/* Footer responsivo:
+              - mobile: coluna (botões empilhados, legível)
+              - sm+  : linha (botões lado a lado) e sem wrap pra evitar "quebra" quando ampliar tela
+          */}
+          <DialogFooter className="mt-4 flex flex-col sm:flex-row sm:flex-nowrap sm:justify-end gap-2">
             <Button
               variant="outline"
-              className="w-full rounded-xl"
+              className="w-full sm:w-auto rounded-xl"
               onClick={() => setConfigOpen(false)}
             >
               Cancelar
             </Button>
             <Button
-              className="w-full rounded-xl bg-blue-500 text-white shadow hover:bg-blue-600"
+              className="w-full sm:w-auto rounded-xl bg-blue-500 text-white shadow hover:bg-blue-600"
               onClick={() => setConfigOpen(false)}
             >
               Salvar

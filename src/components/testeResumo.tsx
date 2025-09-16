@@ -13,9 +13,18 @@ export default function ResumoMesCard() {
     <div className="p-4 max-w-sm mx-auto">
       <div className="bg-white rounded-2xl shadow-sm p-5">
         {/* Título */}
-        <h2 className="text-xl font-semibold text-gray-800 mb-5">
-          Resumo do Mês/Ciclo
-        </h2>
+        {/* <div className="flex">
+          <h2 className="text-xl font-semibold text-gray-800 mb-5">
+            Resumo do Mês/Ciclo
+          </h2>
+          <h3>01/09 - 30/09</h3>
+        </div> */}
+        <div>
+          <h2 className="text-xl font-semibold text-gray-800">
+            Resumo do Mês/Ciclo
+          </h2>
+          <p className="text-sm text-gray-500 mb-2">01/09 - 07/09</p>
+        </div>
 
         {/* Gráfico */}
         <div className="h-57 flex items-center justify-center">
