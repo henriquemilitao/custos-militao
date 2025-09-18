@@ -1,0 +1,96 @@
+// prisma/schema.prisma
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  ciclos    Ciclo[]
+}
+
+model Ciclo {
+  id         String      @id @default(uuid())
+  dataInicio DateTime    @map("data_inicio")
+  dataFim    DateTime    @map("data_fim")
+  valorTotal BigInt      @map("valor_total")
+  createdAt  DateTime    @default(now()) @map("created_at")
+  updatedAt  DateTime    @updatedAt @map("updated_at")
+
+  userId     String
+  user       User        @relation(fields: [userId], references: [id])
+
+  economias  Economia[]
+  gastos     Gasto[]
+  semanas    Semana[]
+}
+
+model Economia {
+  id        String   @id @default(uuid())
+  nome      String
+  valor     BigInt
+  isPago    Boolean
+  dataPago  DateTime? @map("data_pago")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  cicloId   String
+  ciclo     Ciclo     @relation(fields: [cicloId], references: [id])
+}
+
+model Gasto {
+  id        String   @id @default(uuid())
+  name      String
+  valor     BigInt
+  tipo      TipoGasto
+  dataPago  DateTime? @map("data_pago")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  cicloId   String
+  ciclo     Ciclo     @relation(fields: [cicloId], references: [id])
+
+  registros RegistroGasto[]
+}
+
+model RegistroGasto {
+  id        String   @id @default(uuid())
+  name      String
+  valor     BigInt
+  data      DateTime
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  gastoId   String
+  gasto     Gasto    @relation(fields: [gastoId], references: [id])
+
+  semanaId  String
+  semana    Semana   @relation(fields: [semanaId], references: [id])
+}
+
+model Semana {
+  id             String   @id @default(uuid())
+  qualSemanaCiclo Int     @map("qual_semana_ciclo")
+  dataInicio     DateTime @map("data_inicio")
+  dataFim        DateTime @map("data_fim")
+  gastos         BigInt
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  cicloId String
+  ciclo   Ciclo   @relation(fields: [cicloId], references: [id])
+
+  registros RegistroGasto[]
+}
+
+enum TipoGasto {
+  single
+  goal
+}
