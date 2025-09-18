@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ChevronLeft, ChevronRight, Settings, LogOut, CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Calendar } from "./ui/calendar";
+import { Calendar } from "../ui/calendar";
 
 export default function HeaderSistema() {
   const [configOpen, setConfigOpen] = useState(false);

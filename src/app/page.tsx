@@ -1,9 +1,9 @@
 "use client";
-import TesteResumo from "@/components/testeResumo";
-import TesteEconomia from "@/components/testeEconomia";
-import TesteGastos from "@/components/testeGastos";
-import TesteSemanas from "@/components/testeSemanas";
-import HeaderSistema from "@/components/testeHeader";
+import TesteResumo from "@/components/2.0/testeResumo";
+import TesteEconomia from "@/components/2.0/testeEconomia";
+import TesteGastos from "@/components/2.0/testeGastos";
+import TesteSemanas from "@/components/2.0/testeSemanas";
+import HeaderSistema from "@/components/2.0/testeHeader";
 
 export default function Page() {
   return (
