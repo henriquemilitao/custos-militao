@@ -5,30 +5,27 @@ import TesteGastos from "@/components/2.0/testeGastos";
 import TesteSemanas from "@/components/2.0/testeSemanas";
 import HeaderSistema from "@/components/2.0/testeHeader";
 import { useEffect, useState } from "react";
-import { Prisma } from "@prisma/client";
-
-export type CicloComRelacionamentos = Prisma.CicloGetPayload<{
-  include: { economias: true; gastos: true; semanas: { include: { registros: true } } }
-}>
+import { CicloAtualDTO } from "@/dtos/ciclo.dto";
 
 export default function Page() {
-  const idTeste = '82505fb0-96d5-487b-a394-a9550e016bb9'
-  const [ciclo, setCiclo] = useState<CicloComRelacionamentos | null>(null)
+  const [cicloAtual, setCicloAtual] = useState<CicloAtualDTO | null>(null)
   
   useEffect(() => {
-    fetch(`/api/ciclos/${idTeste}`)
+    fetch(`/api/ciclos/atual`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId: "500f33f0-85ff-4f0c-a93a-c3118f43be4b" })
+    })
       .then(res => res.json())
       .then(data => {
-        setCiclo(data)
+        setCicloAtual(data)
       })
-      .catch(err =>
-        console.error(err)
-      )
   }, [])
+
   return (
     <main className="min-h-screen bg-neutral-50">
       <HeaderSistema /> 
-      <TesteResumo ciclo={ciclo}/>
+      <TesteResumo cicloAtual={cicloAtual}/>
       <TesteEconomia />
       <TesteGastos />
       <TesteSemanas />

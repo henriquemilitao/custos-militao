@@ -1,22 +1,22 @@
 "use client";
 
-import { CicloComRelacionamentos } from "@/app/page";
+import { CicloAtualDTO } from "@/dtos/ciclo.dto";
 import { formatCurrencyFromCents } from "@/lib/formatCurrency";
 import { formatDateToDayMonth } from "@/lib/formatDateToDayMonth";
 import { Ciclo } from "@prisma/client";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, PieLabelRenderProps } from "recharts";
 
 type ResumoMesCardProps = {
-  ciclo: CicloComRelacionamentos | null
+  cicloAtual: CicloAtualDTO | null
 }
 
-export default function ResumoMesCard({ciclo}: ResumoMesCardProps) {
+export default function ResumoMesCard({cicloAtual}: ResumoMesCardProps) {
 
-  const economiasMesTotal = ciclo?.economias.reduce((acc, economia) => economia.valor + acc, 0) ?? 0
-  const gastosMesTotal = ciclo?.gastos.reduce((acc, gasto) => gasto.valor + acc, 0) ?? 0
-  const valorMesTotal = ciclo?.valorTotal ?? 0
+  const economiasMesTotal = cicloAtual?.economias.reduce((acc, economia) => economia.valor + acc, 0) ?? 0
+  const gastosMesTotal = cicloAtual?.gastos.reduce((acc, gasto) => gasto.valor + acc, 0) ?? 0
+  const valorMesTotal = cicloAtual?.valorTotal ?? 0
   const disponivelMes = valorMesTotal - economiasMesTotal - gastosMesTotal
-
+  
   const data = [
     { name: "Gastos", value: gastosMesTotal, color: "#ef4444" },
     { name: "Economias", value: economiasMesTotal, color: "#3b82f6" },
@@ -29,10 +29,10 @@ export default function ResumoMesCard({ciclo}: ResumoMesCardProps) {
         {/* Título  TALVEZ TER Q VERIFICAR AQUI DEPOIS, SE FOR HORA 0, ELE PEGA O DIA ANTERIOR*/}
         <div>
           <h2 className="text-xl font-semibold text-gray-800">
-            Resumo do Mês/Ciclo 
+            Resumo do Mês 
             
           </h2>
-          <p className="text-sm text-gray-500 mb-2">{ciclo ? `${formatDateToDayMonth(ciclo?.dataInicio)} - ${formatDateToDayMonth(ciclo?.dataFim)} ` : ''}</p>
+          <p className="text-sm text-gray-500 mb-2">{cicloAtual && `${formatDateToDayMonth(cicloAtual?.dataInicio)} - ${formatDateToDayMonth(cicloAtual?.dataFim)}`}</p>
         </div>
 
         {/* Gráfico */}
