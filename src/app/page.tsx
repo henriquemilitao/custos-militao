@@ -20,7 +20,7 @@ export default function Page() {
 
   return (
     <main className="min-h-screen bg-neutral-50">
-      {JSON.stringify(cicloAtual)}
+      {/* {JSON.stringify(cicloAtual)} */}
       <HeaderSistema /> 
       <TesteResumo cicloAtual={cicloAtual}/>
       <TesteEconomia cicloAtual={cicloAtual}/>

@@ -1,19 +1,16 @@
-"use client";
-
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { MoreVertical, Edit, Trash2, CheckCircle, Plus } from "lucide-react";
 import { CicloAtualDTO } from "@/dtos/ciclo.dto";
 import { formatCurrencyFromCents } from "@/lib/formatCurrency";
+import { createPortal } from "react-dom";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../ui/dropdown-menu";
 
 type EconomiasCardProps = {
   cicloAtual: CicloAtualDTO | null
 }
 
-export default function EconomiasCard({cicloAtual}: EconomiasCardProps) {
+export default function EconomiasCard({ cicloAtual }: EconomiasCardProps) {
   const [showModal, setShowModal] = useState(false);
-  const [showMenu, setShowMenu] = useState<string | null>(null);
-
-  const economias2 = false
 
   return (
     <div className="p-4 max-w-sm mx-auto">
@@ -60,31 +57,29 @@ export default function EconomiasCard({cicloAtual}: EconomiasCardProps) {
                 )}
               </div>
 
-              {/* Botão de menu */}
-              <div className="relative">
-                <button
-                  onClick={() =>
-                    setShowMenu(showMenu === economia.id ? null : economia.id)
-                  }
-                  className="p-1 rounded-full hover:bg-gray-200"
-                >
-                  <MoreVertical size={18} />
-                </button>
+              {/* Botão de menu */}              
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="p-1 rounded-full hover:bg-gray-200">
+                    <MoreVertical size={18} />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-32">
+                  <DropdownMenuItem>
+                    <CheckCircle size={16} className="text-green-500" />
+                    <p className="font-medium text-gray-600">Economizar</p>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Edit size={16} className="text-blue-500" />
+                    <p className="font-medium text-gray-600">Editar</p>
 
-                {showMenu === economia.id && (
-                  <div className="absolute right-0 mt-2 w-32 bg-white shadow-lg rounded-xl border z-10">
-                    <button className="flex items-center gap-2 w-full px-3 py-2 text-sm hover:bg-gray-100">
-                      <CheckCircle size={16} className="text-green-500" /> Economizar
-                    </button>
-                    <button className="flex items-center gap-2 w-full px-3 py-2 text-sm hover:bg-gray-100">
-                      <Edit size={16} className="text-blue-500" /> Editar
-                    </button>
-                    <button className="flex items-center gap-2 w-full px-3 py-2 text-sm hover:bg-gray-100">
-                      <Trash2 size={16} className="text-red-500" /> Excluir
-                    </button>
-                  </div>
-                )}
-              </div>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Trash2 size={16} className="text-red-500" />
+                    <p className="font-medium text-gray-600">Excluir</p>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           )) : <p className="text-xs text-gray-400 mt-7">Nenhuma economia registrada.</p>}
         </div>
