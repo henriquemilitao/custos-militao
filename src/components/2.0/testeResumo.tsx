@@ -1,29 +1,38 @@
 "use client";
 
+import { CicloComRelacionamentos } from "@/app/page";
+import { formatCurrencyFromCents } from "@/lib/formatCurrency";
+import { formatDateToDayMonth } from "@/lib/formatDateToDayMonth";
+import { Ciclo } from "@prisma/client";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, PieLabelRenderProps } from "recharts";
 
-export default function ResumoMesCard() {
+type ResumoMesCardProps = {
+  ciclo: CicloComRelacionamentos | null
+}
+
+export default function ResumoMesCard({ciclo}: ResumoMesCardProps) {
+
+  const economiasMesTotal = ciclo?.economias.reduce((acc, economia) => economia.valor + acc, 0) ?? 0
+  const gastosMesTotal = ciclo?.gastos.reduce((acc, gasto) => gasto.valor + acc, 0) ?? 0
+  const valorMesTotal = ciclo?.valorTotal ?? 0
+  const disponivelMes = valorMesTotal - economiasMesTotal - gastosMesTotal
+
   const data = [
-    { name: "Gastos", value: 820, color: "#ef4444" },
-    { name: "Economias", value: 300, color: "#3b82f6" },
-    { name: "Disponível", value: 630, color: "#22c55e" },
+    { name: "Gastos", value: gastosMesTotal, color: "#ef4444" },
+    { name: "Economias", value: economiasMesTotal, color: "#3b82f6" },
+    { name: "Disponível", value: disponivelMes, color: "#22c55e" },
   ];
 
   return (
     <div className="p-4 max-w-sm mx-auto">
       <div className="bg-white rounded-2xl shadow-sm p-5">
-        {/* Título */}
-        {/* <div className="flex">
-          <h2 className="text-xl font-semibold text-gray-800 mb-5">
-            Resumo do Mês/Ciclo
-          </h2>
-          <h3>01/09 - 30/09</h3>
-        </div> */}
+        {/* Título  TALVEZ TER Q VERIFICAR AQUI DEPOIS, SE FOR HORA 0, ELE PEGA O DIA ANTERIOR*/}
         <div>
           <h2 className="text-xl font-semibold text-gray-800">
-            Resumo do Mês/Ciclo
+            Resumo do Mês/Ciclo 
+            
           </h2>
-          <p className="text-sm text-gray-500 mb-2">01/09 - 07/09</p>
+          <p className="text-sm text-gray-500 mb-2">{ciclo ? `${formatDateToDayMonth(ciclo?.dataInicio)} - ${formatDateToDayMonth(ciclo?.dataFim)} ` : ''}</p>
         </div>
 
         {/* Gráfico */}
@@ -54,19 +63,19 @@ export default function ResumoMesCard() {
         <div className="grid grid-cols-2 gap-3 text-sm mt-5">
           <div className="rounded-xl p-3 text-center bg-gray-50">
             <p className="text-gray-500">Recebido</p>
-            <p className="font-semibold text-gray-800">R$ 1.750,00</p>
+            <p className="font-semibold text-gray-800">{formatCurrencyFromCents(valorMesTotal)}</p>
           </div>
           <div className="rounded-xl p-3 text-center bg-red-50">
             <p className="text-gray-500">Gastos</p>
-            <p className="font-semibold text-red-600">R$ 820,00</p>
+            <p className="font-semibold text-red-600">{formatCurrencyFromCents(gastosMesTotal)}</p>
           </div>
           <div className="rounded-xl p-3 text-center bg-blue-50">
             <p className="text-gray-500">Economia</p>
-            <p className="font-semibold text-blue-600">R$ 300,00</p>
+            <p className="font-semibold text-blue-600">{formatCurrencyFromCents(economiasMesTotal)}</p>
           </div>
           <div className="rounded-xl p-3 text-center bg-green-50">
             <p className="text-gray-500">Disponível</p>
-            <p className="font-semibold text-green-600">R$ 630,00</p>
+            <p className="font-semibold text-green-600">{formatCurrencyFromCents(disponivelMes)}</p>
           </div>
         </div>
       </div>

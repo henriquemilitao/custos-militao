@@ -20,7 +20,7 @@ model Ciclo {
   id         String      @id @default(uuid())
   dataInicio DateTime    @map("data_inicio")
   dataFim    DateTime    @map("data_fim")
-  valorTotal BigInt      @map("valor_total")
+  valorTotal Int      @map("valor_total")
   createdAt  DateTime    @default(now()) @map("created_at")
   updatedAt  DateTime    @updatedAt @map("updated_at")
 
@@ -35,7 +35,7 @@ model Ciclo {
 model Economia {
   id        String   @id @default(uuid())
   nome      String
-  valor     BigInt
+  valor     Int
   isPago    Boolean
   dataPago  DateTime? @map("data_pago")
   createdAt DateTime  @default(now()) @map("created_at")
@@ -48,7 +48,7 @@ model Economia {
 model Gasto {
   id        String   @id @default(uuid())
   name      String
-  valor     BigInt
+  valor     Int
   tipo      TipoGasto
   dataPago  DateTime? @map("data_pago")
   createdAt DateTime  @default(now()) @map("created_at")
@@ -63,7 +63,7 @@ model Gasto {
 model RegistroGasto {
   id        String   @id @default(uuid())
   name      String
-  valor     BigInt
+  valor     Int
   data      DateTime
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime  @updatedAt @map("updated_at")
@@ -80,7 +80,7 @@ model Semana {
   qualSemanaCiclo Int     @map("qual_semana_ciclo")
   dataInicio     DateTime @map("data_inicio")
   dataFim        DateTime @map("data_fim")
-  gastos         BigInt
+  gastos         Int
   createdAt      DateTime @default(now()) @map("created_at")
   updatedAt      DateTime @updatedAt @map("updated_at")
 
