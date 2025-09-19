@@ -1,6 +1,6 @@
 "use client";
 import TesteResumo from "@/components/2.0/testeResumo";
-import TesteEconomia from "@/components/2.0/testeEconomia";
+import TesteEconomia from "@/components/2.0/Economia/cardEconomia";
 import TesteGastos from "@/components/2.0/testeGastos";
 import TesteSemanas from "@/components/2.0/testeSemanas";
 import HeaderSistema from "@/components/2.0/testeHeader";

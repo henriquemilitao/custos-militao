@@ -3,7 +3,9 @@ import { MoreVertical, Edit, Trash2, CheckCircle, Plus } from "lucide-react";
 import { CicloAtualDTO } from "@/dtos/ciclo.dto";
 import { formatCurrencyFromCents } from "@/lib/formatCurrency";
 import { createPortal } from "react-dom";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../ui/dropdown-menu";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "../../ui/dialog";
+import { DialogCreateEditEconomia } from "./components/dialogCreateEditEconomia";
 
 type EconomiasCardProps = {
   cicloAtual: CicloAtualDTO | null
@@ -86,35 +88,7 @@ export default function EconomiasCard({ cicloAtual }: EconomiasCardProps) {
       </div>
 
       {/* Modal de nova economia */}
-      {showModal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-20">
-          <div className="bg-white p-6 rounded-2xl w-80 shadow-lg">
-            <h3 className="text-lg font-semibold mb-4">Nova Economia</h3>
-            <input
-              type="text"
-              placeholder="Nome"
-              className="w-full mb-3 px-3 py-2 border rounded-xl focus:outline-blue-500"
-            />
-            <input
-              type="number"
-              placeholder="Valor (R$)"
-              className="w-full mb-4 px-3 py-2 border rounded-xl focus:outline-blue-500"
-            />
-
-            <div className="flex justify-end gap-2">
-              <button
-                onClick={() => setShowModal(false)}
-                className="px-4 py-2 rounded-xl bg-gray-200 text-gray-700 hover:bg-gray-300"
-              >
-                Cancelar
-              </button>
-              <button className="px-4 py-2 rounded-xl bg-blue-500 text-white hover:bg-blue-600">
-                Salvar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <DialogCreateEditEconomia showModal={showModal} setShowModal={setShowModal} />
     </div>
   );
 }
