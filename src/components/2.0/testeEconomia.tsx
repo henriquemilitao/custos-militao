@@ -2,24 +2,18 @@
 
 import { useState } from "react";
 import { MoreVertical, Edit, Trash2, CheckCircle, Plus } from "lucide-react";
+import { CicloAtualDTO } from "@/dtos/ciclo.dto";
+import { formatCurrencyFromCents } from "@/lib/formatCurrency";
 
-export default function EconomiasCard() {
+type EconomiasCardProps = {
+  cicloAtual: CicloAtualDTO | null
+}
+
+export default function EconomiasCard({cicloAtual}: EconomiasCardProps) {
   const [showModal, setShowModal] = useState(false);
-  const [showMenu, setShowMenu] = useState<number | null>(null);
+  const [showMenu, setShowMenu] = useState<string | null>(null);
 
-  // Valores mockados
-  const totalRecebido = 2000;
-  const economias = [
-    {
-      id: 1,
-      nome: "Reserva de Emergência",
-      valor: 100,
-      feito: true,
-      data: "12/09/2025",
-    },
-    { id: 2, nome: "Viagem", valor: 350, feito: false, data: null },
-    { id: 3, nome: "Novo Notebook", valor: 500, feito: false, data: null },
-  ];
+  const economias2 = false
 
   return (
     <div className="p-4 max-w-sm mx-auto">
@@ -35,33 +29,33 @@ export default function EconomiasCard() {
         </div>
 
         <div className="space-y-3">
-          {economias.map((eco) => (
+          {cicloAtual ? cicloAtual.economias.map((economia) => (
             <div
-              key={eco.id}
+              key={economia.id}
               className={`p-3 rounded-xl border flex justify-between items-center ${
-                eco.feito
+                economia.isPago
                   ? "bg-green-100 border-green-300 opacity-90"
                   : "bg-gray-50 border-gray-200"
               }`}
             >
               <div className="flex flex-col">
                 <div className="flex items-center gap-2">
-                  {eco.feito && <CheckCircle size={18} className="text-green-600" />}
+                  {economia.isPago && <CheckCircle size={18} className="text-green-600" />}
                   <p
                     className={`font-medium text-gray-800 ${
-                      eco.feito ? "line-through text-gray-600" : ""
+                      economia.isPago ? "line-through text-gray-600" : ""
                     }`}
                   >
-                    {eco.nome}
+                    {economia.nome}
                   </p>
                 </div>
                 <p className="text-sm text-gray-500">
-                  Valor: R$ {eco.valor.toFixed(2)} (
-                  {((eco.valor / totalRecebido) * 100).toFixed(1)}%)
+                  Valor: {formatCurrencyFromCents(economia.valor)} (
+                  {((economia.valor / cicloAtual.valorTotal) * 100).toFixed(1)}%)
                 </p>
-                {eco.feito && eco.data && (
+                {economia.isPago && economia.dataPago && (
                   <p className="text-xs text-gray-400">
-                    Guardado em {eco.data}
+                    Guardado em {economia.dataPago.toISOString()}
                   </p>
                 )}
               </div>
@@ -70,14 +64,14 @@ export default function EconomiasCard() {
               <div className="relative">
                 <button
                   onClick={() =>
-                    setShowMenu(showMenu === eco.id ? null : eco.id)
+                    setShowMenu(showMenu === economia.id ? null : economia.id)
                   }
                   className="p-1 rounded-full hover:bg-gray-200"
                 >
                   <MoreVertical size={18} />
                 </button>
 
-                {showMenu === eco.id && (
+                {showMenu === economia.id && (
                   <div className="absolute right-0 mt-2 w-32 bg-white shadow-lg rounded-xl border z-10">
                     <button className="flex items-center gap-2 w-full px-3 py-2 text-sm hover:bg-gray-100">
                       <CheckCircle size={16} className="text-green-500" /> Economizar
@@ -92,7 +86,7 @@ export default function EconomiasCard() {
                 )}
               </div>
             </div>
-          ))}
+          )) : <p className="text-xs text-gray-400 mt-7">Nenhuma economia registrada.</p>}
         </div>
       </div>
 

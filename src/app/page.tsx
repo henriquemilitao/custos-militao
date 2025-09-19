@@ -11,11 +11,7 @@ export default function Page() {
   const [cicloAtual, setCicloAtual] = useState<CicloAtualDTO | null>(null)
   
   useEffect(() => {
-    fetch(`/api/ciclos/atual`, {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId: "500f33f0-85ff-4f0c-a93a-c3118f43be4b" })
-    })
+    fetch(`/api/ciclos/atual?userId=500f33f0-85ff-4f0c-a93a-c3118f43be4b`)
       .then(res => res.json())
       .then(data => {
         setCicloAtual(data)
@@ -24,9 +20,10 @@ export default function Page() {
 
   return (
     <main className="min-h-screen bg-neutral-50">
+      {JSON.stringify(cicloAtual)}
       <HeaderSistema /> 
       <TesteResumo cicloAtual={cicloAtual}/>
-      <TesteEconomia />
+      <TesteEconomia cicloAtual={cicloAtual}/>
       <TesteGastos />
       <TesteSemanas />
     </main>

@@ -20,9 +20,10 @@ export async function getCicloById(cicloId: string) {
     return ciclo
 }
 
-export async function getCicloAtual(userId: string): Promise<CicloAtualDTO | null> {
+export async function getCicloAtual(userId: string | undefined): Promise<CicloAtualDTO | null> {
     const ciclo = await prisma.ciclo.findFirst({
         where: {
+            userId: userId,
             dataInicio: {lte: new Date()},
             dataFim: {gte: new Date()}
         },
@@ -41,12 +42,12 @@ export async function getCicloAtual(userId: string): Promise<CicloAtualDTO | nul
 
     const [somaEconomias, somaGastos] = await Promise.all([
         prisma.economia.aggregate({
-            where: {id: ciclo.id},
-            _sum: {valor: true}
+            where: { cicloId: ciclo.id },
+            _sum: { valor: true }
         }),
         prisma.gasto.aggregate({
-            where: {id: ciclo.id},
-            _sum: {valor: true}
+            where: { cicloId: ciclo.id },
+            _sum: { valor: true }
         })
     ])
 

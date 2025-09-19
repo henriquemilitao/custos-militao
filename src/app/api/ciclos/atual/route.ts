@@ -3,7 +3,10 @@ import { getCicloAtual } from "@/services/ciclo.service";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
-    const { userId } = await req.json()
+    // const { userId } = await req.json()
+
+    const { searchParams } = new URL(req.url || "", "http://localhost");
+    const userId = searchParams.get("userId") ?? undefined;
 
     const cicloAtual = await getCicloAtual(userId)
 
