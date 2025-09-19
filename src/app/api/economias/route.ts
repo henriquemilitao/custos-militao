@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
     const valorCents = Math.round((parsed.valor ?? 0) * 100); // garante number (não null)
 
     // // 4) salvar via service
-    const economia = await createEconomiaService({...parsed, valorCents: parsed.valor})
+    const economia = await createEconomiaService({...parsed, valorCents})
 
     return NextResponse.json({ status: 201 });
   } catch (err: any) {
