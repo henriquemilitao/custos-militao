@@ -1,36 +1,55 @@
 import { useState } from "react"
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { InputCurrency } from "../../InputCurrency"
+import { CicloAtualDTO } from "@/dtos/ciclo.dto"
+import { toast } from "sonner"
 
 type DialogCreateEditEconomiaProps = {
   showModal: boolean
   setShowModal: (show: boolean) => void
+  cicloAtual: CicloAtualDTO | null
+  mutateCiclo: () => void // <- novo
 }
 
-export function DialogCreateEditEconomia({ showModal, setShowModal }: DialogCreateEditEconomiaProps) {
+export function DialogCreateEditEconomia({ showModal, setShowModal, cicloAtual, mutateCiclo }: DialogCreateEditEconomiaProps) {
   const [nome, setNome] = useState("")
   const [valor, setValor] = useState<number | null>(null)
+  const [confirmZero, setConfirmZero] = useState(false)
 
   async function handleSalvar() {
-    try {
-      const res = await fetch("/api/economias", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nome, valor }),
-      })
-
-      if (!res.ok) {
-        throw new Error("Erro ao salvar economia")
-      }
-
-      // sucesso!
-      setShowModal(false)
-      setNome("")
-      setValor(0)
-      // aqui você pode recarregar a lista (props ou mutate do SWR/react-query)
-    } catch (error) {
-      console.error(error)
+    if (!cicloAtual?.id) {
+      toast.error("Nenhum ciclo ativo selecionado.")
+      return
     }
+
+    if ((valor === null || valor === 0) && !confirmZero) {
+      setConfirmZero(true)
+      return
+    }
+
+    const body = { nome: nome.trim(), valor, cicloId: cicloAtual.id }
+
+    const res = await fetch("/api/economias", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    })
+
+    const data = await res.json()
+    if (!res.ok) {
+      toast.error(data?.error || "Erro desconhecido")
+      return
+    }
+
+    toast.success("Economia salva com sucesso!")
+
+    // 🔑 força atualização do ciclo
+    mutateCiclo()
+
+    setShowModal(false)
+    setNome("")
+    setValor(null)
+    setConfirmZero(false)
   }
 
   return (
@@ -54,9 +73,18 @@ export function DialogCreateEditEconomia({ showModal, setShowModal }: DialogCrea
           onValueChange={(val) => setValor(val)}
         />
 
+        {confirmZero && (
+          <p className="text-sm text-yellow-600 mt-2">
+            ⚠️ Você tem certeza que deseja salvar uma economia sem valor/meta?
+          </p>
+        )}
+
         <DialogFooter className="flex flex-row justify-end">
           <button
-            onClick={() => setShowModal(false)}
+            onClick={() => {
+              setShowModal(false)
+              setConfirmZero(false)
+            }}
             className="px-4 py-2 rounded-xl bg-gray-200 text-gray-700 hover:bg-gray-300"
           >
             Cancelar
@@ -65,7 +93,7 @@ export function DialogCreateEditEconomia({ showModal, setShowModal }: DialogCrea
             onClick={handleSalvar}
             className="px-4 py-2 rounded-xl bg-blue-500 text-white hover:bg-blue-600"
           >
-            Salvar
+            {confirmZero ? "Confirmar" : "Salvar"}
           </button>
         </DialogFooter>
       </DialogContent>

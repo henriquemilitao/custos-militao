@@ -13,7 +13,7 @@ type InputCurrencyProps = {
 export function InputCurrency({ value, onValueChange, placeholder, className }: InputCurrencyProps) {
   return (
     <NumericFormat
-      value={value}
+      value={value === null ? undefined : value}
       thousandSeparator="."
       decimalSeparator=","
       prefix="R$ "
@@ -24,6 +24,7 @@ export function InputCurrency({ value, onValueChange, placeholder, className }: 
       className={`w-full px-3 py-2 border rounded-xl focus:outline-blue-500 ${className || ""}`}
       onValueChange={(values) => {
         if (onValueChange) {
+          // values.floatValue é undefined quando campo vazio
           onValueChange(values.floatValue ?? null);
         }
       }}

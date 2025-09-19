@@ -1,18 +1,17 @@
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { MoreVertical, Edit, Trash2, CheckCircle, Plus } from "lucide-react";
 import { CicloAtualDTO } from "@/dtos/ciclo.dto";
 import { formatCurrencyFromCents } from "@/lib/formatCurrency";
-import { createPortal } from "react-dom";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../ui/dropdown-menu";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "../../ui/dialog";
 import { DialogCreateEditEconomia } from "./components/dialogCreateEditEconomia";
 
 type EconomiasCardProps = {
   cicloAtual: CicloAtualDTO | null
+  mutateCiclo: () => void  // <- novo
 }
 
-export default function EconomiasCard({ cicloAtual }: EconomiasCardProps) {
-  const [showModal, setShowModal] = useState(false);
+export default function EconomiasCard({ cicloAtual, mutateCiclo }: EconomiasCardProps) {
+  const [showModal, setShowModal] = useState(false)
 
   return (
     <div className="p-4 max-w-sm mx-auto">
@@ -27,6 +26,7 @@ export default function EconomiasCard({ cicloAtual }: EconomiasCardProps) {
           </button>
         </div>
 
+        {/* Listagem */}
         <div className="space-y-3">
           {cicloAtual ? cicloAtual.economias.map((economia) => (
             <div
@@ -87,8 +87,13 @@ export default function EconomiasCard({ cicloAtual }: EconomiasCardProps) {
         </div>
       </div>
 
-      {/* Modal de nova economia */}
-      <DialogCreateEditEconomia showModal={showModal} setShowModal={setShowModal} />
+      {/* Modal passa mutate */}
+      <DialogCreateEditEconomia 
+        showModal={showModal} 
+        setShowModal={setShowModal} 
+        cicloAtual={cicloAtual} 
+        mutateCiclo={mutateCiclo}
+      />
     </div>
   );
 }
