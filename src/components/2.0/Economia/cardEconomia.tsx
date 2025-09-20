@@ -7,6 +7,7 @@ import { DialogCreateEditEconomia } from "./components/dialogCreateEditEconomia"
 import { toast } from "sonner";
 import { formatarData } from "@/lib/formatDate";
 import { Economia } from "@prisma/client";
+import { DialogConfirmDelete, TipoItemDelete } from "./components/dialogConfirmDelete";
 
 type EconomiasCardProps = {
   cicloAtual: CicloAtualDTO | null
@@ -15,6 +16,7 @@ type EconomiasCardProps = {
 
 export default function EconomiasCard({ cicloAtual, mutateCiclo }: EconomiasCardProps) {
   const [showModal, setShowModal] = useState(false)
+  const [showConfirmDelete, setShowConfirmDelete] = useState(false)
   const [isEdit, setIsEdit] = useState(false)
   const [currentEconomia, setCurrentEconomia] = useState<Economia | null>(null)
 
@@ -37,31 +39,6 @@ export default function EconomiasCard({ cicloAtual, mutateCiclo }: EconomiasCard
       mutateCiclo(); // 🔑 atualiza os dados no SWR
     } catch (err) {
       toast.error("Não foi possível guardar a economia");
-    }
-  }
-
-  const handleDeleteEconomia = async (economia: Economia) => {
-    try {
-      console.log('aaaaaaa')
-      const res = await fetch(`/api/economias/${economia.id}`, {
-        method: "DELETE",
-      })
-
-      if (!res.ok) {
-        toast.error("Erro ao deletar sua economia");
-      }
-
-       toast.success("Economia deletada com sucesso!", {
-        style: {
-          background: "#dcfce7", // verdinho claro
-          color: "#166534",      // texto verde escuro
-        },
-      });
-
-      mutateCiclo();
-    } catch (error) {
-      toast.error("Não foi possível guardar a economia");
-      
     }
   }
 
@@ -133,7 +110,10 @@ export default function EconomiasCard({ cicloAtual, mutateCiclo }: EconomiasCard
                     <p className="font-medium text-gray-600">Editar</p>
 
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleDeleteEconomia(economia)}>
+                  <DropdownMenuItem onClick={() => {
+                      setCurrentEconomia(economia)
+                      setShowConfirmDelete(true)
+                    }}>
                     <Trash2 size={16} className="text-red-500" />
                     <p className="font-medium text-gray-600">Excluir</p>
                   </DropdownMenuItem>
@@ -153,6 +133,15 @@ export default function EconomiasCard({ cicloAtual, mutateCiclo }: EconomiasCard
         isEdit={isEdit}
         setIsEdit={setIsEdit}
         economia={currentEconomia}
+      />
+
+       {/* Modal passa mutate */}
+      <DialogConfirmDelete
+        showModal={showConfirmDelete} 
+        setShowModal={setShowConfirmDelete} 
+        mutateCiclo={mutateCiclo}
+        item={currentEconomia}
+        tipoItem={TipoItemDelete.ECONOMIAS}
       />
     </div>
   );
