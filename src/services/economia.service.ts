@@ -19,6 +19,21 @@ export async function createEconomiaService(params: {
   });
 }
 
+export async function editEconomiaService(economiaId: string, params: {
+  nome: string;
+  valorCents: number | null;
+}) {
+  const { nome, valorCents} = params;
+
+  return prisma.economia.update({
+    where: {id: economiaId},
+    data: {
+      nome,
+      valor: valorCents ?? 0, // null vira 0
+    },
+  });
+}
+
 export async function guardarEconomiaService(economiaId: string) {
   
   return prisma.economia.update({

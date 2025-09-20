@@ -1,9 +1,9 @@
-// app/api/economias/route.ts
+import { editEconomiaSchema } from "@/dtos/economia.schema";
+import { notFound, ok } from "@/lib/http";
+import { editEconomiaService } from "@/services/economia.service";
 import { NextRequest, NextResponse } from "next/server";
 import { ZodError, ZodIssue } from "zod";
-import { createEconomiaSchema } from "@/dtos/economia.schema";
-import { verifyTokenFromRequest, AuthError } from "@/lib/auth";
-import { createEconomiaService } from "@/services/economia.service";
+
 
 function zodErrorToMessage(err: ZodError) {
   return err.issues
@@ -14,33 +14,23 @@ function zodErrorToMessage(err: ZodError) {
     .join(" | ");
 }
 
-export async function POST(req: NextRequest) {
+export async function PATCH(req: NextRequest, context: { params: Promise<{ id: string}>} ) {
   try {
-    // 1) autenticação (opcional para dev) - tenta pegar userId do token
-    // let userId: string | null = null;
-    // try {
-    //   const payload = verifyTokenFromRequest(req); // se não tiver token pode lançar AuthError
-    //   userId = (payload as any)?.sub ?? null;
-    // } catch (authErr: any) {
-    //   // ATENÇÃO:
-    //   // Por enquanto, não exigimos token (modo dev). Em produção, mude para:
-    //   // throw authErr;
-    //   userId = null;
-    // }
-
-
+    const economiaId = (await context.params).id
 
     // 2) parse/validação do body com Zod
     const body = await req.json();
-    const parsed = createEconomiaSchema.parse(body); // lança ZodError se inválido
+    const parsed = editEconomiaSchema.parse(body); // lança ZodError se inválido
     
     // 3) 
     const valorCents = Math.round((parsed.valor ?? 0)); // garante number (não null)
 
     // // 4) salvar via service
-    const economia = await createEconomiaService({...parsed, valorCents})
+    const economia = await editEconomiaService(economiaId, {...parsed, valorCents})
 
-    return NextResponse.json({ status: 201 });
+    if (!economia) return notFound()
+
+    return ok("Economia alterada com sucesso");
   } catch (err: any) {
     if (err instanceof ZodError) {
       return NextResponse.json({ error: zodErrorToMessage(err) }, { status: 422 });

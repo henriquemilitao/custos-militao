@@ -3,8 +3,6 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { InputCurrency } from "../../InputCurrency"
 import { CicloAtualDTO } from "@/dtos/ciclo.dto"
 import { toast } from "sonner"
-import { createEconomiaSchema } from "@/dtos/economia.schema"
-import z from "zod"
 import { Economia } from "@prisma/client"
 
 type DialogCreateEditEconomiaProps = {
@@ -83,6 +81,49 @@ export function DialogCreateEditEconomia({ showModal, setShowModal, cicloAtual, 
     handleClose(); // 🔑 usa a função de reset
   }
 
+
+
+  async function handleEditar() {
+    if (!cicloAtual?.id) {
+      toast.error("Nenhum ciclo ativo selecionado.");
+      return;
+    }
+
+    if (!nome.trim()) {
+      setErrors({ nome: "Nome é obrigatório" });
+      return;
+    }
+
+    if ((valor === null || valor === 0) && !confirmZero) {
+      setConfirmZero(true);
+      return;
+    }
+
+    const body = { nome: nome.trim(), valor};
+
+    const res = await fetch(`/api/economias/${economia?.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+      toast.error(data?.error || "Erro desconhecido");
+      return;
+    }
+
+    toast.success("Economia alterada com sucesso!", {
+      style: {
+        background: "#dcfce7", // verdinho claro
+        color: "#166534",      // texto verde escuro
+      },
+    });
+    mutateCiclo();
+
+    handleClose(); // 🔑 usa a função de reset
+  }
+
   return (
       <Dialog
         open={showModal}
@@ -116,10 +157,16 @@ export function DialogCreateEditEconomia({ showModal, setShowModal, cicloAtual, 
             {errors.nome && <span className="text-xs text-red-600 -mb-2">{errors.nome}</span>}
         </div>
 
-        <InputCurrency
+        {/* <InputCurrency
           placeholder="Valor (R$)"
           value={valor && valor / 100}
           onValueChange={(val) => setValor(val)}
+        /> */}
+
+        <InputCurrency
+          placeholder="Valor (R$)"
+          value={valor !== null ? valor / 100 : null} // mostra em reais
+          onValueChange={(val) => setValor(val !== null ? Math.round(val * 100) : null)} // salva em centavos
         />
 
         {confirmZero && (
@@ -139,7 +186,7 @@ export function DialogCreateEditEconomia({ showModal, setShowModal, cicloAtual, 
             Cancelar
           </button>
           <button
-            onClick={handleSalvar}
+            onClick={isEdit ? handleEditar : handleSalvar}
             className={`px-4 py-2 rounded-xl bg-blue-500 text-white hover:bg-blue-600 ${confirmZero && 'bg-red-600 hover:bg-red-700'}`}
           >
             {confirmZero ? "Confirmar" : "Salvar"}
