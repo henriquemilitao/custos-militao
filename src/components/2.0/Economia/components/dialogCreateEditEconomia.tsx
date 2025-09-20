@@ -87,7 +87,7 @@ export function DialogCreateEditEconomia({ showModal, setShowModal, cicloAtual, 
         <div className="flex flex-col gap-1">
           <input
             type="text"
-            placeholder="Qual sua economia?"
+            placeholder="Nome"
             value={nome}
             onChange={(e) => {
               setNome(e.target.value);
@@ -101,7 +101,7 @@ export function DialogCreateEditEconomia({ showModal, setShowModal, cicloAtual, 
         </div>
 
         <InputCurrency
-          placeholder="Valor a guardar (R$)"
+          placeholder="Valor (R$)"
           value={valor}
           onValueChange={(val) => setValor(val)}
         />

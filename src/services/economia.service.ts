@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { Economia } from "@prisma/client";
 
 // services/economiaService.ts
 export async function createEconomiaService(params: {
@@ -12,8 +13,21 @@ export async function createEconomiaService(params: {
     data: {
       nome,
       valor: valorCents ?? 0, // null vira 0
-      isPago: false,
+      isGuardado: false,
       cicloId,
     },
   });
+}
+
+export async function guardarEconomiaService(economiaId: string) {
+  
+  return prisma.economia.update({
+    where: {
+      id: economiaId
+    },
+    data: {
+      isGuardado: true,
+      dataGuardado: new Date()
+    }
+  })
 }

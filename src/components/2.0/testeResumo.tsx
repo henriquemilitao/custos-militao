@@ -13,7 +13,7 @@ type ResumoMesCardProps = {
 export default function ResumoMesCard({cicloAtual}: ResumoMesCardProps) {
 
   const economiasMesTotal = cicloAtual?.economias.reduce((acc, economia) => economia.valor + acc, 0) ?? 0
-  const gastosMesTotal = cicloAtual?.gastos.reduce((acc, gasto) => gasto.valor + acc, 0) ?? 0
+  const gastosMesTotal = cicloAtual?.gastos?.reduce((acc, gasto) => gasto.valor + acc, 0) ?? 0
   const valorMesTotal = cicloAtual?.valorTotal ?? 0
   const disponivelMes = valorMesTotal - economiasMesTotal - gastosMesTotal
   

@@ -4,6 +4,8 @@ import { CicloAtualDTO } from "@/dtos/ciclo.dto";
 import { formatCurrencyFromCents } from "@/lib/formatCurrency";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../ui/dropdown-menu";
 import { DialogCreateEditEconomia } from "./components/dialogCreateEditEconomia";
+import { toast } from "sonner";
+import { formatarData } from "@/lib/formatDate";
 
 type EconomiasCardProps = {
   cicloAtual: CicloAtualDTO | null
@@ -32,17 +34,17 @@ export default function EconomiasCard({ cicloAtual, mutateCiclo }: EconomiasCard
             <div
               key={economia.id}
               className={`p-3 rounded-xl border flex justify-between items-center ${
-                economia.isPago
+                economia.isGuardado
                   ? "bg-green-100 border-green-300 opacity-90"
                   : "bg-gray-50 border-gray-200"
               }`}
             >
               <div className="flex flex-col">
                 <div className="flex items-center gap-2">
-                  {economia.isPago && <CheckCircle size={18} className="text-green-600" />}
+                  {economia.isGuardado && <CheckCircle size={18} className="text-green-600" />}
                   <p
                     className={`font-medium text-gray-800 ${
-                      economia.isPago ? "line-through text-gray-600" : ""
+                      economia.isGuardado ? "line-through text-gray-600" : ""
                     }`}
                   >
                     {economia.nome}
@@ -52,9 +54,9 @@ export default function EconomiasCard({ cicloAtual, mutateCiclo }: EconomiasCard
                   Valor: {formatCurrencyFromCents(economia.valor)} (
                   {((economia.valor / cicloAtual.valorTotal) * 100).toFixed(1)}%)
                 </p>
-                {economia.isPago && economia.dataPago && (
+                {economia.isGuardado && economia.dataGuardado && (
                   <p className="text-xs text-gray-400">
-                    Guardado em {economia.dataPago.toISOString()}
+                    Guardado em {formatarData(economia.dataGuardado)}
                   </p>
                 )}
               </div>
@@ -67,7 +69,29 @@ export default function EconomiasCard({ cicloAtual, mutateCiclo }: EconomiasCard
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-32">
-                  <DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={async () => {
+                      try {
+                        const res = await fetch(`/api/economias/${economia.id}/guardar`, {
+                          method: "PATCH",
+                        });
+
+                        if (!res.ok) {
+                          toast.error("Erro ao guardar economia");
+                        }
+
+                        toast.success("Dinheiro guardado com sucesso!", {
+                          style: {
+                            background: "#dcfce7", // verdinho claro
+                            color: "#166534",      // texto verde escuro
+                          },
+                        });
+                        mutateCiclo(); // 🔑 atualiza os dados no SWR
+                      } catch (err) {
+                        toast.error("Não foi possível guardar a economia");
+                      }
+                    }}
+                  >
                     <CheckCircle size={16} className="text-green-500" />
                     <p className="font-medium text-gray-600">Economizar</p>
                   </DropdownMenuItem>

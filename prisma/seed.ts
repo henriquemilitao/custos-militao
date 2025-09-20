@@ -21,8 +21,8 @@ async function main() {
   // economias (2 exemplos)
   await prisma.economia.createMany({
     data: [
-      { nome: "Reserva de emergência", valor: 200, isPago: false, cicloId: ciclo.id },
-      { nome: "Viagem", valor: 150, isPago: false, cicloId: ciclo.id },
+      { nome: "Reserva de emergência", valor: 200, isGuardado: false, cicloId: ciclo.id },
+      { nome: "Viagem", valor: 150, isGuardado: false, cicloId: ciclo.id },
     ],
   });
 
