@@ -6,7 +6,7 @@ import { NumericFormat } from "react-number-format";
 type InputCurrencyProps = {
   value?: number | null;
   onValueChange?: (value: number | null) => void;
-  placeholder?: string;
+  placeholder?: string | undefined;
   className?: string;
 };
 

@@ -1,23 +1,38 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { InputCurrency } from "../../InputCurrency"
 import { CicloAtualDTO } from "@/dtos/ciclo.dto"
 import { toast } from "sonner"
 import { createEconomiaSchema } from "@/dtos/economia.schema"
 import z from "zod"
+import { Economia } from "@prisma/client"
 
 type DialogCreateEditEconomiaProps = {
   showModal: boolean
   setShowModal: (show: boolean) => void
   cicloAtual: CicloAtualDTO | null
   mutateCiclo: () => void // <- novo
+  isEdit: boolean
+  setIsEdit: (edit: boolean) => void
+  economia: Economia | null
 }
 
-export function DialogCreateEditEconomia({ showModal, setShowModal, cicloAtual, mutateCiclo }: DialogCreateEditEconomiaProps) {
+export function DialogCreateEditEconomia({ showModal, setShowModal, cicloAtual, mutateCiclo, isEdit, setIsEdit, economia }: DialogCreateEditEconomiaProps) {
   const [nome, setNome] = useState("")
   const [valor, setValor] = useState<number | null>(null)
   const [confirmZero, setConfirmZero] = useState(false)
   const [errors, setErrors] = useState<{ nome?: string }>({});
+
+  
+  useEffect(() => {
+    if (isEdit && economia) {
+      setNome(economia.nome);
+      setValor(economia.valor);
+    } else {
+      setNome("");
+      setValor(null);
+    }
+  }, [isEdit, economia, showModal]);
 
   function handleClose() {
     setShowModal(false);
@@ -74,6 +89,7 @@ export function DialogCreateEditEconomia({ showModal, setShowModal, cicloAtual, 
         onOpenChange={(open) => {
           if (!open) {
             handleClose(); // 🔑 limpa nome, valor, erros etc
+            setIsEdit(false)
           } else {
             setShowModal(true);
           }
@@ -81,13 +97,13 @@ export function DialogCreateEditEconomia({ showModal, setShowModal, cicloAtual, 
       >
         <DialogContent className="w-100">
         <DialogHeader>
-          <DialogTitle className="text-left mb-2">Nova Economia</DialogTitle>
+          <DialogTitle className="text-left mb-2">{!isEdit ? 'Nova Economia' : 'Editar Economia'}</DialogTitle>
         </DialogHeader>
 
         <div className="flex flex-col gap-1">
           <input
             type="text"
-            placeholder="Nome"
+            placeholder='Nome'
             value={nome}
             onChange={(e) => {
               setNome(e.target.value);
@@ -102,7 +118,7 @@ export function DialogCreateEditEconomia({ showModal, setShowModal, cicloAtual, 
 
         <InputCurrency
           placeholder="Valor (R$)"
-          value={valor}
+          value={valor && valor / 100}
           onValueChange={(val) => setValor(val)}
         />
 
@@ -114,7 +130,10 @@ export function DialogCreateEditEconomia({ showModal, setShowModal, cicloAtual, 
 
         <DialogFooter className="flex flex-row justify-end">
           <button
-            onClick={handleClose}
+            onClick={() => {
+              handleClose(),
+              setIsEdit(false)
+            }}
             className="px-4 py-2 rounded-xl bg-gray-200 text-gray-700 hover:bg-gray-300"
           >
             Cancelar

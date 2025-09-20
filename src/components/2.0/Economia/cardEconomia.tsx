@@ -6,6 +6,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { DialogCreateEditEconomia } from "./components/dialogCreateEditEconomia";
 import { toast } from "sonner";
 import { formatarData } from "@/lib/formatDate";
+import { Economia } from "@prisma/client";
 
 type EconomiasCardProps = {
   cicloAtual: CicloAtualDTO | null
@@ -14,6 +15,8 @@ type EconomiasCardProps = {
 
 export default function EconomiasCard({ cicloAtual, mutateCiclo }: EconomiasCardProps) {
   const [showModal, setShowModal] = useState(false)
+  const [isEdit, setIsEdit] = useState(false)
+  const [currentEconomia, setCurrentEconomia] = useState<Economia | null>(null)
 
   return (
     <div className="p-4 max-w-sm mx-auto">
@@ -95,7 +98,11 @@ export default function EconomiasCard({ cicloAtual, mutateCiclo }: EconomiasCard
                     <CheckCircle size={16} className="text-green-500" />
                     <p className="font-medium text-gray-600">Economizar</p>
                   </DropdownMenuItem>
-                  <DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => {
+                    setIsEdit(true)
+                    setShowModal(true)
+                    setCurrentEconomia(economia)
+                  }}>
                     <Edit size={16} className="text-blue-500" />
                     <p className="font-medium text-gray-600">Editar</p>
 
@@ -117,6 +124,9 @@ export default function EconomiasCard({ cicloAtual, mutateCiclo }: EconomiasCard
         setShowModal={setShowModal} 
         cicloAtual={cicloAtual} 
         mutateCiclo={mutateCiclo}
+        isEdit={isEdit}
+        setIsEdit={setIsEdit}
+        economia={currentEconomia}
       />
     </div>
   );
