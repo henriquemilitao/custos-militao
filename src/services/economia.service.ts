@@ -46,3 +46,9 @@ export async function guardarEconomiaService(economiaId: string) {
     }
   })
 }
+
+export async function deleteEconomiaService(economiaId: string){
+  return prisma.economia.delete({
+    where: {id: economiaId}
+  });
+}

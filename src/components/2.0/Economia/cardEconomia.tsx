@@ -18,6 +18,53 @@ export default function EconomiasCard({ cicloAtual, mutateCiclo }: EconomiasCard
   const [isEdit, setIsEdit] = useState(false)
   const [currentEconomia, setCurrentEconomia] = useState<Economia | null>(null)
 
+  const handleGuardarEconomia = async (economia: Economia) => {
+    try {
+      const res = await fetch(`/api/economias/${economia.id}/guardar`, {
+        method: "PATCH",
+      });
+
+      if (!res.ok) {
+        toast.error("Erro ao guardar sua economia");
+      }
+
+      toast.success("Dinheiro guardado com sucesso!", {
+        style: {
+          background: "#dcfce7", // verdinho claro
+          color: "#166534",      // texto verde escuro
+        },
+      });
+      mutateCiclo(); // 🔑 atualiza os dados no SWR
+    } catch (err) {
+      toast.error("Não foi possível guardar a economia");
+    }
+  }
+
+  const handleDeleteEconomia = async (economia: Economia) => {
+    try {
+      console.log('aaaaaaa')
+      const res = await fetch(`/api/economias/${economia.id}`, {
+        method: "DELETE",
+      })
+
+      if (!res.ok) {
+        toast.error("Erro ao deletar sua economia");
+      }
+
+       toast.success("Economia deletada com sucesso!", {
+        style: {
+          background: "#dcfce7", // verdinho claro
+          color: "#166534",      // texto verde escuro
+        },
+      });
+
+      mutateCiclo();
+    } catch (error) {
+      toast.error("Não foi possível guardar a economia");
+      
+    }
+  }
+
   return (
     <div className="p-4 max-w-sm mx-auto">
       <div className="bg-white rounded-2xl shadow-md p-4">
@@ -73,28 +120,7 @@ export default function EconomiasCard({ cicloAtual, mutateCiclo }: EconomiasCard
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-32">
                   <DropdownMenuItem
-                    onClick={async () => {
-                      try {
-                        const res = await fetch(`/api/economias/${economia.id}/guardar`, {
-                          method: "PATCH",
-                        });
-
-                        if (!res.ok) {
-                          toast.error("Erro ao guardar economia");
-                        }
-
-                        toast.success("Dinheiro guardado com sucesso!", {
-                          style: {
-                            background: "#dcfce7", // verdinho claro
-                            color: "#166534",      // texto verde escuro
-                          },
-                        });
-                        mutateCiclo(); // 🔑 atualiza os dados no SWR
-                      } catch (err) {
-                        toast.error("Não foi possível guardar a economia");
-                      }
-                    }}
-                  >
+                    onClick={() => handleGuardarEconomia(economia)}>
                     <CheckCircle size={16} className="text-green-500" />
                     <p className="font-medium text-gray-600">Economizar</p>
                   </DropdownMenuItem>
@@ -107,7 +133,7 @@ export default function EconomiasCard({ cicloAtual, mutateCiclo }: EconomiasCard
                     <p className="font-medium text-gray-600">Editar</p>
 
                   </DropdownMenuItem>
-                  <DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleDeleteEconomia(economia)}>
                     <Trash2 size={16} className="text-red-500" />
                     <p className="font-medium text-gray-600">Excluir</p>
                   </DropdownMenuItem>

@@ -1,6 +1,6 @@
 import { editEconomiaSchema } from "@/dtos/economia.schema";
 import { notFound, ok } from "@/lib/http";
-import { editEconomiaService } from "@/services/economia.service";
+import { deleteEconomiaService, editEconomiaService } from "@/services/economia.service";
 import { NextRequest, NextResponse } from "next/server";
 import { ZodError, ZodIssue } from "zod";
 
@@ -41,4 +41,16 @@ export async function PATCH(req: NextRequest, context: { params: Promise<{ id: s
     console.error("API /economias error:", err);
     return NextResponse.json({ error: "Erro interno do servidor" }, { status: 500 });
   }
+}
+
+export async function DELETE(req: NextRequest, context: { params: Promise<{ id: string}>}) {
+  const economiaId = (await context.params).id
+  
+  const economia = await deleteEconomiaService(economiaId)
+
+  if (!economia) {
+    return notFound()
+  }
+
+  return ok(economia)
 }

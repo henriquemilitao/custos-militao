@@ -81,8 +81,6 @@ export function DialogCreateEditEconomia({ showModal, setShowModal, cicloAtual, 
     handleClose(); // 🔑 usa a função de reset
   }
 
-
-
   async function handleEditar() {
     if (!cicloAtual?.id) {
       toast.error("Nenhum ciclo ativo selecionado.");
@@ -156,12 +154,6 @@ export function DialogCreateEditEconomia({ showModal, setShowModal, cicloAtual, 
           />
             {errors.nome && <span className="text-xs text-red-600 -mb-2">{errors.nome}</span>}
         </div>
-
-        {/* <InputCurrency
-          placeholder="Valor (R$)"
-          value={valor && valor / 100}
-          onValueChange={(val) => setValor(val)}
-        /> */}
 
         <InputCurrency
           placeholder="Valor (R$)"

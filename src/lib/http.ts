@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server"
 
 export function ok(data: any) {
-    console.log('sss')
   return NextResponse.json(data, { status: 200 })
 }
 
