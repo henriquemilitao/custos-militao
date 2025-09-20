@@ -1,5 +1,6 @@
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Economia } from "@prisma/client";
+import { useState } from "react";
 import { toast } from "sonner";
 
 export enum TipoItemDelete {
@@ -15,14 +16,20 @@ type DialogConfirmDeleteProps = {
 }
 
 export function DialogConfirmDelete({ showModal, setShowModal, mutateCiclo, item, tipoItem }: DialogConfirmDeleteProps) {
+  const [loading, setLoading] = useState(false);
+
+
   const handleDelete = async () => {
     try {
-      const res = await fetch(`/api/${tipoItem}/${item?.id}`, {
+        setLoading(true);
+        const res = await fetch(`/api/${tipoItem}/${item?.id}`, {
         method: "DELETE",
       });
 
       if (!res.ok) {
-        toast.error("Erro ao deletar seu item");
+        const data = await res.json().catch(() => null);
+        toast.error(data?.error || "Erro ao deletar seu item");
+        setLoading(false);
         return;
       }
 
@@ -37,6 +44,8 @@ export function DialogConfirmDelete({ showModal, setShowModal, mutateCiclo, item
       setShowModal(false); // fecha após deletar
     } catch {
       toast.error("Não foi possível deletar seu item");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -56,17 +65,19 @@ export function DialogConfirmDelete({ showModal, setShowModal, mutateCiclo, item
         </p>
 
         <DialogFooter className="flex flex-row justify-end">
-          <button
+           <button
             onClick={() => setShowModal(false)}
             className="px-4 py-2 rounded-xl bg-gray-200 text-gray-700 hover:bg-gray-300"
+            disabled={loading}
           >
             Cancelar
           </button>
           <button
             onClick={handleDelete}
             className="px-4 py-2 rounded-xl text-white bg-red-600 hover:bg-red-700"
+            disabled={loading}
           >
-            Deletar
+            {loading ? "Deletando..." : "Deletar"}
           </button>
         </DialogFooter>
       </DialogContent>

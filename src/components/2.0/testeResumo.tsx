@@ -1,8 +1,8 @@
 "use client";
 
 import { CicloAtualDTO } from "@/dtos/ciclo.dto";
-import { formatCurrencyFromCents } from "@/lib/formatCurrency";
-import { formatDateToDayMonth } from "@/lib/formatDateToDayMonth";
+import { formatCurrencyFromCents } from "@/lib/formatters/formatCurrency";
+import { formatDateToDayMonth } from "@/lib/formatters/formatDateToDayMonth";
 import { Ciclo } from "@prisma/client";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, PieLabelRenderProps } from "recharts";
 

@@ -1,5 +1,5 @@
 import { badRequest, notFound, ok, serverError } from "@/lib/http"
-import { getCicloById } from "@/services/ciclo.service"
+import { getCicloById } from "@/services/ciclo/ciclo.service"
 import { NextRequest, NextResponse } from "next/server"
 
 export async function GET(_: NextRequest, context: { params: Promise<{ id: string}>} ) {

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import type { GastoItem } from "@/types/budget";
 import { Plus, Trash2 } from "lucide-react";
 import ConfigGastoAleatorio from "./ConfigGastoAleatorio";
-import { moedaBRL } from "@/lib/currency";
+import { moedaBRL } from "@/lib/formatters/currency";
 
 const PESOS = [1, 1, 1, 1.5] as const;
 

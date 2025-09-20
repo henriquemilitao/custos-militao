@@ -1,6 +1,6 @@
 import { editEconomiaSchema } from "@/dtos/economia.schema";
 import { notFound, ok } from "@/lib/http";
-import { deleteEconomiaService, editEconomiaService } from "@/services/economia.service";
+import { deleteEconomiaService, editEconomiaService } from "@/services/economia/economia.service";
 import { NextRequest, NextResponse } from "next/server";
 import { ZodError, ZodIssue } from "zod";
 

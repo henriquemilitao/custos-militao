@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { guardarEconomiaService } from "@/services/economia.service";
+import { guardarEconomiaService } from "@/services/economia/economia.service";
 import { badRequest, notFound, ok, serverError } from "@/lib/http";
 
 export async function PATCH(

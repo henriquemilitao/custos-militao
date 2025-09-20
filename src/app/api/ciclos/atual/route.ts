@@ -1,5 +1,5 @@
 import { notFound, ok } from "@/lib/http";
-import { getCicloAtual } from "@/services/ciclo.service";
+import { getCicloAtual } from "@/services/ciclo/ciclo.service";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {

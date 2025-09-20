@@ -3,7 +3,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import EditableCurrency from "./EditableCurrency";
-import { moedaBRL } from "@/lib/currency";
+import { moedaBRL } from "@/lib/formatters/currency";
 import ProgressBar from "@/components/ui/progress-bar";
 
 function clamp(n: number) {

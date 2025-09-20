@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
-import { parseCurrency, formatCurrencyBRL } from "@/lib/currency";
+import { parseCurrency, formatCurrencyBRL } from "@/lib/formatters/currency";
 
 type Props = {
   value: number | "";

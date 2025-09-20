@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { MoreVertical, Edit, Trash2, CheckCircle, Plus } from "lucide-react";
 import { CicloAtualDTO } from "@/dtos/ciclo.dto";
-import { formatCurrencyFromCents } from "@/lib/formatCurrency";
+import { formatCurrencyFromCents } from "@/lib/formatters/formatCurrency";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../ui/dropdown-menu";
 import { DialogCreateEditEconomia } from "./components/dialogCreateEditEconomia";
 import { toast } from "sonner";
-import { formatarData } from "@/lib/formatDate";
+import { formatarData } from "@/lib/formatters/formatDate";
 import { Economia } from "@prisma/client";
 import { DialogConfirmDelete, TipoItemDelete } from "./components/dialogConfirmDelete";
 
@@ -138,7 +138,10 @@ export default function EconomiasCard({ cicloAtual, mutateCiclo }: EconomiasCard
        {/* Modal passa mutate */}
       <DialogConfirmDelete
         showModal={showConfirmDelete} 
-        setShowModal={setShowConfirmDelete} 
+        setShowModal={(open) => {
+          setShowConfirmDelete(open);
+          if (!open) setCurrentEconomia(null); // limpa quando fechar
+        }}
         mutateCiclo={mutateCiclo}
         item={currentEconomia}
         tipoItem={TipoItemDelete.ECONOMIAS}

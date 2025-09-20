@@ -126,11 +126,10 @@ export function DialogCreateEditEconomia({ showModal, setShowModal, cicloAtual, 
       <Dialog
         open={showModal}
         onOpenChange={(open) => {
+          setShowModal(open);
           if (!open) {
-            handleClose(); // 🔑 limpa nome, valor, erros etc
-            setIsEdit(false)
-          } else {
-            setShowModal(true);
+            handleClose();
+            setIsEdit(false);
           }
         }}
       >
