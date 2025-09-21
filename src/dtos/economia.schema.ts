@@ -2,13 +2,13 @@ import { z } from "zod";
 
 export const createEconomiaSchema = z.object({
   nome: z.string().min(1, "Nome é obrigatório"),
-  valor: z.number().nullable().refine(v => v === null || v >= 0, "Valor inválido"),
+  valorCents: z.number().nullable().refine(v => v === null || v >= 0, "Valor inválido"),
   cicloId: z.string().uuid("cicloId inválido"), // obrigatório só no create
 });
 
 export const editEconomiaSchema = z.object({
   nome: z.string().min(1, "Nome é obrigatório"),
-  valor: z.number().nullable().refine(v => v === null || v >= 0, "Valor inválido"),
+  valorCents: z.number().nullable().refine(v => v === null || v >= 0, "Valor inválido"),
   // sem cicloId
 });
 

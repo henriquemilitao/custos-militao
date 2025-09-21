@@ -4,6 +4,7 @@ import { ZodError, ZodIssue } from "zod";
 import { createEconomiaSchema } from "@/dtos/economia.schema";
 import { verifyTokenFromRequest, AuthError } from "@/lib/auth";
 import { createEconomiaService } from "@/services/economia/economia.service";
+import { created } from "@/lib/http";
 
 function zodErrorToMessage(err: ZodError) {
   return err.issues
@@ -16,39 +17,21 @@ function zodErrorToMessage(err: ZodError) {
 
 export async function POST(req: NextRequest) {
   try {
-    // 1) autenticação (opcional para dev) - tenta pegar userId do token
-    // let userId: string | null = null;
-    // try {
-    //   const payload = verifyTokenFromRequest(req); // se não tiver token pode lançar AuthError
-    //   userId = (payload as any)?.sub ?? null;
-    // } catch (authErr: any) {
-    //   // ATENÇÃO:
-    //   // Por enquanto, não exigimos token (modo dev). Em produção, mude para:
-    //   // throw authErr;
-    //   userId = null;
-    // }
-
-
-
-    // 2) parse/validação do body com Zod
     const body = await req.json();
-    const parsed = createEconomiaSchema.parse(body); // lança ZodError se inválido
+    const parsed = createEconomiaSchema.parse(body);
     
-    // 3) 
-    const valorCents = Math.round((parsed.valor ?? 0)); // garante number (não null)
+    const valorCents = Math.round(parsed.valorCents ?? 0);
 
-    // // 4) salvar via service
-    const economia = await createEconomiaService({...parsed, valorCents})
+    const economia = await createEconomiaService({
+      ...parsed,
+      valorCents,
+    });
 
-    return NextResponse.json({ status: 201 });
+    return created(economia);
   } catch (err: any) {
     if (err instanceof ZodError) {
       return NextResponse.json({ error: zodErrorToMessage(err) }, { status: 422 });
     }
-    if (err?.name === "AuthError") {
-      return NextResponse.json({ error: err.message }, { status: 401 });
-    }
-    console.error("API /economias error:", err);
     return NextResponse.json({ error: "Erro interno do servidor" }, { status: 500 });
   }
 }
