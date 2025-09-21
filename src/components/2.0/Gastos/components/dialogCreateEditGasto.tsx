@@ -1,53 +1,58 @@
-// components/economias/components/dialogCreateEditEconomia.tsx
+// components/economias/components/dialogCreateEditGasto.tsx
 "use client";
 
 import { useEffect, useState } from "react";
 import { BaseDialog } from "@/components/common/BaseDialog";
 import { CicloAtualDTO } from "@/dtos/ciclo.dto";
 import { toast } from "sonner";
-import { Economia } from "@prisma/client";
+import { Economia, Gasto, Prisma } from "@prisma/client";
 import { InputCurrency } from "../../InputCurrency";
 import { Button } from "@/components/common/Button";
+import { TipoGastoSelect } from "../../testeTipoGastoSelect";
+import { TipoGastoEnum } from "@/dtos/gasto.schema";
 
-type DialogCreateEditEconomiaProps = {
+type DialogCreateEditGastoProps = {
   showModal: boolean;
   setShowModal: (show: boolean) => void;
   cicloAtual: CicloAtualDTO | null;
   mutateCiclo: () => void; // <- novo
   isEdit: boolean;
   setIsEdit: (edit: boolean) => void;
-  economia: Economia | null;
+  gasto: Gasto | null;
 };
 
-export function DialogCreateEditEconomia({
+export function DialogCreateEditGasto({
   showModal,
   setShowModal,
   cicloAtual,
   mutateCiclo,
   isEdit,
   setIsEdit,
-  economia,
-}: DialogCreateEditEconomiaProps) {
+  gasto,
+}: DialogCreateEditGastoProps) {
   const [nome, setNome] = useState("");
   const [valor, setValor] = useState<number | null>(null); // cents
   const [confirmZero, setConfirmZero] = useState(false);
-  const [errors, setErrors] = useState<{ nome?: string }>({});
+  const [errors, setErrors] = useState<{ nome?: string, tipoGasto?: string } >({});
   const [loading, setLoading] = useState(false);
+  const [tipoGasto, setTipoGasto] = useState<TipoGastoEnum | null>(null)
 
   useEffect(() => {
-    if (isEdit && economia) {
-      setNome(economia.nome);
-      setValor(economia.valor);
+    if (isEdit && gasto) {
+      setNome(gasto.name);
+      setValor(gasto.valor);
     } else {
       setNome("");
       setValor(null);
+      setTipoGasto(null)
     }
-  }, [isEdit, economia, showModal]);
+  }, [isEdit, gasto, showModal]);
 
   function handleClose() {
     setShowModal(false);
     setNome("");
     setValor(null);
+    setTipoGasto(null)
     setConfirmZero(false);
     setErrors({});
   }
@@ -63,6 +68,12 @@ export function DialogCreateEditEconomia({
       return;
     }
 
+    console.log(tipoGasto)
+    if (!tipoGasto){
+      setErrors({ tipoGasto: "Selecione um Tipo de Gasto"})
+      return;
+    }
+
     if ((valor === null || valor === 0) && !confirmZero) {
       setConfirmZero(true);
       return;
@@ -70,9 +81,9 @@ export function DialogCreateEditEconomia({
 
     setLoading(true);
     try {
-      const body = { nome: nome.trim(), valorCents: Math.round(valor ?? 0), cicloId: cicloAtual.id };
+      const body = { nome: nome.trim(), valorCents: Math.round(valor ?? 0), cicloId: cicloAtual.id, tipoGasto: tipoGasto};
 
-      const res = await fetch("/api/economias", {
+      const res = await fetch("/api/gastos", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
@@ -84,7 +95,7 @@ export function DialogCreateEditEconomia({
         return;
       }
 
-      toast.success("Economia salva com sucesso!", {
+      toast.success("Gasto salvo com sucesso!", {
         style: {
           background: "#dcfce7", // verdinho claro
           color: "#166534", // texto verde escuro
@@ -95,60 +106,60 @@ export function DialogCreateEditEconomia({
       handleClose();
       setIsEdit(false);
     } catch (err) {
-      toast.error("Não foi possível salvar a economia");
+      toast.error("Não foi possível salvar seu gasto");
     } finally {
       setLoading(false);
     }
   }
 
-  async function handleEditar() {
-    if (!cicloAtual?.id) {
-      toast.error("Nenhum ciclo ativo selecionado.");
-      return;
-    }
+//   async function handleEditar() {
+//     if (!cicloAtual?.id) {
+//       toast.error("Nenhum ciclo ativo selecionado.");
+//       return;
+//     }
 
-    if (!nome.trim()) {
-      setErrors({ nome: "Nome é obrigatório" });
-      return;
-    }
+//     if (!nome.trim()) {
+//       setErrors({ nome: "Nome é obrigatório" });
+//       return;
+//     }
 
-    if ((valor === null || valor === 0) && !confirmZero) {
-      setConfirmZero(true);
-      return;
-    }
+//     if ((valor === null || valor === 0) && !confirmZero) {
+//       setConfirmZero(true);
+//       return;
+//     }
 
-    setLoading(true);
-    try {
-      const body = { nome: nome.trim(), valorCents: Math.round(valor ?? 0) };
+//     setLoading(true);
+//     try {
+//       const body = { nome: nome.trim(), valorCents: Math.round(valor ?? 0) };
 
-      const res = await fetch(`/api/economias/${economia?.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
+//       const res = await fetch(`/api/economias/${economia?.id}`, {
+//         method: "PATCH",
+//         headers: { "Content-Type": "application/json" },
+//         body: JSON.stringify(body),
+//       });
 
-      const data = await res.json().catch(() => null);
-      if (!res.ok) {
-        toast.error(data?.error || "Erro desconhecido");
-        return;
-      }
+//       const data = await res.json().catch(() => null);
+//       if (!res.ok) {
+//         toast.error(data?.error || "Erro desconhecido");
+//         return;
+//       }
 
-      toast.success("Economia alterada com sucesso!", {
-        style: {
-          background: "#dcfce7",
-          color: "#166534",
-        },
-      });
-      mutateCiclo();
+//       toast.success("Economia alterada com sucesso!", {
+//         style: {
+//           background: "#dcfce7",
+//           color: "#166534",
+//         },
+//       });
+//       mutateCiclo();
 
-      handleClose();
-      setIsEdit(false);
-    } catch (err) {
-      toast.error("Não foi possível editar a economia");
-    } finally {
-      setLoading(false);
-    }
-  }
+//       handleClose();
+//       setIsEdit(false);
+//     } catch (err) {
+//       toast.error("Não foi possível editar a economia");
+//     } finally {
+//       setLoading(false);
+//     }
+//   }
 
   return (
     <BaseDialog
@@ -163,7 +174,7 @@ export function DialogCreateEditEconomia({
           setShowModal(true);
         }
       }}
-      title={!isEdit ? "Nova Economia" : "Editar Economia"}
+      title={!isEdit ? "Novo Gasto" : "Editar Gasto"}
       footer={
         <>
           <Button variant="secondary" disabled={loading} 
@@ -173,7 +184,11 @@ export function DialogCreateEditEconomia({
               }}>
               Cancelar
           </Button>
-          <Button variant={confirmZero ? 'danger' : 'primary'} loading={loading} onClick={isEdit ? handleEditar : handleSalvar}>
+          <Button variant={confirmZero ? 'danger' : 'primary'} 
+            loading={loading} 
+            //   onClick={isEdit ? handleEditar : handleSalvar}
+              onClick={handleSalvar}
+            >
             Salvar
           </Button>
         </>
@@ -200,11 +215,15 @@ export function DialogCreateEditEconomia({
           onValueChange={(val) => setValor(val !== null ? Math.round(val * 100) : null)} // salva em centavos
         />
 
+        <TipoGastoSelect tipoGasto={tipoGasto} setTipoGasto={setTipoGasto} setErrors={setErrors}/>
+        {errors.tipoGasto && <span className="text-xs font-semibold text-red-600 -mt-7 -mb-2">{errors.tipoGasto}</span>}
+        
         {confirmZero && (
-          <p className="text-sm text-yellow-600">
-            ⚠️ Você tem certeza que deseja salvar uma economia sem <span className="text-base font-semibold">valor/meta?</span>
+          <p className="text-sm text-yellow-600 -mt-5 -mb-4">
+            ⚠️ Você tem certeza que deseja salvar um gasto sem <span className="text-base font-semibold">valor/meta?</span>
           </p>
         )}
+
       </div>
     </BaseDialog>
   );

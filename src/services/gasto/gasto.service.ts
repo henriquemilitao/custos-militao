@@ -1,4 +1,5 @@
 // src/services/gasto/gasto.service.ts
+import { TipoGastoEnum } from "@/dtos/gasto.schema";
 import { prisma } from "@/lib/prisma";
 
 export type GastoWithRegistrosSum = {
@@ -52,4 +53,23 @@ export async function getGastosByCicloId(cicloId: string): Promise<GastoWithRegi
     ...g,
     registrosTotal: mapaSoma.get(g.id) ?? 0,
   }));
+}
+
+export async function createGastoService(params: {
+  nome: string;
+  valorCents: number | null;
+  cicloId: string;
+  tipoGasto: TipoGastoEnum
+}) {
+  const { nome, valorCents, cicloId, tipoGasto } = params;
+
+  return prisma.gasto.create({
+    data: {
+      name: nome,
+      valor: valorCents ?? 0, // null vira 0
+      isPago: false,
+      tipo: tipoGasto,
+      cicloId,
+    },
+  });
 }
