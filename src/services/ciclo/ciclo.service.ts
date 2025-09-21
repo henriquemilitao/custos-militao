@@ -64,7 +64,7 @@ export async function getCicloAtual(userId: string | undefined): Promise<CicloAt
     })
 
     if (!ciclo) return null
-
+    
     const [somaEconomias, somaGastos, 
         somaEconomiaJaGuardada, somaGastosUnicosJaRealizados, 
         somaGastosPorMetaJaRealizados] = await Promise.all([
@@ -99,12 +99,43 @@ export async function getCicloAtual(userId: string | undefined): Promise<CicloAt
     const gastoTotalJaRealizado = gastosUnicosJaRealizados + gastosPorMetaJaRealizados
     const disponivelMes = ciclo.valorTotal - economiasJaGuardadas - gastoTotalJaRealizado
     
+    const registrosAgrupados = await prisma.registroGasto.groupBy({
+        by: ["gastoId"],
+        where: {
+            gastoId: {
+            in: (
+                await prisma.gasto.findMany({
+                where: { cicloId: ciclo.id },
+                select: { id: true }
+                })
+            ).map(g => g.id)
+            }
+        },
+        _sum: {
+            valor: true
+        }
+    })
+
+    const gastosPorMetaTotais = ciclo.gastos
+        .filter(g => g.tipo === 'goal')
+        .map(g => {
+            const registro = registrosAgrupados.find(r => r.gastoId === g.id)
+            const totalJaGasto =  registro?._sum.valor ?? 0
+            return {
+                ...g,
+                totalPlanejado: g.valor,
+                totalJaGasto,
+                totalDisponivel: g.valor - totalJaGasto
+            }
+        })
+
     return {
         ...ciclo,
         economiasMesTotal,
         gastosMesTotal,
         economiasJaGuardadas,
         gastoTotalJaRealizado,
-        disponivelMes
+        disponivelMes,
+        gastosPorMetaTotais
     }
 }

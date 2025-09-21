@@ -109,7 +109,7 @@ export default function EconomiasCard({ cicloAtual, mutateCiclo }: EconomiasCard
                     {!economia.isGuardado ?
                       <CheckCircle size={16} className="text-green-500" />
                       :
-                      <RotateCcw size={16} className="text-red-500" />
+                      <RotateCcw size={16} className="text-yellow-500" />
                     }
                     <p className="font-medium text-gray-600">{!economia.isGuardado ? 'Guardar' : 'Reverter'}</p>
                   </DropdownMenuItem>

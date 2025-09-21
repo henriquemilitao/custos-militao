@@ -1,7 +1,7 @@
 "use client";
 import TesteResumo from "@/components/2.0/testeResumo";
 import TesteEconomia from "@/components/2.0/Economia/cardEconomia";
-import TesteGastos from "@/components/2.0/testeGastos";
+import TesteGastos from "@/components/2.0/Gastos/testeGastos";
 import TesteSemanas from "@/components/2.0/testeSemanas";
 import HeaderSistema from "@/components/2.0/testeHeader";
 import { useCicloAtual } from "@/hooks/useCicloAtual";
