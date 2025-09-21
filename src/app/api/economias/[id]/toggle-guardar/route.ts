@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { guardarEconomiaService } from "@/services/economia/economia.service";
+import { toggleGuardarEconomiaService } from "@/services/economia/economia.service";
 import { badRequest, notFound, ok, serverError } from "@/lib/http";
 
 export async function PATCH(
@@ -13,7 +13,7 @@ export async function PATCH(
   }
 
   try {
-    const economia = await guardarEconomiaService(id);
+    const economia = await toggleGuardarEconomiaService(id);
 
     if (!economia) {
       return notFound();

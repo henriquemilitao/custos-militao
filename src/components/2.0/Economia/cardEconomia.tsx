@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { MoreVertical, Edit, Trash2, CheckCircle, Plus } from "lucide-react";
+import { MoreVertical, Edit, Trash2, CheckCircle, Plus, Delete, DeleteIcon, X, RotateCcw } from "lucide-react";
 import { CicloAtualDTO } from "@/dtos/ciclo.dto";
 import { formatCurrencyFromCents } from "@/lib/formatters/formatCurrency";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../ui/dropdown-menu";
@@ -21,24 +21,34 @@ export default function EconomiasCard({ cicloAtual, mutateCiclo }: EconomiasCard
   const [currentEconomia, setCurrentEconomia] = useState<Economia | null>(null)
 
   const handleGuardarEconomia = async (economia: Economia) => {
+    const acao = economia.isGuardado ? 'reverter sua ação' : 'guardar sua economia'
+
     try {
-      const res = await fetch(`/api/economias/${economia.id}/guardar`, {
+
+      const res = await fetch(`/api/economias/${economia.id}/toggle-guardar`, {
         method: "PATCH",
       });
 
+      const data = await res.json().catch(() => null);
       if (!res.ok) {
-        toast.error("Erro ao guardar sua economia");
+        toast.error(data?.error || "Erro ao atualizar economia");
+        return;
       }
 
-      toast.success("Dinheiro guardado com sucesso!", {
-        style: {
-          background: "#dcfce7", // verdinho claro
-          color: "#166534",      // texto verde escuro
-        },
-      });
-      mutateCiclo(); // 🔑 atualiza os dados no SWR
+      toast.success(
+        economia.isGuardado
+          ? "Economia revertida com sucesso!"
+          : "Dinheiro guardado com sucesso!",
+        {
+          style: economia.isGuardado
+            ? { background: "#fff7ed", color: "#92400e" } // laranja/quase warning
+            : { background: "#dcfce7", color: "#166534" }, // verdinho
+        }
+      );
+
+      mutateCiclo();
     } catch (err) {
-      toast.error("Não foi possível guardar a economia");
+      toast.error("Não foi possível atualizar a economia");
     }
   }
 
@@ -98,8 +108,12 @@ export default function EconomiasCard({ cicloAtual, mutateCiclo }: EconomiasCard
                 <DropdownMenuContent align="end" className="w-32">
                   <DropdownMenuItem
                     onClick={() => handleGuardarEconomia(economia)}>
-                    <CheckCircle size={16} className="text-green-500" />
-                    <p className="font-medium text-gray-600">Economizar</p>
+                    {!economia.isGuardado ?
+                      <CheckCircle size={16} className="text-green-500" />
+                      :
+                      <RotateCcw size={16} className="text-red-500" />
+                    }
+                    <p className="font-medium text-gray-600">{!economia.isGuardado ? 'Guardar' : 'Reverter'}</p>
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => {
                     setIsEdit(true)

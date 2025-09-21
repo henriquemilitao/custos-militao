@@ -23,7 +23,7 @@ export async function PATCH(req: NextRequest, context: { params: Promise<{ id: s
     const parsed = editEconomiaSchema.parse(body); // lança ZodError se inválido
     
     // 3) 
-    const valorCents = Math.round((parsed.valor ?? 0)); // garante number (não null)
+    const valorCents = Math.round((parsed.valorCents ?? 0)); // garante number (não null)
 
     // // 4) salvar via service
     const economia = await editEconomiaService(economiaId, {...parsed, valorCents})

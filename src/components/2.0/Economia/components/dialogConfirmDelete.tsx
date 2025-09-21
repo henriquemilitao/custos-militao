@@ -34,7 +34,8 @@ export function DialogConfirmDelete({ showModal, setShowModal, mutateCiclo, item
         return;
       }
 
-      toast.success("Item deletado com sucesso!", { style: { background: "#dcfce7", color: "#166534" } });
+      toast.success("Item deletado com sucesso!", { style: { background: "#fff7ed", color: "#92400e" }});
+
       mutateCiclo();
       setShowModal(false);
     } catch {

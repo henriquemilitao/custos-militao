@@ -34,15 +34,21 @@ export async function editEconomiaService(economiaId: string, params: {
   });
 }
 
-export async function guardarEconomiaService(economiaId: string) {
-  
+export async function toggleGuardarEconomiaService(economiaId: string) {
+  const economia = await prisma.economia.findUnique({
+    where: { id: economiaId },
+  });
+
+  console.log(economia)
+  if (!economia) return null;
+
   return prisma.economia.update({
     where: {
       id: economiaId
     },
     data: {
-      isGuardado: true,
-      dataGuardado: new Date()
+      isGuardado: !economia.isGuardado,
+      dataGuardado: economia.isGuardado ? null : new Date()
     }
   })
 }

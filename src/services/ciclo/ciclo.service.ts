@@ -7,11 +7,23 @@ export async function getCicloById(cicloId: string) {
             id: cicloId
         },
         include: {
-            economias: true,
-            gastos: true,
+            economias: {
+                orderBy: {
+                    createdAt: 'asc'
+                }
+            },
+            gastos: {
+                orderBy: {
+                    createdAt: 'asc'
+                }
+            },
             semanas: {
                 include: {
-                    registros: true
+                    registros: {
+                        orderBy: {
+                            createdAt: 'asc'
+                        }
+                    },
                 }
             }
         }
@@ -28,11 +40,23 @@ export async function getCicloAtual(userId: string | undefined): Promise<CicloAt
             dataFim: {gte: new Date()}
         },
         include: {
-            economias: true,
-            gastos: true,
+            economias: {
+                orderBy: {
+                    createdAt: 'asc'
+                }
+            },
+            gastos: {
+                orderBy: {
+                    createdAt: 'asc'
+                }
+            },
             semanas: {
                 include: {
-                    registros: true
+                    registros: {
+                        orderBy: {
+                            createdAt: 'asc'
+                        }
+                    },
                 }
             }
         }
