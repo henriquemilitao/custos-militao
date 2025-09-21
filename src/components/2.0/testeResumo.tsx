@@ -12,15 +12,17 @@ type ResumoMesCardProps = {
 
 export default function ResumoMesCard({cicloAtual}: ResumoMesCardProps) {
 
-  const economiasMesTotal = cicloAtual?.economias.reduce((acc, economia) => economia.valor + acc, 0) ?? 0
-  const gastosMesTotal = cicloAtual?.gastos?.reduce((acc, gasto) => gasto.valor + acc, 0) ?? 0
-  const valorMesTotal = cicloAtual?.valorTotal ?? 0
-  const disponivelMes = valorMesTotal - economiasMesTotal - gastosMesTotal
+  // const economiasMesTotal = cicloAtual?.economias.reduce((acc, economia) => economia.valor + acc, 0) ?? 0
+  // const gastosMesTotal = cicloAtual?.gastos?.reduce((acc, gasto) => gasto.valor + acc, 0) ?? 0
+  // const valorMesTotal = cicloAtual?.valorTotal ?? 0
+  // const disponivelMes = valorMesTotal - economiasMesTotal - gastosMesTotal
   
+
+
   const data = [
-    { name: "Gastos", value: gastosMesTotal, color: "#ef4444" },
-    { name: "Economias", value: economiasMesTotal, color: "#3b82f6" },
-    { name: "Disponível", value: disponivelMes, color: "#22c55e" },
+    { name: "Gastos", value: cicloAtual?.gastoTotalJaRealizado, color: "#ef4444" },
+    { name: "Economias", value: cicloAtual?.economiasJaGuardadas, color: "#3b82f6" },
+    { name: "Disponível", value: cicloAtual?.disponivelMes, color: "#22c55e" },
   ];
 
   return (
@@ -63,19 +65,19 @@ export default function ResumoMesCard({cicloAtual}: ResumoMesCardProps) {
         <div className="grid grid-cols-2 gap-3 text-sm mt-5">
           <div className="rounded-xl p-3 text-center bg-gray-50">
             <p className="text-gray-500">Recebido</p>
-            <p className="font-semibold text-gray-800">{formatCurrencyFromCents(valorMesTotal)}</p>
+            <p className="font-semibold text-gray-800">{formatCurrencyFromCents(cicloAtual?.valorTotal ?? 0)}</p>
           </div>
           <div className="rounded-xl p-3 text-center bg-red-50">
             <p className="text-gray-500">Gastos</p>
-            <p className="font-semibold text-red-600">{formatCurrencyFromCents(gastosMesTotal)}</p>
+            <p className="font-semibold text-red-600">{formatCurrencyFromCents(cicloAtual?.gastoTotalJaRealizado ?? 0)}</p>
           </div>
           <div className="rounded-xl p-3 text-center bg-blue-50">
             <p className="text-gray-500">Economia</p>
-            <p className="font-semibold text-blue-600">{formatCurrencyFromCents(economiasMesTotal)}</p>
+            <p className="font-semibold text-blue-600">{formatCurrencyFromCents(cicloAtual?.economiasJaGuardadas ?? 0)}</p>
           </div>
           <div className="rounded-xl p-3 text-center bg-green-50">
             <p className="text-gray-500">Disponível</p>
-            <p className="font-semibold text-green-600">{formatCurrencyFromCents(disponivelMes)}</p>
+            <p className="font-semibold text-green-600">{formatCurrencyFromCents(cicloAtual?.disponivelMes ?? 0)}</p>
           </div>
         </div>
       </div>

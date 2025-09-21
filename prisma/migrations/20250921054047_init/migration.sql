@@ -43,6 +43,7 @@ CREATE TABLE "public"."Gasto" (
     "name" TEXT NOT NULL,
     "valor" INTEGER NOT NULL,
     "tipo" "public"."TipoGasto" NOT NULL,
+    "is_pago" BOOLEAN NOT NULL,
     "data_pago" TIMESTAMP(3),
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,

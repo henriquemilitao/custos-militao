@@ -41,9 +41,10 @@ export async function getCicloAtual(userId: string | undefined): Promise<CicloAt
         },
         include: {
             economias: {
-                orderBy: {
-                    createdAt: 'asc'
-                }
+                orderBy: [
+                    { createdAt: 'asc' },
+                    { id: 'asc' } // desempate
+                ],
             },
             gastos: {
                 orderBy: {
@@ -64,24 +65,46 @@ export async function getCicloAtual(userId: string | undefined): Promise<CicloAt
 
     if (!ciclo) return null
 
-    const [somaEconomias, somaGastos] = await Promise.all([
-        prisma.economia.aggregate({
-            where: { cicloId: ciclo.id },
-            _sum: { valor: true }
-        }),
-        prisma.gasto.aggregate({
-            where: { cicloId: ciclo.id },
-            _sum: { valor: true }
-        })
-    ])
+    const [somaEconomias, somaGastos, 
+        somaEconomiaJaGuardada, somaGastosUnicosJaRealizados, 
+        somaGastosPorMetaJaRealizados] = await Promise.all([
+            prisma.economia.aggregate({
+                where: { cicloId: ciclo.id },
+                _sum: { valor: true }
+            }),
+            prisma.gasto.aggregate({
+                where: { cicloId: ciclo.id },
+                _sum: { valor: true }
+            }),
+            prisma.economia.aggregate({
+                where: { cicloId: ciclo.id, isGuardado: true },
+                _sum: { valor: true}
+            }),
+            prisma.gasto.aggregate({
+                where: { cicloId: ciclo.id, tipo: "single", isPago: true},
+                _sum: { valor: true}
+            }),
+            prisma.registroGasto.aggregate({
+                where: { gasto: { cicloId: ciclo.id }},
+                _sum: { valor: true}
+            })
+        ]
+    )
 
     const economiasMesTotal = somaEconomias._sum.valor ?? 0
     const gastosMesTotal = somaGastos._sum.valor ?? 0
+    const economiasJaGuardadas = somaEconomiaJaGuardada._sum.valor ?? 0
+    const gastosUnicosJaRealizados = somaGastosUnicosJaRealizados._sum.valor ?? 0
+    const gastosPorMetaJaRealizados = somaGastosPorMetaJaRealizados._sum.valor ?? 0
+    const gastoTotalJaRealizado = gastosUnicosJaRealizados + gastosPorMetaJaRealizados
+    const disponivelMes = ciclo.valorTotal - economiasJaGuardadas - gastoTotalJaRealizado
     
     return {
         ...ciclo,
         economiasMesTotal,
         gastosMesTotal,
-        disponivelMes: ciclo.valorTotal - economiasMesTotal - gastosMesTotal
+        economiasJaGuardadas,
+        gastoTotalJaRealizado,
+        disponivelMes
     }
 }

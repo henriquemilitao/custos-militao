@@ -50,6 +50,7 @@ model Gasto {
   name      String
   valor     Int
   tipo      TipoGasto
+  isPago    Boolean   @map("is_pago")
   dataPago  DateTime? @map("data_pago")
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime  @updatedAt @map("updated_at")

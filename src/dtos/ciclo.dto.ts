@@ -7,5 +7,7 @@ export type CicloAtualComRelacionamentos = Prisma.CicloGetPayload<{
 export type CicloAtualDTO = CicloAtualComRelacionamentos & {
     economiasMesTotal: number
     gastosMesTotal: number
+    economiasJaGuardadas: number
+    gastoTotalJaRealizado: number
     disponivelMes: number
 }

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { MoreVertical, Edit, Trash2, CheckCircle, Plus } from "lucide-react";
 import { TipoGastoSelect } from "./testeTipoGastoSelect";
+import { CicloAtualDTO } from "@/dtos/ciclo.dto";
 
 type GastoSimples = {
   id: number;
@@ -23,7 +24,13 @@ type GastoMeta = {
 
 type Gasto = GastoSimples | GastoMeta;
 
-export default function GastosCard() {
+
+type GastosCardProps = {
+  cicloAtual: CicloAtualDTO | null
+  mutateCiclo: () => void  // <- novo
+}
+
+export default function GastosCard({cicloAtual, mutateCiclo}: GastosCardProps) {
   const [showModal, setShowModal] = useState(false);
   const [showMenu, setShowMenu] = useState<number | null>(null);
 

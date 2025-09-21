@@ -21,8 +21,6 @@ export default function EconomiasCard({ cicloAtual, mutateCiclo }: EconomiasCard
   const [currentEconomia, setCurrentEconomia] = useState<Economia | null>(null)
 
   const handleGuardarEconomia = async (economia: Economia) => {
-    const acao = economia.isGuardado ? 'reverter sua ação' : 'guardar sua economia'
-
     try {
 
       const res = await fetch(`/api/economias/${economia.id}/toggle-guardar`, {

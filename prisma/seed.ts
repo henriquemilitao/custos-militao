@@ -29,9 +29,9 @@ async function main() {
   // gastos fixos/meta (3 exemplos)
   const gastos = await prisma.gasto.createMany({
     data: [
-      { name: "Academia", valor: 120, tipo: "single", cicloId: ciclo.id },
-      { name: "Streaming", valor: 50, tipo: "single", cicloId: ciclo.id },
-      { name: "Lazer", valor: 300, tipo: "goal", cicloId: ciclo.id },
+      { name: "Academia", valor: 120, tipo: "single", cicloId: ciclo.id, isPago: true },
+      { name: "Streaming", valor: 50, tipo: "single", cicloId: ciclo.id, isPago: false },
+      { name: "Lazer", valor: 300, tipo: "goal", cicloId: ciclo.id, isPago: false },
     ],
   });
 
