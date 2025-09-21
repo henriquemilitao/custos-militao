@@ -7,7 +7,7 @@ import { DialogCreateEditEconomia } from "./components/dialogCreateEditEconomia"
 import { toast } from "sonner";
 import { formatarData } from "@/lib/formatters/formatDate";
 import { Economia } from "@prisma/client";
-import { DialogConfirmDelete, TipoItemDelete } from "./components/dialogConfirmDelete";
+import { DialogConfirmDelete, TipoItemDelete } from "../../common/dialogConfirmDelete";
 
 type EconomiasCardProps = {
   cicloAtual: CicloAtualDTO | null
@@ -156,7 +156,7 @@ export default function EconomiasCard({ cicloAtual, mutateCiclo }: EconomiasCard
         }}
         mutateCiclo={mutateCiclo}
         item={currentEconomia}
-        tipoItem={TipoItemDelete.ECONOMIAS}
+        tipoItem={TipoItemDelete.GASTOS}
       />
     </div>
   );

@@ -8,6 +8,7 @@ import { TipoGastoSelect } from "../testeTipoGastoSelect";
 import { DialogCreateEditGasto } from "./components/dialogCreateEditGasto";
 import { Gasto } from "@prisma/client";
 import { toast } from "sonner";
+import { DialogConfirmDelete, TipoItemDelete } from "@/components/common/dialogConfirmDelete";
 
 type GastosCardProps = {
   cicloAtual: CicloAtualDTO | null;
@@ -16,6 +17,7 @@ type GastosCardProps = {
 
 export default function GastosCard({ cicloAtual, mutateCiclo }: GastosCardProps) {
   const [showModal, setShowModal] = useState<boolean>(false);
+  const [showConfirmDelete, setShowConfirmDelete] = useState(false)
   const [isEdit, setIsEdit] = useState<boolean>(false);
   const [currentGasto, setCurrentGasto] = useState<Gasto | null>(null);
 
@@ -188,7 +190,10 @@ export default function GastosCard({ cicloAtual, mutateCiclo }: GastosCardProps)
                         <Edit size={16} className="text-blue-500" />
                         <p className="font-medium text-gray-600">Editar</p>
                       </DropdownMenuItem>
-                      <DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => {
+                        setCurrentGasto(gasto)
+                        setShowConfirmDelete(true)
+                        }}>
                         <Trash2 size={16} className="text-red-500" />
                         <p className="font-medium text-gray-600">Excluir</p>
                       </DropdownMenuItem>
@@ -212,6 +217,18 @@ export default function GastosCard({ cicloAtual, mutateCiclo }: GastosCardProps)
         isEdit={isEdit}
         setIsEdit={setIsEdit}
         gasto={currentGasto}
+      />
+
+      {/* Modal passa mutate */}
+      <DialogConfirmDelete
+        showModal={showConfirmDelete} 
+        setShowModal={(open) => {
+          setShowConfirmDelete(open);
+          if (!open) setCurrentGasto(null); // limpa quando fechar
+        }}
+        mutateCiclo={mutateCiclo}
+        item={currentGasto}
+        tipoItem={TipoItemDelete.GASTOS}
       />
     </div>
   );

@@ -92,3 +92,10 @@ export async function togglePagarGastoService(gastoId: string) {
     }
   })
 }
+
+
+export async function deleteGastoService(gastoId: string){
+  return prisma.gasto.delete({
+    where: {id: gastoId}
+  });
+}

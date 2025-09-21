@@ -3,24 +3,29 @@
 
 import { BaseDialog } from "@/components/common/BaseDialog";
 import { Button } from "@/components/common/Button";
-import { Economia } from "@prisma/client";
+import { Economia, Gasto } from "@prisma/client";
 import { useState } from "react";
 import { toast } from "sonner";
 
 export enum TipoItemDelete  {
-  ECONOMIAS = 'economias'
+  ECONOMIAS = 'economias',
+  GASTOS = 'gastos'
 }
 
 type DialogConfirmDeleteProps = {
   showModal: boolean;
   setShowModal: (show: boolean) => void;
   mutateCiclo: () => void;
-  item: Economia | null;
+  item: Economia | Gasto | null;
   tipoItem: TipoItemDelete;
 };
 
 export function DialogConfirmDelete({ showModal, setShowModal, mutateCiclo, item, tipoItem }: DialogConfirmDeleteProps) {
   const [loading, setLoading] = useState(false);
+
+  // pega o nome certo independente do tipo
+  const itemNome = (item as Economia)?.nome ?? (item as Gasto)?.name ?? "este item";
+
 
   const handleDelete = async () => {
     if (!item?.id) return;
@@ -64,7 +69,7 @@ export function DialogConfirmDelete({ showModal, setShowModal, mutateCiclo, item
       <p className="text-sm text-gray-700">
         <span className="text-yellow-600 mr-2">⚠️</span>
         <span>Você tem certeza que deseja excluir </span>
-        <strong className="text-blue-700"> {item?.nome ?? "este item"}?</strong>
+        <strong className="text-blue-700"> {itemNome}?</strong>
       </p>
     </BaseDialog>
   );
