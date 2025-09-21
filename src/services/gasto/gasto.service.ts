@@ -73,3 +73,22 @@ export async function createGastoService(params: {
     },
   });
 }
+
+
+export async function togglePagarGastoService(gastoId: string) {
+  const gasto = await prisma.gasto.findUnique({
+    where: { id: gastoId },
+  });
+
+  if (!gasto) return null;
+
+  return prisma.gasto.update({
+    where: {
+      id: gastoId
+    },
+    data: {
+      isPago: !gasto.isPago,
+      dataPago: gasto.isPago ? null : new Date()
+    }
+  })
+}

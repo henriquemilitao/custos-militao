@@ -1,12 +1,13 @@
 // ...seus imports (mantive como estavam)
 import { useState } from "react";
-import { MoreVertical, Edit, Trash2, CheckCircle, Plus } from "lucide-react";
+import { MoreVertical, Edit, Trash2, CheckCircle, Plus, RotateCcw } from "lucide-react";
 import { CicloAtualDTO } from "@/dtos/ciclo.dto";
 import { formatarData } from "@/lib/formatters/formatDate";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { TipoGastoSelect } from "../testeTipoGastoSelect";
 import { DialogCreateEditGasto } from "./components/dialogCreateEditGasto";
 import { Gasto } from "@prisma/client";
+import { toast } from "sonner";
 
 type GastosCardProps = {
   cicloAtual: CicloAtualDTO | null;
@@ -27,6 +28,37 @@ export default function GastosCard({ cicloAtual, mutateCiclo }: GastosCardProps)
       <div className="bg-blue-500 h-2 rounded-full" style={{ width: `${percent}%` }} />
     </div>
   );
+
+  
+  const handleGuardarGasto = async (gasto: Gasto) => {
+    try {
+
+      const res = await fetch(`/api/gastos/${gasto.id}/toggle-pagar`, {
+        method: "PATCH",
+      });
+
+      const data = await res.json().catch(() => null);
+      if (!res.ok) {
+        toast.error(data?.error || "Erro ao atualizar gasto");
+        return;
+      }
+
+      toast.success(
+        gasto.isPago
+          ? "Pagamento revertido com sucesso!"
+          : "Pagamento efetuado com sucesso!",
+        {
+          style: gasto.isPago
+            ? { background: "#fff7ed", color: "#92400e" } // laranja/quase warning
+            : { background: "#dcfce7", color: "#166534" }, // verdinho
+        }
+      );
+
+      mutateCiclo();
+    } catch (err) {
+      toast.error("Não foi possível atualizar a gasto");
+    }
+  }
 
   return (
     <div className="p-4 max-w-sm mx-auto">
@@ -137,13 +169,22 @@ export default function GastosCard({ cicloAtual, mutateCiclo }: GastosCardProps)
                       </button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-32">
-                      {gasto.tipo === "single" && !gasto.isPago && (
-                        <DropdownMenuItem>
-                          <CheckCircle size={16} className="text-green-500" />
-                          <p className="font-medium text-gray-600">Pagar</p>
+                      {gasto.tipo === "single" && (
+                        <DropdownMenuItem
+                          onClick={() => handleGuardarGasto(gasto)}
+                        >
+                          {!gasto.isPago ?
+                            <CheckCircle size={16} className="text-green-500" />
+                            :
+                            <RotateCcw size={16} className="text-yellow-500" />
+                          }                          
+                          <p className="font-medium text-gray-600">{!gasto.isPago ? 'Pagar' : 'Reverter'}</p>
                         </DropdownMenuItem>
                       )}
-                      <DropdownMenuItem onClick={() => { setIsEdit(true); setCurrentGasto(gasto); setShowModal(true); }}>
+                      <DropdownMenuItem onClick={() => { 
+                        setIsEdit(true); 
+                        setCurrentGasto(gasto); setShowModal(true); 
+                        }}>
                         <Edit size={16} className="text-blue-500" />
                         <p className="font-medium text-gray-600">Editar</p>
                       </DropdownMenuItem>
