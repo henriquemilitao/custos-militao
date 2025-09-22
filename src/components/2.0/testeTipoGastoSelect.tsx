@@ -1,30 +1,54 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { CreditCard, BarChart } from "lucide-react";
-import { TipoGastoEnum } from "@/dtos/gasto.schema";
+import { Gasto, TipoGasto } from "@prisma/client";
 
 type TipoGastoSelectProps = {
-  tipoGasto: TipoGastoEnum | null
-  setTipoGasto: (tipo: TipoGastoEnum) => void
-  setErrors: (tipo: {nome?: string, tipoGasto?: string}) => void
-}
+  tipoGasto: TipoGasto | null;
+  setTipoGasto: (tipo: TipoGasto | null) => void;
+  setErrors: (tipo: { nome?: string; tipoGasto?: string }) => void;
+  isEdit: boolean;
+  gasto: Gasto | null;
+};
 
-export function TipoGastoSelect({tipoGasto, setTipoGasto, setErrors}: TipoGastoSelectProps) {
-  const [selected, setSelected] = useState<string | null>(null);
+export function TipoGastoSelect({
+  tipoGasto,
+  setTipoGasto,
+  setErrors,
+  isEdit,
+  gasto,
+}: TipoGastoSelectProps) {
+  const [selected, setSelected] = useState<TipoGasto | null>(null);
+
+  // Quando abrir modal em edição, seta tanto selected quanto tipoGasto
+  useEffect(() => {
+    if (isEdit && gasto) {
+      setSelected(gasto.tipo);
+      setTipoGasto(gasto.tipo);
+    } else {
+      setSelected(null);
+      setTipoGasto(null);
+    }
+  }, [isEdit, gasto, setTipoGasto]);
+
+  // Mantém o selected sincronizado com a prop tipoGasto
+  useEffect(() => {
+    setSelected(tipoGasto);
+  }, [tipoGasto]);
 
   const options = [
     {
-      value: TipoGastoEnum.SINGLE,
+      value: TipoGasto.single,
       title: "Gasto Fixo",
       desc: "Pago uma única vez por mês (ex.: aluguel, internet).",
-      icon: <CreditCard className="w-5 h-5" />
+      icon: <CreditCard className="w-5 h-5" />,
     },
     {
-      value: TipoGastoEnum.GOAL,
+      value: TipoGasto.goal,
       title: "Gasto com Meta",
       desc: "Pago várias vezes ao longo do mês (ex.: mercado, combustível).",
-      icon: <BarChart className="w-5 h-5" />
-    }
+      icon: <BarChart className="w-5 h-5" />,
+    },
   ];
 
   return (
@@ -35,12 +59,14 @@ export function TipoGastoSelect({tipoGasto, setTipoGasto, setErrors}: TipoGastoS
           <Card
             key={opt.value}
             onClick={() => {
-              setSelected(opt.value)
-              setTipoGasto(opt.value)
-              setErrors({})
+              setSelected(opt.value);
+              setTipoGasto(opt.value);
+              setErrors({});
             }}
-            className={`cursor-pointer transition-all  ${
-              selected === opt.value ? "border-blue-500 shadow-lg bg-blue-50" : "hover:border-blue-400"
+            className={`cursor-pointer transition-all ${
+              selected === opt.value
+                ? "border-blue-500 shadow-lg bg-blue-50"
+                : "hover:border-blue-400"
             }`}
           >
             <CardContent className="flex flex-col gap-2 p-4 py-0">

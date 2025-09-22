@@ -185,7 +185,8 @@ export default function GastosCard({ cicloAtual, mutateCiclo }: GastosCardProps)
                       )}
                       <DropdownMenuItem onClick={() => { 
                         setIsEdit(true); 
-                        setCurrentGasto(gasto); setShowModal(true); 
+                        setCurrentGasto(gasto); 
+                        setShowModal(true); 
                         }}>
                         <Edit size={16} className="text-blue-500" />
                         <p className="font-medium text-gray-600">Editar</p>

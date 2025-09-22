@@ -1,6 +1,6 @@
 // src/services/gasto/gasto.service.ts
-import { TipoGastoEnum } from "@/dtos/gasto.schema";
 import { prisma } from "@/lib/prisma";
+import { TipoGasto } from "@prisma/client";
 
 export type GastoWithRegistrosSum = {
   id: string;
@@ -59,7 +59,7 @@ export async function createGastoService(params: {
   nome: string;
   valorCents: number | null;
   cicloId: string;
-  tipoGasto: TipoGastoEnum
+  tipoGasto: TipoGasto
 }) {
   const { nome, valorCents, cicloId, tipoGasto } = params;
 
@@ -73,6 +73,73 @@ export async function createGastoService(params: {
     },
   });
 }
+
+
+export async function editGastoService(
+  gastoId: string,
+  params: { name: string; valorCents: number | null; tipoGasto: TipoGasto }
+) {
+  const { name, valorCents, tipoGasto } = params;
+
+  const gasto = await prisma.gasto.findUnique({ where: { id: gastoId } });
+  if (!gasto) return null;
+
+  // Caso específico: único pago -> recorrente
+  if (gasto.tipo === TipoGasto.single && tipoGasto === TipoGasto.goal && gasto.isPago) {
+    await prisma.$transaction([
+      prisma.registroGasto.create({
+        data: {
+          name: gasto.name,
+          gastoId: gasto.id,
+          valor: gasto.valor,
+          data: gasto.dataPago ?? new Date(),
+          semanaId: 'e88d8ed1-aafc-470a-b0f8-d7dc6c5ac217' //ALTERAR ESSA MERDA DEPOIS PQP
+           //ALTERAR ESSA MERDA DEPOIS PQP
+            //ALTERAR ESSA MERDA DEPOIS PQP
+             //ALTERAR ESSA MERDA DEPOIS PQP
+              //ALTERAR ESSA MERDA DEPOIS PQP
+               //ALTERAR ESSA MERDA DEPOIS PQP
+                //ALTERAR ESSA MERDA DEPOIS PQP
+                 //ALTERAR ESSA MERDA DEPOIS PQP
+                  //ALTERAR ESSA MERDA DEPOIS PQP
+                   //ALTERAR ESSA MERDA DEPOIS PQP
+                    //ALTERAR ESSA MERDA DEPOIS PQP
+                     //ALTERAR ESSA MERDA DEPOIS PQP
+                      //ALTERAR ESSA MERDA DEPOIS PQP
+        },
+      }),
+      prisma.gasto.update({
+        where: { id: gastoId },
+        data: {
+          name,
+          valor: valorCents ?? 0,
+          tipo: tipoGasto,
+          isPago: false,
+          dataPago: null,
+        },
+      }),
+    ]);
+
+    return { 
+      ...gasto, 
+      valor: valorCents,
+      tipo: tipoGasto,
+      isPago: false,
+      dataPago: null
+    };
+  }
+
+  // Demais casos normais
+  return prisma.gasto.update({
+    where: { id: gastoId },
+    data: {
+      name,
+      valor: valorCents ?? 0,
+      tipo: tipoGasto,
+    },
+  });
+}
+
 
 
 export async function togglePagarGastoService(gastoId: string) {
@@ -92,7 +159,6 @@ export async function togglePagarGastoService(gastoId: string) {
     }
   })
 }
-
 
 export async function deleteGastoService(gastoId: string){
   return prisma.gasto.delete({
