@@ -74,7 +74,6 @@ export async function createGastoService(params: {
   });
 }
 
-
 export async function editGastoService(
   gastoId: string,
   params: { name: string; valorCents: number | null; tipoGasto: TipoGasto }
@@ -140,8 +139,6 @@ export async function editGastoService(
   });
 }
 
-
-
 export async function togglePagarGastoService(gastoId: string) {
   const gasto = await prisma.gasto.findUnique({
     where: { id: gastoId },
@@ -161,6 +158,20 @@ export async function togglePagarGastoService(gastoId: string) {
 }
 
 export async function deleteGastoService(gastoId: string){
+  const gasto = await prisma.gasto.findUnique({
+    where: { id: gastoId},
+    select: { tipo: true }
+  })
+  
+  if (!gasto) throw new Error("Gasto não encontrado");
+
+  if (gasto.tipo === "goal") {
+    // deleta registros relacionados primeiro
+    await prisma.registroGasto.deleteMany({
+      where: { gastoId }
+    });
+  }
+
   return prisma.gasto.delete({
     where: {id: gastoId}
   });

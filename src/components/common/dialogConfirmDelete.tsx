@@ -3,7 +3,7 @@
 
 import { BaseDialog } from "@/components/common/BaseDialog";
 import { Button } from "@/components/common/Button";
-import { Economia, Gasto } from "@prisma/client";
+import { Economia, Gasto, TipoGasto } from "@prisma/client";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -54,10 +54,14 @@ export function DialogConfirmDelete({ showModal, setShowModal, mutateCiclo, item
     <BaseDialog
       open={showModal}
       onOpenChange={(open) => setShowModal(open)}
-      title="Confirmação"
+      title="Confirmação de Exclusão"
       footer={
         <>
-          <Button variant="secondary" onClick={() => setShowModal(false)} disabled={loading}>
+          <Button
+            variant="secondary"
+            onClick={() => setShowModal(false)}
+            disabled={loading}
+          >
             Cancelar
           </Button>
           <Button variant="danger" loading={loading} onClick={handleDelete}>
@@ -66,11 +70,22 @@ export function DialogConfirmDelete({ showModal, setShowModal, mutateCiclo, item
         </>
       }
     >
-      <p className="text-sm text-gray-700">
-        <span className="text-yellow-600 mr-2">⚠️</span>
-        <span>Você tem certeza que deseja excluir </span>
-        <strong className="text-blue-700"> {itemNome}?</strong>
-      </p>
+      <div className="space-y-3">
+        <p className="text-gray-700 text-sm leading-relaxed">
+          <span className="text-yellow-500 mr-2">⚠️</span>
+          Tem certeza que deseja excluir{" "}
+          <strong className="text-blue-600">{itemNome}</strong>?
+        </p>
+
+        {tipoItem === TipoItemDelete.GASTOS &&
+          (item as Gasto)?.tipo === TipoGasto.goal && (
+            <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-sm text-red-700">
+              <strong>⚠ Atenção:</strong> Todos os registros relacionados a este
+              gasto também serão <span className="font-semibold">DELETADOS</span>.
+            </div>
+          )}
+      </div>
     </BaseDialog>
+
   );
 }

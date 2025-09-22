@@ -1,5 +1,6 @@
 import { CicloAtualDTO } from "@/dtos/ciclo.dto";
 import { prisma } from "@/lib/prisma";
+import { TipoGasto } from "@prisma/client";
 
 export async function getCicloById(cicloId: string) { 
     const ciclo = await prisma.ciclo.findUnique({ 
@@ -36,8 +37,8 @@ export async function getCicloAtual(userId: string | undefined): Promise<CicloAt
     const ciclo = await prisma.ciclo.findFirst({
         where: {
             userId: userId,
-            dataInicio: {lte: new Date()},
-            dataFim: {gte: new Date()}
+            dataInicio: { lte: new Date() },
+            dataFim: { gte: new Date() }
         },
         include: {
             economias: {
@@ -47,9 +48,11 @@ export async function getCicloAtual(userId: string | undefined): Promise<CicloAt
                 ],
             },
             gastos: {
-                orderBy: {
-                    createdAt: 'asc'
-                }
+                orderBy: [
+                    { tipo: 'asc' },       // primeiro "unique", depois "goal"
+                    { createdAt: 'asc' },  // dentro de cada tipo, pela ordem de criação
+                    { id: 'asc' }          // desempate
+                ]
             },
             semanas: {
                 include: {
@@ -61,7 +64,7 @@ export async function getCicloAtual(userId: string | undefined): Promise<CicloAt
                 }
             }
         }
-    })
+    });
 
     if (!ciclo) return null
     
@@ -98,6 +101,23 @@ export async function getCicloAtual(userId: string | undefined): Promise<CicloAt
     const gastosPorMetaJaRealizados = somaGastosPorMetaJaRealizados._sum.valor ?? 0
     const gastoTotalJaRealizado = gastosUnicosJaRealizados + gastosPorMetaJaRealizados
     const disponivelMes = ciclo.valorTotal - economiasJaGuardadas - gastoTotalJaRealizado
+    
+    // // Sempre criar a sobra do mes por padrão
+    // const sobra = await prisma.gasto.findFirst({
+    //     where: { cicloId: ciclo.id, isSobra: true }
+    // })
+
+    // if (!sobra) {
+    //     await prisma.gasto.create({
+    //         data: {
+    //         name: "Sobra do mês",
+    //         valor: ciclo.valorTotal - economiasMesTotal - gastosMesTotal,
+    //         tipo: TipoGasto.goal,
+    //         isSobra: true,
+    //         cicloId: ciclo.id
+    //         }
+    //     })
+    // }
     
     const registrosAgrupados = await prisma.registroGasto.groupBy({
         by: ["gastoId"],
