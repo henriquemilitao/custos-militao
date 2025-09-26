@@ -86,6 +86,8 @@ export default function ControleSemanal({ cicloAtual, mutateCiclo }: ControleSem
       };
     });
 
+    const registros = semana.registros
+
     return {
       id: semana.id,
       label: `Semana ${semana.qualSemanaCiclo}`,
@@ -93,19 +95,10 @@ export default function ControleSemanal({ cicloAtual, mutateCiclo }: ControleSem
       valorGasto,
       valorTotal, // global (todas metas somadas)
       gastosMeta, // detalhe por meta
+      registros // registros dos gastos dessa semana
     };
   }) || [];
 
-
-  // const tipoGastos = cicloAtual?.gastos.filter(g => g.tipo === TipoGasto.goal).map(gasto => {
-  //   console.log(gasto)
-  //   cicloAtual.semanas
-  //   return {
-  //     gasto
-  //   }
-
-  // })
-  console.log(tipoGastos)
   // Pega objeto da semana escolhida
   const semanaAtual = semanas.find((s) => s.id === semanaSelecionada) || null;
 
@@ -127,7 +120,7 @@ export default function ControleSemanal({ cicloAtual, mutateCiclo }: ControleSem
 
 
   // Mock de listagem por data
-  const gastosPorData = {
+  const gastosPorData2 = {
     "12/09/2025": [
       { nome: "Supermercado", valor: 80 },
       { nome: "Uber", valor: 25 },
@@ -138,6 +131,21 @@ export default function ControleSemanal({ cicloAtual, mutateCiclo }: ControleSem
       { nome: "Lanche", valor: 22 },
     ],
   };
+
+  // Gera os gastos agrupados por data a partir da semana atual
+  const gastosPorData = semanaAtual
+    ? semanaAtual?.registros.reduce((acc: Record<string, { nome: string; valor: number }[]>, reg) => {
+        const dataFormatada = format(new Date(reg.data), "dd/MM/yyyy", { locale: ptBR })
+        if (!acc[dataFormatada]) {
+          acc[dataFormatada] = []
+        }
+        acc[dataFormatada].push({
+          nome: reg.name,
+          valor: reg.valor / 100, // 👈 se valor está salvo em centavos
+        })
+        return acc
+      }, {})
+    : {}
 
   // Helpers de data
   const hoje = new Date();
