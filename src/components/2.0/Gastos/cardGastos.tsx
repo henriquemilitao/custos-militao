@@ -2,9 +2,8 @@
 import { useState } from "react";
 import { MoreVertical, Edit, Trash2, CheckCircle, Plus, RotateCcw } from "lucide-react";
 import { CicloAtualDTO } from "@/dtos/ciclo.dto";
-import { formatarData } from "@/lib/formatters/formatDate";
+import { formatDateShort } from "@/lib/formatters/formatDate";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { TipoGastoSelect } from "../testeTipoGastoSelect";
 import { DialogCreateEditGasto } from "./components/dialogCreateEditGasto";
 import { Gasto } from "@prisma/client";
 import { toast } from "sonner";
@@ -133,7 +132,7 @@ export default function GastosCard({ cicloAtual, mutateCiclo }: GastosCardProps)
                       <>
                         <p className="text-sm text-gray-500">Valor: R$ {(gasto.valor / 100).toFixed(2)}</p>
                         {gasto.isPago && gasto.dataPago && (
-                          <p className="text-xs text-gray-400">Pago em {formatarData(gasto.dataPago)}</p>
+                          <p className="text-xs text-gray-400">Pago em {formatDateShort(gasto.dataPago)}</p>
                         )}
                       </>
                     )}

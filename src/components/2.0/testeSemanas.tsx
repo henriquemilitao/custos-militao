@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -15,14 +15,65 @@ import { Progress } from "@/components/ui/progress";
 import { Plus, CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { CicloAtualDTO } from "@/dtos/ciclo.dto";
+import { formatPeriodoDayMonth } from "@/lib/formatters/formatDate";
+import { TipoGasto } from "@prisma/client";
 
-export default function ControleSemanal() {
+type ControleSemanalProps = {
+  cicloAtual: CicloAtualDTO | null;
+  mutateCiclo: () => void;
+};
+
+export default function ControleSemanal({ cicloAtual, mutateCiclo }: ControleSemanalProps) {
   const [open, setOpen] = useState(false);
   const [data, setData] = useState<Date | null>(new Date());
+  const [semanaSelecionada, setSemanaSelecionada] = useState<string>("");
 
-  // Mock de semanas
-  const semanas = ["Semana 1", "Semana 2", "Semana 3"];
-  const [semanaSelecionada, setSemanaSelecionada] = useState(semanas[0]);
+  // soma total dos gastos "goal" planejados
+  const totalGoals = cicloAtual?.gastosPorMetaTotais?.
+    reduce((acc, gasto) => acc + gasto.totalPlanejado, 0) ?? 0;
+
+
+  // transforma semanas do ciclo em options
+  const semanas = cicloAtual?.semanas.map((semana, index) => {
+    // soma tudo que foi gasto nesta semana
+    const valorGasto = semana.registros?.reduce((acc, gasto) => acc + gasto.valor, 0) ?? 0;
+
+    // soma do que já foi gasto até a semana anterior
+    const gastoAnterior = cicloAtual.semanas
+      .slice(0, index) // só semanas antes da atual
+      .flatMap((s) => s.registros || [])
+      .reduce((acc, gasto) => acc + gasto.valor, 0);
+
+    // semanas restantes (inclui a atual)
+    const semanasRestantes = cicloAtual.semanas.length - index;
+
+    // valor disponível = (totalGoals - gastoAnterior) / semanasRestantes
+    const valorTotal = semanasRestantes > 0
+      ? Math.floor((totalGoals - gastoAnterior) / semanasRestantes)
+      : 0;
+
+    return {
+      id: semana.id,
+      label: `Semana ${semana.qualSemanaCiclo}`,
+      periodo: formatPeriodoDayMonth(semana.dataInicio, semana.dataFim),
+      valorGasto,
+      valorTotal
+    };
+  }) || [];
+
+  const tipoGastos = cicloAtual?.gastos.filter(g => g.tipo === TipoGasto.goal)
+
+  // Pega objeto da semana escolhida
+  const semanaAtual = semanas.find((s) => s.id === semanaSelecionada) || null;
+
+  // Define default quando carrega
+  useEffect(() => {
+    if (semanas.length > 0 && !semanaSelecionada) {
+      setSemanaSelecionada(semanas[0].id);
+    }
+  }, [semanas, semanaSelecionada]);
+
 
   // Mock de gastos por meta
   const gastosMeta = [
@@ -30,6 +81,8 @@ export default function ControleSemanal() {
     { nome: "Futebol", gasto: 100, total: 150 },
     { nome: "Aleatórios", gasto: 120, total: 300 },
   ];
+
+
 
   // Mock de listagem por data
   const gastosPorData = {
@@ -61,16 +114,16 @@ export default function ControleSemanal() {
         <div className="flex justify-between items-center mb-4">
           <div>
             <h2 className="text-lg font-semibold text-gray-800">Controle Semanal</h2>
-            <p className="text-xs text-gray-500">01/09 - 07/09</p>
+            <p className="text-xs text-gray-500">{semanaAtual?.periodo}</p>
           </div>
           <select
             value={semanaSelecionada}
             onChange={(e) => setSemanaSelecionada(e.target.value)}
             className="border rounded-lg px-2 py-1 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            {semanas.map((sem, idx) => (
-              <option key={idx} value={sem}>
-                {sem}
+            {semanas.map((sem) => (
+              <option key={sem.id} value={sem.id}>
+                {sem.label}
               </option>
             ))}
           </select>
@@ -80,21 +133,21 @@ export default function ControleSemanal() {
         <div className="grid grid-cols-3 gap-2 text-center mb-6">
           <div>
             <p className="text-sm text-gray-500">Total Semana</p>
-            <p className="text-sm font-medium">R$ 157,50</p>
+            <p className="text-sm font-medium">{semanaAtual && `R$ ${(semanaAtual?.valorTotal / 100).toFixed(2)}`}</p>
           </div>
           <div>
             <p className="text-sm text-gray-500">Gasto</p>
-            <p className="text-sm font-medium text-red-500">R$ 0,00</p>
+            <p className="text-sm font-medium text-red-500">{semanaAtual && `R$ ${(semanaAtual?.valorGasto / 100).toFixed(2)}`}</p>
           </div>
           <div>
             <p className="text-sm text-gray-500">Disponível</p>
-            <p className="text-sm font-medium text-green-600">R$ 157,50</p>
+            <p className="text-sm font-medium text-green-600">{semanaAtual && `R$ ${((semanaAtual?.valorTotal - semanaAtual?.valorGasto) / 100).toFixed(2)}`}</p>
+                                                              
           </div>
         </div>
 
         {/* Gastos por Meta */}
         <div className="space-y-3 mb-7">
-          {/* <p className="text-sm font-medium text-gray-700">Gastos por Meta</p> */}
           {gastosMeta.map((item, idx) => {
             const porcentagem = (item.gasto / item.total) * 100;
             return (
@@ -105,10 +158,7 @@ export default function ControleSemanal() {
                     R$ {item.gasto} / {item.total}
                   </span>
                 </div>
-                <Progress
-                  value={porcentagem}
-                  className="h-2 [&>div]:bg-blue-500"
-                />
+                <Progress value={porcentagem} className="h-2 [&>div]:bg-blue-500" />
               </div>
             );
           })}
@@ -134,7 +184,7 @@ export default function ControleSemanal() {
           ))}
         </div>
 
-        {/* Botão de adicionar gasto no final */}
+        {/* Botão de adicionar gasto */}
         <div className="mt-4">
           <Button
             onClick={() => setOpen(true)}
@@ -205,14 +255,13 @@ export default function ControleSemanal() {
                       onSelect={(d) => d && setData(d)}
                       locale={ptBR}
                       initialFocus
-                      // showOutsideDays={false}
                     />
                   </PopoverContent>
                 </Popover>
               </div>
             </div>
 
-            {/* Categoria - agora usando gastos por meta */}
+            {/* Categoria (mock) */}
             <div className="space-y-1">
               <label className="text-base text-neutral-700">Categoria</label>
               <div className="grid grid-cols-2 gap-2">

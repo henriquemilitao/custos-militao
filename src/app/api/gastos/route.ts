@@ -33,6 +33,7 @@ export async function POST(req: NextRequest) {
 
     return created(gasto);
   } catch (err: any) {
+    console.log(zodErrorToMessage(err))
     if (err instanceof ZodError) {
       return NextResponse.json({ error: zodErrorToMessage(err) }, { status: 422 });
     }

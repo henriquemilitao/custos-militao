@@ -2,7 +2,7 @@
 
 import { CicloAtualDTO } from "@/dtos/ciclo.dto";
 import { formatCurrencyFromCents } from "@/lib/formatters/formatCurrency";
-import { formatDateToDayMonth } from "@/lib/formatters/formatDateToDayMonth";
+import { formatDateDayMonth, formatPeriodoDayMonth } from "@/lib/formatters/formatDate";
 import { Ciclo } from "@prisma/client";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, PieLabelRenderProps } from "recharts";
 
@@ -34,7 +34,7 @@ export default function ResumoMesCard({cicloAtual}: ResumoMesCardProps) {
             Resumo do Mês 
             
           </h2>
-          <p className="text-sm text-gray-500 mb-2">{cicloAtual && `${formatDateToDayMonth(cicloAtual?.dataInicio)} - ${formatDateToDayMonth(cicloAtual?.dataFim)}`}</p>
+          <p className="text-sm text-gray-500 mb-2">{cicloAtual && `${formatPeriodoDayMonth(cicloAtual?.dataInicio, cicloAtual?.dataFim)}`}</p>
         </div>
 
         {/* Gráfico */}

@@ -80,7 +80,7 @@ export default function Page() {
       <TesteResumo cicloAtual={cicloAtual}/>
       <TesteEconomia cicloAtual={cicloAtual} mutateCiclo={mutateCiclo}/>
       <TesteGastos cicloAtual={cicloAtual} mutateCiclo={mutateCiclo}/>
-      <TesteSemanas />
+      <TesteSemanas cicloAtual={cicloAtual} mutateCiclo={mutateCiclo}/>
     </main>
   );
 }

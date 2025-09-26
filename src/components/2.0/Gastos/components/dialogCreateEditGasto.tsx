@@ -11,7 +11,7 @@ import { Button } from "@/components/common/Button";
 import { TipoGastoSelect } from "../../testeTipoGastoSelect";
 import { DialogBlockTipoChange } from "./dialogBlockTipoChange";
 import { DialogAvisoMigracaoTipoChange } from "./dialogAvisoMigracaoTipoChange";
-import { formatarData } from "@/lib/formatters/formatDate";
+import { formatDateShort } from "@/lib/formatters/formatDate";
 
 type DialogCreateEditGastoProps = {
   showModal: boolean;
@@ -88,7 +88,7 @@ export function DialogCreateEditGasto({
 
     setLoading(true);
     try {
-      const body = { name: name.trim(), valorCents: Math.round(valor ?? 0), cicloId: cicloAtual.id, tipoGasto: tipoGasto};
+      const body = { nome: name.trim(), valorCents: Math.round(valor ?? 0), cicloId: cicloAtual.id, tipoGasto: tipoGasto};
 
       const res = await fetch("/api/gastos", {
         method: "POST",
@@ -270,7 +270,7 @@ export function DialogCreateEditGasto({
           setShowAvisoMigracaoModal(false);
           handleEditar();
         }}
-        dataPago={gasto?.dataPago ? formatarData(gasto?.dataPago) : undefined}
+        dataPago={gasto?.dataPago ? formatDateShort(gasto?.dataPago) : undefined}
       />
     </BaseDialog>
   );

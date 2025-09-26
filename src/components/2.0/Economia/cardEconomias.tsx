@@ -5,7 +5,7 @@ import { formatCurrencyFromCents } from "@/lib/formatters/formatCurrency";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../ui/dropdown-menu";
 import { DialogCreateEditEconomia } from "./components/dialogCreateEditEconomia";
 import { toast } from "sonner";
-import { formatarData } from "@/lib/formatters/formatDate";
+import { formatDateShort } from "@/lib/formatters/formatDate";
 import { Economia } from "@prisma/client";
 import { DialogConfirmDelete, TipoItemDelete } from "../../common/dialogConfirmDelete";
 
@@ -91,7 +91,7 @@ export default function EconomiasCard({ cicloAtual, mutateCiclo }: EconomiasCard
                 </p>
                 {economia.isGuardado && economia.dataGuardado && (
                   <p className="text-xs text-gray-400">
-                    Guardado em {formatarData(economia.dataGuardado)}
+                    Guardado em {formatDateShort(economia.dataGuardado)}
                   </p>
                 )}
               </div>
