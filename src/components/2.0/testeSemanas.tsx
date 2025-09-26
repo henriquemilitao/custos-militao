@@ -18,6 +18,7 @@ import { ptBR } from "date-fns/locale";
 import { CicloAtualDTO } from "@/dtos/ciclo.dto";
 import { formatPeriodoDayMonth } from "@/lib/formatters/formatDate";
 import { TipoGasto } from "@prisma/client";
+import { formatCurrencyFromCents } from "@/lib/formatters/formatCurrency";
 
 type ControleSemanalProps = {
   cicloAtual: CicloAtualDTO | null;
@@ -141,7 +142,7 @@ export default function ControleSemanal({ cicloAtual, mutateCiclo }: ControleSem
         }
         acc[dataFormatada].push({
           nome: reg.name,
-          valor: reg.valor / 100, // 👈 se valor está salvo em centavos
+          valor: reg.valor,
         })
         return acc
       }, {})
@@ -183,15 +184,21 @@ export default function ControleSemanal({ cicloAtual, mutateCiclo }: ControleSem
         <div className="grid grid-cols-3 gap-2 text-center mb-6">
           <div>
             <p className="text-sm text-gray-500">Total Semana</p>
-            <p className="text-sm font-medium">{semanaAtual && `R$ ${(semanaAtual?.valorTotal / 100).toFixed(2)}`}</p>
+            <p className="text-sm font-medium">
+              {semanaAtual && formatCurrencyFromCents(semanaAtual?.valorTotal)}
+            </p>
           </div>
           <div>
             <p className="text-sm text-gray-500">Gasto</p>
-            <p className="text-sm font-medium text-red-500">{semanaAtual && `R$ ${(semanaAtual?.valorGasto / 100).toFixed(2)}`}</p>
+            <p className="text-sm font-medium text-red-500">
+              {semanaAtual && formatCurrencyFromCents(semanaAtual?.valorGasto)}
+            </p>
           </div>
           <div>
             <p className="text-sm text-gray-500">Disponível</p>
-            <p className="text-sm font-medium text-green-600">{semanaAtual && `R$ ${((semanaAtual?.valorTotal - semanaAtual?.valorGasto) / 100).toFixed(2)}`}</p>
+            <p className="text-sm font-medium text-green-600">
+              {semanaAtual && formatCurrencyFromCents(semanaAtual?.valorTotal - semanaAtual?.valorGasto)}
+            </p>
                                                               
           </div>
         </div>
@@ -205,7 +212,7 @@ export default function ControleSemanal({ cicloAtual, mutateCiclo }: ControleSem
                 <div className="flex justify-between text-xs text-gray-600">
                   <span>{item.nome}</span>
                   <span>
-                    {`R$ ${(item.gastoNaSemana / 100).toFixed(1)} / R$ ${(item.totalPlanejado / 100).toFixed(2)}`}
+                    {formatCurrencyFromCents(item.gastoNaSemana)} / {formatCurrencyFromCents(item.totalPlanejado)}
                   </span>
                 </div>
                 <Progress value={porcentagem} className="h-2 [&>div]:bg-blue-500" />
@@ -226,7 +233,7 @@ export default function ControleSemanal({ cicloAtual, mutateCiclo }: ControleSem
                     className="flex justify-between text-sm text-gray-600 border-b last:border-0 py-1"
                   >
                     <span>- {g.nome}</span>
-                    <span>R$ {g.valor.toFixed(2)}</span>
+                    <span>{formatCurrencyFromCents(g.valor)}</span>
                   </li>
                 ))}
               </ul>
@@ -235,7 +242,7 @@ export default function ControleSemanal({ cicloAtual, mutateCiclo }: ControleSem
         </div>
 
         {/* Botão de adicionar gasto */}
-        <div className="mt-4">
+        <div className="mt-10">
           <Button
             onClick={() => setOpen(true)}
             className="w-full rounded-xl bg-blue-500 text-white shadow hover:bg-blue-600 active:scale-95 transition"

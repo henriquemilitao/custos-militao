@@ -8,6 +8,7 @@ import { DialogCreateEditGasto } from "./components/dialogCreateEditGasto";
 import { Gasto } from "@prisma/client";
 import { toast } from "sonner";
 import { DialogConfirmDelete, TipoItemDelete } from "@/components/common/dialogConfirmDelete";
+import { formatCurrencyFromCents } from "@/lib/formatters/formatCurrency";
 
 type GastosCardProps = {
   cicloAtual: CicloAtualDTO | null;
@@ -130,7 +131,7 @@ export default function GastosCard({ cicloAtual, mutateCiclo }: GastosCardProps)
 
                     {gasto.tipo === "single" && (
                       <>
-                        <p className="text-sm text-gray-500">Valor: R$ {(gasto.valor / 100).toFixed(2)}</p>
+                        <p className="text-sm text-gray-500">Valor: {formatCurrencyFromCents(gasto.valor)}</p>
                         {gasto.isPago && gasto.dataPago && (
                           <p className="text-xs text-gray-400">Pago em {formatDateShort(gasto.dataPago)}</p>
                         )}
@@ -140,18 +141,18 @@ export default function GastosCard({ cicloAtual, mutateCiclo }: GastosCardProps)
                     {gasto.tipo === "goal" && (
                       <div className="mt-2 space-y-1 text-sm">
                         <p className="text-gray-500">
-                          Meta: <span className="font-medium">R$ {(metaCents / 100).toFixed(2)}</span>
+                          Meta: <span className="font-medium">{formatCurrencyFromCents(metaCents)}</span>
                         </p>
                         <p className="text-gray-500">
                           Já gastei:{" "}
                           <span className="font-medium text-red-500">
-                            R$ {(jaGastoCents / 100).toFixed(2)}
+                            {formatCurrencyFromCents(jaGastoCents)}
                           </span>
                         </p>
                         <p className="text-gray-500">
                           Disponível:{" "}
                           <span className="font-medium text-green-600">
-                            R$ {(disponivelCents / 100).toFixed(2)}
+                            {formatCurrencyFromCents(disponivelCents)}
                           </span>
                         </p>
                         <ProgressBar percent={percentBar} />
