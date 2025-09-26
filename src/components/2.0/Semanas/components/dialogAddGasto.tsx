@@ -8,11 +8,13 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Button as Button2 } from "@/components/common/Button";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { CalendarIcon } from "lucide-react";
 import { ptBR } from "date-fns/locale";
 import { format } from "date-fns";
+import { InputCurrency } from "../../InputCurrency";
 
 type Props = {
   open: boolean;
@@ -52,9 +54,7 @@ export function DialogAddGasto({ open, setOpen, data, setData }: Props) {
           <div className="flex gap-3">
             <div className="flex-1 space-y-1">
               <label className="text-base text-neutral-700">Valor</label>
-              <input
-                type="number"
-                inputMode="decimal"
+              <InputCurrency
                 placeholder="R$ 0,00"
                 className="block w-full border rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
@@ -64,10 +64,11 @@ export function DialogAddGasto({ open, setOpen, data, setData }: Props) {
               <label className="text-base text-neutral-700">Data</label>
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-full justify-start rounded-xl">
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {data ? (
-                      data.toDateString() === hoje.toDateString()
+                  <Button variant="outline" className="px-3 py-2 w-full justify-start rounded-xl h-[42px]">
+                    <CalendarIcon className="mr-2 h-4 w-4" color= "black"/>
+                    <span className="text-black-600 font-semibold">
+                      {data ? (
+                        data.toDateString() === hoje.toDateString()
                         ? "Hoje"
                         : data.toDateString() === ontem.toDateString()
                         ? "Ontem"
@@ -76,9 +77,10 @@ export function DialogAddGasto({ open, setOpen, data, setData }: Props) {
                         : data.toDateString() === amanha.toDateString()
                         ? "Amanhã"
                         : format(data, "dd/MM/yyyy", { locale: ptBR })
-                    ) : (
-                      <span>Escolha</span>
-                    )}
+                      ) : (
+                        <span>Escolha</span>
+                      )}
+                    </span>
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0">
@@ -107,12 +109,12 @@ export function DialogAddGasto({ open, setOpen, data, setData }: Props) {
         </div>
 
         <DialogFooter className="mt-4 flex flex-row justify-end gap-2">
-          <Button variant="outline" className="px-3 py-1 rounded-xl border" onClick={() => setOpen(false)}>
+          <Button2 variant="secondary" className="px-3 py-1 rounded-xl border" onClick={() => setOpen(false)}>
             Cancelar
-          </Button>
-          <Button className="px-4 py-2 rounded-xl bg-blue-500 text-white shadow hover:bg-blue-600 active:scale-95 transition">
+          </Button2>
+          <Button2 className="px-4 py-2 rounded-xl bg-blue-500 text-white shadow hover:bg-blue-600 active:scale-95 transition">
             Salvar
-          </Button>
+          </Button2>
         </DialogFooter>
       </DialogContent>
     </Dialog>
