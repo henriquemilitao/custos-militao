@@ -23,7 +23,6 @@ type ControleSemanalProps = {
 
 export default function ControleSemanal({ cicloAtual, mutateCiclo }: ControleSemanalProps) {
   const [open, setOpen] = useState(false);
-  const [data, setData] = useState<Date | null>(new Date());
   const [semanaSelecionada, setSemanaSelecionada] = useState<string>("");
 
   const totalGoals =
@@ -122,7 +121,13 @@ export default function ControleSemanal({ cicloAtual, mutateCiclo }: ControleSem
         </div>
       </div>
 
-      <DialogAddGasto open={open} setOpen={setOpen} data={data} setData={setData} />
+      <DialogAddGasto
+        open={open}
+        setOpen={setOpen}
+        metas={semanaAtual?.gastosMeta || []}
+        mutateCiclo={mutateCiclo}
+        semanaAtual={semanaAtual}
+      />
     </div>
   );
 }
