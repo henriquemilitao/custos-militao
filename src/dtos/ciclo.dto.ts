@@ -7,6 +7,7 @@ export type CicloAtualComRelacionamentos = Prisma.CicloGetPayload<{
 // DTO específico pros gastos por meta enriquecidos
 export type GastoPorMetaDTO = {
   id: string
+  name: string
   valor: number
   tipo: string
   isPago: boolean

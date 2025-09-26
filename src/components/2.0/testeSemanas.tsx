@@ -33,13 +33,14 @@ export default function ControleSemanal({ cicloAtual, mutateCiclo }: ControleSem
   const totalGoals = cicloAtual?.gastosPorMetaTotais?.
     reduce((acc, gasto) => acc + gasto.totalPlanejado, 0) ?? 0;
 
+  const tipoGastos = cicloAtual?.gastos.filter(g => g.tipo === TipoGasto.goal)
 
   // transforma semanas do ciclo em options
   const semanas = cicloAtual?.semanas.map((semana, index) => {
     // soma tudo que foi gasto nesta semana
     const valorGasto = semana.registros?.reduce((acc, gasto) => acc + gasto.valor, 0) ?? 0;
-
-    // soma do que já foi gasto até a semana anterior
+    
+    // soma do que já foi gasto até a semana anterior (global)
     const gastoAnterior = cicloAtual.semanas
       .slice(0, index) // só semanas antes da atual
       .flatMap((s) => s.registros || [])
@@ -48,22 +49,63 @@ export default function ControleSemanal({ cicloAtual, mutateCiclo }: ControleSem
     // semanas restantes (inclui a atual)
     const semanasRestantes = cicloAtual.semanas.length - index;
 
-    // valor disponível = (totalGoals - gastoAnterior) / semanasRestantes
+    // valor disponível (global)
     const valorTotal = semanasRestantes > 0
       ? Math.floor((totalGoals - gastoAnterior) / semanasRestantes)
       : 0;
+
+    // gastos por meta desta semana
+    const gastosMeta = cicloAtual.gastosPorMetaTotais.map((meta) => {
+      // quanto já foi gasto com essa meta nas semanas anteriores
+      const gastoAnteriorMeta = cicloAtual.semanas
+        .slice(0, index)
+        .flatMap((s) => s.registros || [])
+        .filter((r) => r.gastoId === meta.id)
+        .reduce((acc, r) => acc + r.valor, 0);
+
+      // quanto foi gasto nesta semana com essa meta
+      const gastoNaSemana = (semana.registros || [])
+        .filter((r) => r.gastoId === meta.id)
+        .reduce((acc, r) => acc + r.valor, 0);
+
+      // semanas restantes (para essa meta)
+      const semanasRestantesMeta = cicloAtual.semanas.length - index;
+
+      // valor disponível para essa meta nesta semana
+      const valorDisponivelMeta = semanasRestantesMeta > 0
+        ? Math.floor((meta.totalPlanejado - gastoAnteriorMeta) / semanasRestantesMeta)
+        : 0;
+
+      return {
+        id: meta.id,
+        nome: meta.name,
+        totalPlanejado: meta.totalPlanejado,
+        gastoNaSemana,
+        gastoAnteriorMeta,
+        valorDisponivelMeta,
+      };
+    });
 
     return {
       id: semana.id,
       label: `Semana ${semana.qualSemanaCiclo}`,
       periodo: formatPeriodoDayMonth(semana.dataInicio, semana.dataFim),
       valorGasto,
-      valorTotal
+      valorTotal, // global (todas metas somadas)
+      gastosMeta, // detalhe por meta
     };
   }) || [];
 
-  const tipoGastos = cicloAtual?.gastos.filter(g => g.tipo === TipoGasto.goal)
 
+  // const tipoGastos = cicloAtual?.gastos.filter(g => g.tipo === TipoGasto.goal).map(gasto => {
+  //   console.log(gasto)
+  //   cicloAtual.semanas
+  //   return {
+  //     gasto
+  //   }
+
+  // })
+  console.log(tipoGastos)
   // Pega objeto da semana escolhida
   const semanaAtual = semanas.find((s) => s.id === semanaSelecionada) || null;
 
@@ -148,14 +190,14 @@ export default function ControleSemanal({ cicloAtual, mutateCiclo }: ControleSem
 
         {/* Gastos por Meta */}
         <div className="space-y-3 mb-7">
-          {gastosMeta.map((item, idx) => {
-            const porcentagem = (item.gasto / item.total) * 100;
+          {semanaAtual?.gastosMeta.map((item, idx) => {
+            const porcentagem = (item.gastoNaSemana / item.totalPlanejado) * 100;
             return (
               <div key={idx} className="space-y-1">
                 <div className="flex justify-between text-xs text-gray-600">
                   <span>{item.nome}</span>
                   <span>
-                    R$ {item.gasto} / {item.total}
+                    {`R$ ${(item.gastoNaSemana / 100).toFixed(1)} / R$ ${(item.totalPlanejado / 100).toFixed(2)}`}
                   </span>
                 </div>
                 <Progress value={porcentagem} className="h-2 [&>div]:bg-blue-500" />
