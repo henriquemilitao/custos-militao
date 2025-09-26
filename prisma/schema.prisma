@@ -17,32 +17,33 @@ model User {
 }
 
 model Ciclo {
-  id         String      @id @default(uuid())
-  dataInicio DateTime    @map("data_inicio")
-  dataFim    DateTime    @map("data_fim")
-  valorTotal Int      @map("valor_total")
-  createdAt  DateTime    @default(now()) @map("created_at")
-  updatedAt  DateTime    @updatedAt @map("updated_at")
+  id                String   @id @default(uuid())
+  dataInicio        DateTime @map("data_inicio")
+  dataFim           DateTime @map("data_fim")
+  valorTotal        Int      @map("valor_total")
+  quantidadeSemanas Int      @map("quantidade_semanas")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
 
-  userId     String
-  user       User        @relation(fields: [userId], references: [id])
+  userId  String
+  user    User      @relation(fields: [userId], references: [id])
 
-  economias  Economia[]
-  gastos     Gasto[]
-  semanas    Semana[]
+  economias Economia[]
+  gastos    Gasto[]
+  semanas   Semana[]
 }
 
 model Economia {
-  id        String   @id @default(uuid())
-  nome      String
-  valor     Int
+  id           String   @id @default(uuid())
+  nome         String
+  valor        Int
   isGuardado   Boolean   @map("is_guardado")
   dataGuardado DateTime? @map("data_guardado")
-  createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime  @updatedAt @map("updated_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
 
-  cicloId   String
-  ciclo     Ciclo     @relation(fields: [cicloId], references: [id])
+  cicloId String
+  ciclo   Ciclo   @relation(fields: [cicloId], references: [id])
 }
 
 model Gasto {
@@ -69,19 +70,18 @@ model RegistroGasto {
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime  @updatedAt @map("updated_at")
 
-  gastoId   String
-  gasto     Gasto    @relation(fields: [gastoId], references: [id])
+  gastoId  String
+  gasto    Gasto   @relation(fields: [gastoId], references: [id])
 
-  semanaId  String
-  semana    Semana   @relation(fields: [semanaId], references: [id])
+  semanaId String
+  semana   Semana  @relation(fields: [semanaId], references: [id])
 }
 
 model Semana {
   id             String   @id @default(uuid())
-  qualSemanaCiclo Int     @map("qual_semana_ciclo")
+  qualSemanaCiclo Int     @map("qual_semana_ciclo") // Ex: 1, 2, 3...
   dataInicio     DateTime @map("data_inicio")
   dataFim        DateTime @map("data_fim")
-  gastos         Int
   createdAt      DateTime @default(now()) @map("created_at")
   updatedAt      DateTime @updatedAt @map("updated_at")
 
@@ -89,6 +89,8 @@ model Semana {
   ciclo   Ciclo   @relation(fields: [cicloId], references: [id])
 
   registros RegistroGasto[]
+
+  @@unique([cicloId, qualSemanaCiclo]) // garante que não exista semana duplicada no mesmo ciclo
 }
 
 enum TipoGasto {

@@ -16,6 +16,7 @@ CREATE TABLE "public"."Ciclo" (
     "data_inicio" TIMESTAMP(3) NOT NULL,
     "data_fim" TIMESTAMP(3) NOT NULL,
     "valor_total" INTEGER NOT NULL,
+    "quantidade_semanas" INTEGER NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
     "userId" TEXT NOT NULL,
@@ -72,13 +73,15 @@ CREATE TABLE "public"."Semana" (
     "qual_semana_ciclo" INTEGER NOT NULL,
     "data_inicio" TIMESTAMP(3) NOT NULL,
     "data_fim" TIMESTAMP(3) NOT NULL,
-    "gastos" INTEGER NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
     "cicloId" TEXT NOT NULL,
 
     CONSTRAINT "Semana_pkey" PRIMARY KEY ("id")
 );
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Semana_cicloId_qual_semana_ciclo_key" ON "public"."Semana"("cicloId", "qual_semana_ciclo");
 
 -- AddForeignKey
 ALTER TABLE "public"."Ciclo" ADD CONSTRAINT "Ciclo_userId_fkey" FOREIGN KEY ("userId") REFERENCES "public"."User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
