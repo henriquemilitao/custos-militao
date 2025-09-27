@@ -184,6 +184,7 @@ export default function ControleSemanal({ cicloAtual, mutateCiclo }: ControleSem
           setIsEdit={setIsEdit}
           mutateCiclo={mutateCiclo} 
           setCurrentGasto={setCurrentGasto}
+          currentGasto={currentGasto}
         />
       </div>
 

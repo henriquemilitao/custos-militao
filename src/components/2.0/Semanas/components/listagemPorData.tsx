@@ -5,6 +5,7 @@ import ProgressBar from "@/components/ui/progress-bar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { CicloAtualDTO } from "@/dtos/ciclo.dto";
 import { useState } from "react";
+import { DialogConfirmDelete, TipoItemDelete } from "@/components/common/dialogConfirmDelete";
 
 type Gasto = { id: string; name: string; valor: number; data: Date; gastoId: string };
 type GastosPorCategoria = Record<
@@ -26,6 +27,7 @@ type GastosPorCategoriaProps = {
   isEdit: boolean;
   setIsEdit: (edit: boolean) => void;
   setCurrentGasto: (gasto: { id: string; name: string; valor: number; data: Date; gastoId: string } | null) => void;
+  currentGasto: { id: string; name: string; valor: number; data: Date; gastoId: string } | null;
 };
 
 export function ListagemPorCategoria({
@@ -37,7 +39,10 @@ export function ListagemPorCategoria({
   isEdit,
   setIsEdit,
   setCurrentGasto,
+  currentGasto
 }: GastosPorCategoriaProps) {
+
+  const [showConfirmDelete, setShowConfirmDelete] = useState(false)
 
   return (
     <div className={`space-y-8 ${Object.entries(gastosPorCategoria).length === 0 ? "mb-4" : "mb-11"}`}>
@@ -113,8 +118,14 @@ export function ListagemPorCategoria({
                                   <p className="font-medium text-gray-600">Editar</p>
                                 </DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => {
-                                  // setCurrentGasto(gasto)
-                                  // setShowConfirmDelete(true)
+                                  setCurrentGasto({
+                                      id: g.id,
+                                      name: g.name,
+                                      valor: g.valor,
+                                      data: g.data,
+                                      gastoId: g.gastoId,
+                                    });
+                                  setShowConfirmDelete(true)
                                   }}>
                                   <Trash2 size={16} className="text-red-500" />
                                   <p className="font-medium text-gray-600">Excluir</p>
@@ -132,6 +143,19 @@ export function ListagemPorCategoria({
           );
         }
       )}
+
+      
+      {/* Modal passa mutate */}
+      <DialogConfirmDelete
+        showModal={showConfirmDelete} 
+        setShowModal={(open) => {
+          setShowConfirmDelete(open);
+          if (!open) setCurrentGasto(null); // limpa quando fechar
+        }}
+        mutateCiclo={mutateCiclo}
+        item={currentGasto}
+        tipoItem={TipoItemDelete.REGISTROS}
+      />
     </div>
   );
 }

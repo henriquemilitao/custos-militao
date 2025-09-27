@@ -9,18 +9,20 @@ import { toast } from "sonner";
 
 export enum TipoItemDelete  {
   ECONOMIAS = 'economias',
-  GASTOS = 'gastos'
+  GASTOS = 'gastos',
+  REGISTROS = 'registros'
 }
 
 type DialogConfirmDeleteProps = {
   showModal: boolean;
   setShowModal: (show: boolean) => void;
   mutateCiclo: () => void;
-  item: Economia | Gasto | null;
+  item: Economia | Gasto | { id: string; name: string; valor: number; data: Date; gastoId: string } | null;
   tipoItem: TipoItemDelete;
 };
 
 export function DialogConfirmDelete({ showModal, setShowModal, mutateCiclo, item, tipoItem }: DialogConfirmDeleteProps) {
+  console.log('aaaaa')
   const [loading, setLoading] = useState(false);
 
   // pega o nome certo independente do tipo

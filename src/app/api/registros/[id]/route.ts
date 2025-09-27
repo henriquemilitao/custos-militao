@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ZodError } from "zod";
 import { editRegistroGastoSchema } from "@/dtos/registroGasto.schema";
-import { editRegistroGastoService } from "@/services/registroGasto/registroGasto.service";
+import { deleteRegistroGastoService, editRegistroGastoService } from "@/services/registroGasto/registroGasto.service";
+import { notFound, ok } from "@/lib/http";
 
 export async function PATCH(req: NextRequest, context: { params: Promise<{ id: string}>} ) {
   try {
@@ -31,4 +32,17 @@ export async function PATCH(req: NextRequest, context: { params: Promise<{ id: s
     }
     return NextResponse.json({ error: "Erro interno do servidor" }, { status: 500 });
   }
+}
+
+
+export async function DELETE(req: NextRequest, context: { params: Promise<{ id: string}>}) {
+  const registroId = (await context.params).id
+
+  const registro = await deleteRegistroGastoService(registroId)
+
+  if (!registro) {
+    return notFound()
+  }
+
+  return ok(registro)
 }
