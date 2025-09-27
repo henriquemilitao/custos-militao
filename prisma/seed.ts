@@ -1,26 +1,32 @@
-const { PrismaClient } = require("@prisma/client");
+import { PrismaClient } from "@prisma/client";
+import { startOfDay } from "date-fns";
 
 const prisma = new PrismaClient();
+
+function normalize(date: string | Date): Date {
+  return startOfDay(new Date(date));
+}
 
 async function main() {
   // 1 usuário
   const user = await prisma.user.create({
-    id: '978dbd3e-ff8c-4344-90af-0be8e53a9346',
-    data: {},
+    data: {
+      id: "978dbd3e-ff8c-4344-90af-0be8e53a9346",
+    },
   });
 
   // 1 ciclo
   const ciclo = await prisma.ciclo.create({
     data: {
-      dataInicio: new Date("2025-09-01"),
-      dataFim: new Date("2025-09-30"),
+      dataInicio: normalize("2025-09-01"),
+      dataFim: normalize("2025-09-30"),
       valorTotal: 1000,
       quantidadeSemanas: 4, // ✅ obrigatório agora
       userId: user.id,
     },
   });
 
-  // economias (2 exemplos)
+  // economias
   await prisma.economia.createMany({
     data: [
       { nome: "Reserva de emergência", valor: 200, isGuardado: false, cicloId: ciclo.id },
@@ -28,7 +34,7 @@ async function main() {
     ],
   });
 
-  // gastos (criando individualmente para pegar IDs)
+  // gastos
   const academia = await prisma.gasto.create({
     data: {
       name: "Academia",
@@ -59,12 +65,12 @@ async function main() {
     },
   });
 
-  // semanas (2 exemplos)
+  // semanas
   const semana1 = await prisma.semana.create({
     data: {
       qualSemanaCiclo: 1,
-      dataInicio: new Date("2025-09-01"),
-      dataFim: new Date("2025-09-07"),
+      dataInicio: normalize("2025-09-01"),
+      dataFim: normalize("2025-09-07"),
       cicloId: ciclo.id,
     },
   });
@@ -72,26 +78,26 @@ async function main() {
   const semana2 = await prisma.semana.create({
     data: {
       qualSemanaCiclo: 2,
-      dataInicio: new Date("2025-09-08"),
-      dataFim: new Date("2025-09-14"),
+      dataInicio: normalize("2025-09-08"),
+      dataFim: normalize("2025-09-14"),
       cicloId: ciclo.id,
     },
   });
 
-  // registros de gastos (semana 1, vinculados ao gasto "Lazer")
+  // registros de gastos
   await prisma.registroGasto.createMany({
     data: [
       {
         name: "Pizza",
         valor: 80,
-        data: new Date("2025-09-03"),
+        data: normalize("2025-09-03"),
         semanaId: semana1.id,
         gastoId: lazer.id,
       },
       {
         name: "Cinema",
         valor: 50,
-        data: new Date("2025-09-05"),
+        data: normalize("2025-09-05"),
         semanaId: semana1.id,
         gastoId: lazer.id,
       },

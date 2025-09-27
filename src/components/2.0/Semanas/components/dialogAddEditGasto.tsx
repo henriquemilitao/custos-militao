@@ -9,7 +9,7 @@ import { CalendarIcon } from "lucide-react";
 import { ptBR } from "date-fns/locale";
 import { format } from "date-fns";
 import { InputCurrency } from "../../InputCurrency";
-import { createRegistroGastoSchema } from "@/dtos/registroGasto.schema";
+import { CreateRegistroGastoDTO, createRegistroGastoSchema, EditRegistroGastoDTO, editRegistroGastoSchema } from "@/dtos/registroGasto.schema";
 import { toast } from "sonner";
 import { BaseDialog } from "@/components/common/BaseDialog";
 import { CicloAtualDTO } from "@/dtos/ciclo.dto";
@@ -63,7 +63,8 @@ export function DialogAddEditGasto({
   const [gastoId, setGastoId] = useState<string | null>(null);
   const [errors, setErrors] = useState<{ name?: string; valorCents?: string; data?: string; gastoId?: string; semanaId?: string }>({});
   const [loading, setLoading] = useState(false);
-
+  const [confirmCategoria, setConfirmCategoria] = useState(false);
+  
   const [showConfirm, setShowConfirm] = useState<{ message: string; body: any } | null>(null);
   const [openCalendar, setOpenCalendar] = useState(false);
 
@@ -100,19 +101,25 @@ export function DialogAddEditGasto({
     valorCents: "Digite um valor",
   };
 
-  async function handleSalvar() {
-    setLoading(true);
+ 
+  async function handleSalvarOuEditar() {
+    if (!semanaAtual?.id && !isEdit) {
+      toast.error("Nenhuma semana ativa selecionada.");
+      return;
+    }
+
     setErrors({});
 
-    const body = {
+    const payload = {
       name: formatarName(name.trim()),
-      valorCents: valor,
+      valorCents: valor ?? null,
       data,
       gastoId: gastoId ?? "",
       semanaId: semanaAtual?.id ?? "",
     };
 
-    const parsed = createRegistroGastoSchema.safeParse(body);
+    const schema = isEdit ? editRegistroGastoSchema : createRegistroGastoSchema;
+    const parsed = schema.safeParse(payload);
 
     if (!parsed.success) {
       const fieldErrors: Record<string, string> = {};
@@ -121,47 +128,116 @@ export function DialogAddEditGasto({
         fieldErrors[path] = errorMessages[path] ?? issue.message;
       });
       setErrors(fieldErrors);
-      setLoading(false);
       return;
     }
 
+    // Confirma alteração de categoria no modo edição
+    if (isEdit && currentGasto?.gastoId && currentGasto.gastoId !== parsed.data.gastoId && !confirmCategoria) {
+      setConfirmCategoria(true);
+      return;
+    }
+
+    if (isEdit) {
+      await handleEditar(parsed.data as EditRegistroGastoDTO);
+    } else {
+      await handleCriar(parsed.data as CreateRegistroGastoDTO);
+    }
+  }
+
+  async function handleCriar(data: CreateRegistroGastoDTO) {
+    setLoading(true);
     try {
-      const res = await fetch(isEdit && currentGasto ? `/api/registros/${currentGasto.id}` : "/api/registros", {
-        method: isEdit ? "PUT" : "POST",
+      const res = await fetch("/api/registros", {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(parsed.data),
+        body: JSON.stringify(data),
       });
 
-      const dataRes = await res.json().catch(() => null);
+      const json = await res.json().catch(() => null);
 
       if (!res.ok) {
-        if (dataRes?.type === "fora-ciclo") {
+        if (json?.type === "fora-ciclo") {
           toast("A data escolhida não pertence ao ciclo atual.", {
-            description: `Defina uma data entre ${formatPeriodoDayMonth(cicloAtual?.dataInicio, cicloAtual?.dataFim)}.`,
+            description: `Defina uma data entre 
+            ${formatPeriodoDayMonth(cicloAtual?.dataInicio, cicloAtual?.dataFim)}.`,
             style: { background: "#fee2e2", color: "#b91c1c" },
           });
-        } else if (dataRes?.type === "fora-semana") {
-          setShowConfirm({ message: dataRes.error, body: { ...parsed.data, permission: true } });
+        } else if (json?.type === "fora-semana") {
+          setShowConfirm({
+            message: json.error,
+            body: { ...data, permission: true },
+          });
         } else {
-          toast.error(dataRes?.error || "Erro ao salvar gasto");
+          toast.error(json?.error || "Erro ao salvar gasto");
         }
-        setLoading(false);
         return;
       }
 
-      toast.success(isEdit ? "Gasto atualizado com sucesso!" : "Gasto adicionado com sucesso!", {
+      toast.success("Registro salvo com sucesso!", {
         style: { background: "#dcfce7", color: "#166534" },
       });
 
       mutateCiclo();
       handleClose();
-    } catch (error) {
-      console.error(error);
-      toast.error("Erro inesperado ao salvar gasto");
+    } catch (err: any) {
+      toast.error(err.message || "Erro inesperado");
     } finally {
       setLoading(false);
     }
   }
+
+
+  async function handleEditar(data: EditRegistroGastoDTO) {
+    if (!currentGasto?.id) {
+      toast.error("Registro inválido para edição.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/registros/${currentGasto.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+
+      const json = await res.json().catch(() => null);
+
+      if (!res.ok) {
+        console.log({ json, res, jsonType: json.type });
+        if (json?.type === "fora-ciclo") {
+          toast("A data escolhida não pertence ao ciclo atual.", {
+            description: `Defina uma data entre 
+            ${formatPeriodoDayMonth(cicloAtual?.dataInicio, cicloAtual?.dataFim)}.`,
+            style: { background: "#fee2e2", color: "#b91c1c" },
+          });
+        } else if (json?.type === "fora-semana") {
+          console.log('oiiiiiiZ')
+          setShowConfirm({
+            message: json.error,
+            body: { ...data, permission: true },
+          });
+        } else {
+          toast.error(json?.error || "Erro ao editar gasto");
+        }
+        return;
+      }
+
+      toast.success("Registro alterado com sucesso!", {
+        style: { background: "#dcfce7", color: "#166534" },
+      });
+
+      mutateCiclo();
+      handleClose();
+    } catch (err: any) {
+      toast.error(err.message || "Erro inesperado");
+    } finally {
+      setLoading(false);
+      setConfirmCategoria(false);
+    }
+  }
+
+
 
   return (
     <BaseDialog
@@ -176,7 +252,7 @@ export function DialogAddEditGasto({
           <Button variant="secondary" disabled={loading} onClick={handleClose}>
             Cancelar
           </Button>
-          <Button variant="primary" loading={loading} onClick={handleSalvar}>
+          <Button variant={confirmCategoria ? 'danger' : 'primary'} loading={loading} onClick={handleSalvarOuEditar}>
             {isEdit ? "Atualizar" : "Salvar"}
           </Button>
         </>
@@ -225,7 +301,7 @@ export function DialogAddEditGasto({
                 mode="single"
                 selected={data!}
                 onSelect={(d) => {
-                  setTimeout(() => setOpenCalendar(false), 200);
+                  setTimeout(() => setOpenCalendar(false), 100);
                   d && setData(d);
                 }}
                 locale={ptBR}
@@ -249,6 +325,7 @@ export function DialogAddEditGasto({
             <button
               key={opt.id}
               onClick={() => {
+                setConfirmCategoria(false);
                 setGastoId(opt.id);
               }}
               className={`border rounded-xl p-3 hover:border-blue-400 text-sm text-left ${
@@ -262,6 +339,89 @@ export function DialogAddEditGasto({
         </div>
       </div>
       <div className="-mt-3">{errors.gastoId && <span className="text-xs text-red-600 mt-1">{errors.gastoId}</span>}</div>
+      {/* Confirmar mudança de categoria */}
+      {confirmCategoria && (
+        <p className="text-sm text-yellow-600 -mt-2">
+          ⚠️ Você está alterando o{" "}
+          <span className="text-base font-semibold">tipo</span> deste gasto.
+          Tem certeza que deseja continuar?
+        </p>
+      )}
+
+      {showConfirm && (
+        <BaseDialog
+          open={true}
+          onOpenChange={() => setShowConfirm(null)}
+          title="Data de outra semana"
+          footer={
+            <>
+              <Button variant="secondary" onClick={() => setShowConfirm(null)}>
+                Cancelar
+              </Button>
+              <Button
+                variant="primary"
+                onClick={async () => {
+                  if (isEdit) {
+
+                    const res = await fetch(`/api/registros/${currentGasto?.id}`, {
+                      method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(showConfirm.body),
+                  });
+                  if (res.ok) {
+                    toast.success(`Gasto adicionado com sucesso na semana do dia ${formatDateDayMonth(data)}`, {
+                      style: { background: "#dcfce7", color: "#166534" },
+                    });
+                    mutateCiclo();
+                    handleClose();
+                  } else {
+                    toast.error("Erro ao adicionar gasto");
+                  }
+                  setShowConfirm(null);
+              } else {
+                const res = await fetch("/api/registros", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(showConfirm.body),
+                  });
+                  if (res.ok) {
+                    toast.success(`Gasto adicionado com sucesso na semana do dia ${formatDateDayMonth(data)}`, {
+                      style: { background: "#dcfce7", color: "#166534" },
+                    });
+                    mutateCiclo();
+                    handleClose();
+                  } else {
+                    toast.error("Erro ao adicionar gasto");
+                  }
+                  setShowConfirm(null);
+                }}}
+              >
+                Continuar
+                </Button>
+            </>
+          }
+        >
+          <div className="space-y-3">
+            {/* Destaque em vermelho/amarelo */}
+            <div className="p-3 rounded-lg bg-yellow-50 border border-yellow-300 text-sm text-yellow-800 flex items-start gap-2">
+              <span className="text-yellow-600 text-lg">⚠️</span>
+              <div>
+                <p className="font-semibold">Atenção!</p>
+                <p>{showConfirm.message}</p>
+              </div>
+            </div>
+
+            <p className="text-sm text-gray-700 leading-relaxed">
+              Se você confirmar, o gasto será automaticamente adicionado{" "}
+              <strong className="text-blue-600">na semana correspondente ao dia
+                <strong className="text-blue-800 text-sm">
+                 {''} {formatDateDayMonth(data)}
+                </strong>
+              </strong>.
+            </p>
+          </div>
+        </BaseDialog>
+      )}
     </BaseDialog>
   );
 }

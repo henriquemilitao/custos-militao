@@ -1,17 +1,21 @@
 // services/registroGasto/registroGasto.service.ts
 import { prisma } from "@/lib/prisma";
 import { CreateRegistroGastoDTO, EditRegistroGastoDTO } from "@/dtos/registroGasto.schema";
+import { startOfDay } from "date-fns";
 
 type ServiceResult<T> =
   | { ok: true; data: T }
   | { ok: false; message: string; type: "fora-ciclo" | "fora-semana" };
+
+function normalize(d: Date) {
+  return startOfDay(new Date(d));
+}
 
 export async function createRegistroGastoService(
   params: CreateRegistroGastoDTO
 ): Promise<ServiceResult<any>> {
   const { name, valorCents, data, gastoId, semanaId, permission } = params;
 
-  // carrega a semana junto com o ciclo
   const semana = await prisma.semana.findUnique({
     where: { id: semanaId },
     include: { ciclo: true },
@@ -21,11 +25,15 @@ export async function createRegistroGastoService(
     return { ok: false, message: "Semana não encontrada.", type: "fora-semana" };
   }
 
-  const dataInicioCiclo = new Date(semana.ciclo.dataInicio);
-  const dataFimCiclo = new Date(semana.ciclo.dataFim);
+  // 🔹 Normaliza datas
+  const dataNorm = normalize(data);
+  const inicioCiclo = normalize(semana.ciclo.dataInicio);
+  const fimCiclo = normalize(semana.ciclo.dataFim);
+  const inicioSemana = normalize(semana.dataInicio);
+  const fimSemana = normalize(semana.dataFim);
 
-  // 1. Verifica se a data pertence ao ciclo
-  if (data < dataInicioCiclo || data > dataFimCiclo) {
+  // 1. Verifica se pertence ao ciclo
+  if (dataNorm < inicioCiclo || dataNorm > fimCiclo) {
     return {
       ok: false,
       message: "A data escolhida não pertence ao ciclo atual.",
@@ -33,26 +41,23 @@ export async function createRegistroGastoService(
     };
   }
 
-  // 2. Verifica se a data pertence à semana enviada
-  const dataInicioSemana = new Date(semana.dataInicio);
-  const dataFimSemana = new Date(semana.dataFim);
-
-  if (data < dataInicioSemana || data > dataFimSemana) {
+  // 2. Verifica se pertence à semana
+  if (dataNorm < inicioSemana || dataNorm > fimSemana) {
     if (!permission) {
       return {
         ok: false,
         message: "A data selecionada não pertence à essa semana.",
         type: "fora-semana",
       };
-    } 
+    }
   }
 
-  // Se a data não pertence à semana enviada, tenta encontrar a semana correta
+  // 3. Localiza semana correta
   const semanaCorreta = await prisma.semana.findFirst({
     where: {
-      cicloId: semana.cicloId, // garante que está no ciclo atual
-      dataInicio: { lte: data },
-      dataFim: { gte: data },
+      cicloId: semana.cicloId,
+      dataInicio: { lte: dataNorm },
+      dataFim: { gte: dataNorm },
     },
   });
 
@@ -64,13 +69,12 @@ export async function createRegistroGastoService(
     };
   }
 
-
-  // 3. Tudo ok → cria registro
+  // 4. Cria registro
   const registro = await prisma.registroGasto.create({
     data: {
       name,
       valor: valorCents ?? 0,
-      data,
+      data: dataNorm,
       gastoId,
       semanaId: semanaCorreta.id || semanaId,
     },
@@ -103,10 +107,14 @@ export async function editRegistroGastoService(
     return { ok: false, message: "Semana não encontrada.", type: "fora-semana" };
   }
 
-  const dataInicioCiclo = new Date(semana.ciclo.dataInicio);
-  const dataFimCiclo = new Date(semana.ciclo.dataFim);
+  // 🔹 Normaliza datas
+  const dataNorm = normalize(data);
+  const inicioCiclo = normalize(semana.ciclo.dataInicio);
+  const fimCiclo = normalize(semana.ciclo.dataFim);
+  const inicioSemana = normalize(semana.dataInicio);
+  const fimSemana = normalize(semana.dataFim);
 
-  if (data < dataInicioCiclo || data > dataFimCiclo) {
+  if (dataNorm < inicioCiclo || dataNorm > fimCiclo) {
     return {
       ok: false,
       message: "A data escolhida não pertence ao ciclo atual.",
@@ -114,10 +122,7 @@ export async function editRegistroGastoService(
     };
   }
 
-  const dataInicioSemana = new Date(semana.dataInicio);
-  const dataFimSemana = new Date(semana.dataFim);
-
-  if (data < dataInicioSemana || data > dataFimSemana) {
+  if (dataNorm < inicioSemana || dataNorm > fimSemana) {
     if (!permission) {
       return {
         ok: false,
@@ -130,8 +135,8 @@ export async function editRegistroGastoService(
   const semanaCorreta = await prisma.semana.findFirst({
     where: {
       cicloId: semana.cicloId,
-      dataInicio: { lte: data },
-      dataFim: { gte: data },
+      dataInicio: { lte: dataNorm },
+      dataFim: { gte: dataNorm },
     },
   });
 
@@ -148,7 +153,7 @@ export async function editRegistroGastoService(
     data: {
       name,
       valor: valorCents ?? 0,
-      data,
+      data: dataNorm,
       semanaId: semanaCorreta.id,
     },
   });

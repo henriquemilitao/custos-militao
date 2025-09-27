@@ -165,6 +165,14 @@ export default function ControleSemanal({ cicloAtual, mutateCiclo }: ControleSem
 
         <ResumoValores semanaAtual={semanaAtual} />
 
+        <div className="">
+          <Button
+            onClick={() => setOpen(true)}
+            className="w-full rounded-xl bg-blue-500 text-white shadow hover:bg-blue-600 active:scale-95 transition mb-8"
+          >
+            <Plus size={16} className="mr-2" /> Adicionar gasto
+          </Button>
+        </div>
         {/* <GastosPorMeta semanaAtual={semanaAtual} /> */}
 
         <ListagemPorCategoria 
@@ -177,15 +185,6 @@ export default function ControleSemanal({ cicloAtual, mutateCiclo }: ControleSem
           mutateCiclo={mutateCiclo} 
           setCurrentGasto={setCurrentGasto}
         />
-
-        <div className="">
-          <Button
-            onClick={() => setOpen(true)}
-            className="w-full rounded-xl bg-blue-500 text-white shadow hover:bg-blue-600 active:scale-95 transition"
-          >
-            <Plus size={16} className="mr-2" /> Adicionar gasto
-          </Button>
-        </div>
       </div>
 
       <DialogAddEditGasto
