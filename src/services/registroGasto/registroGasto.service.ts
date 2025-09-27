@@ -1,6 +1,6 @@
 // services/registroGasto/registroGasto.service.ts
 import { prisma } from "@/lib/prisma";
-import { CreateRegistroGastoDTO } from "@/dtos/registroGasto.schema";
+import { CreateRegistroGastoDTO, EditRegistroGastoDTO } from "@/dtos/registroGasto.schema";
 
 type ServiceResult<T> =
   | { ok: true; data: T }
@@ -77,4 +77,85 @@ export async function createRegistroGastoService(
   });
 
   return { ok: true, data: registro };
+}
+
+export async function editRegistroGastoService(
+  registroId: string,
+  params: EditRegistroGastoDTO
+): Promise<ServiceResult<any>> {
+  const registro = await prisma.registroGasto.findUnique({
+    where: { id: registroId },
+    include: { semana: { include: { ciclo: true } } },
+  });
+
+  if (!registro) {
+    return { ok: false, message: "Registro não encontrado", type: "fora-semana" };
+  }
+
+  const { name, valorCents, data, semanaId, permission } = params;
+
+  const semana = await prisma.semana.findUnique({
+    where: { id: semanaId },
+    include: { ciclo: true },
+  });
+
+  if (!semana) {
+    return { ok: false, message: "Semana não encontrada.", type: "fora-semana" };
+  }
+
+  const dataInicioCiclo = new Date(semana.ciclo.dataInicio);
+  const dataFimCiclo = new Date(semana.ciclo.dataFim);
+
+  if (data < dataInicioCiclo || data > dataFimCiclo) {
+    return {
+      ok: false,
+      message: "A data escolhida não pertence ao ciclo atual.",
+      type: "fora-ciclo",
+    };
+  }
+
+  const dataInicioSemana = new Date(semana.dataInicio);
+  const dataFimSemana = new Date(semana.dataFim);
+
+  if (data < dataInicioSemana || data > dataFimSemana) {
+    if (!permission) {
+      return {
+        ok: false,
+        message: "A data selecionada não pertence à essa semana.",
+        type: "fora-semana",
+      };
+    }
+  }
+
+  const semanaCorreta = await prisma.semana.findFirst({
+    where: {
+      cicloId: semana.cicloId,
+      dataInicio: { lte: data },
+      dataFim: { gte: data },
+    },
+  });
+
+  if (!semanaCorreta) {
+    return {
+      ok: false,
+      message: "Não foi encontrada uma semana correspondente a esta data.",
+      type: "fora-semana",
+    };
+  }
+
+  const updated = await prisma.registroGasto.update({
+    where: { id: registroId },
+    data: {
+      name,
+      valor: valorCents ?? 0,
+      data,
+      semanaId: semanaCorreta.id,
+    },
+  });
+
+  return { ok: true, data: updated };
+}
+
+export async function deleteRegistroGastoService(registroId: string) {
+  return prisma.registroGasto.delete({ where: { id: registroId } });
 }

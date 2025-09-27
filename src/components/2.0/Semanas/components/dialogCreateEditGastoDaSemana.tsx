@@ -1,213 +1,77 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { BaseDialog } from "@/components/common/BaseDialog";
-import { CicloAtualDTO } from "@/dtos/ciclo.dto";
+import { useState, useEffect } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { formatCurrencyFromCents } from "@/lib/formatters/formatCurrency";
 import { toast } from "sonner";
-import { Gasto } from "@prisma/client";
-import { InputCurrency } from "../../InputCurrency";
-import { Button } from "@/components/common/Button";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon } from "lucide-react";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
-import { formatarName } from "@/lib/formatters/formatName";
 
-type DialogCreateEditGastoProps = {
+type Props = {
   showModal: boolean;
-  setShowModal: (show: boolean) => void;
-  cicloAtual: CicloAtualDTO | null;
+  setShowModal: (v: boolean) => void;
+  registro: { id: string; nome: string; valor: number } | null;
   mutateCiclo: () => void;
-  isEdit: boolean;
-  setIsEdit: (edit: boolean) => void;
-  gasto: Gasto | null;
 };
 
-export function DialogCreateEditGasto({
-  showModal,
-  setShowModal,
-  cicloAtual,
-  mutateCiclo,
-  isEdit,
-  setIsEdit,
-  gasto,
-}: DialogCreateEditGastoProps) {
+export function DialogCreateEditRegistro({ showModal, setShowModal, registro, mutateCiclo }: Props) {
   const [nome, setNome] = useState("");
-  const [valor, setValor] = useState<number | null>(null);
-  const [data, setData] = useState<Date>(new Date());
-  const [confirmZero, setConfirmZero] = useState(false);
-  const [errors, setErrors] = useState<{ nome?: string }>({});
-  const [loading, setLoading] = useState(false);
+  const [valor, setValor] = useState(0);
 
   useEffect(() => {
-    if (isEdit && gasto) {
-      setNome(gasto.name);
-      setValor(gasto.valor);
-    //   setData(new Date(gasto.));
-    } else {
-      setNome("");
-      setValor(null);
-      setData(new Date());
+    if (registro) {
+      setNome(registro.nome);
+      setValor(registro.valor);
     }
-  }, [isEdit, gasto, showModal]);
+  }, [registro]);
 
-  function handleClose() {
-    setShowModal(false);
-    setNome("");
-    setValor(null);
-    setData(new Date());
-    setConfirmZero(false);
-    setErrors({});
-  }
-
-  async function handleSalvarOuEditar() {
-    if (!cicloAtual?.id) {
-      toast.error("Nenhum ciclo ativo selecionado.");
-      return;
-    }
-
-    if (!nome.trim()) {
-      setErrors({ nome: "Descrição é obrigatória" });
-      return;
-    }
-
-    if ((valor === null || valor === 0) && !confirmZero) {
-      setConfirmZero(true);
-      return;
-    }
-
-    setLoading(true);
+  async function handleSave() {
+    if (!registro) return;
     try {
-      const body = {
-        name: formatarName(nome.trim()),
-        valor: Math.round(valor ?? 0),
-        data,
-        cicloId: cicloAtual.id,
-      };
-
-      const url = isEdit ? `/api/gastos/${gasto?.id}` : "/api/gastos";
-      const method = isEdit ? "PATCH" : "POST";
-
-      const res = await fetch(url, {
-        method,
+      const res = await fetch(`/api/registros/${registro.id}`, {
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
+        body: JSON.stringify({ name: nome, valorCents: valor }),
       });
 
-      const dataRes = await res.json().catch(() => null);
-      if (!res.ok) {
-        toast.error(dataRes?.error || "Erro desconhecido");
-        return;
-      }
-
-      toast.success(
-        isEdit ? "Gasto atualizado com sucesso!" : "Gasto salvo com sucesso!",
-        {
-          style: { background: "#dcfce7", color: "#166534" },
-        }
-      );
+      if (!res.ok) throw new Error("Erro ao salvar registro");
+      toast.success("Registro atualizado!");
       mutateCiclo();
-      handleClose();
-      setIsEdit(false);
-    } catch {
-      toast.error("Não foi possível salvar o gasto");
-    } finally {
-      setLoading(false);
+      setShowModal(false);
+    } catch (err: any) {
+      toast.error(err.message);
     }
   }
 
   return (
-    <BaseDialog
-      open={showModal}
-      onOpenChange={(open) => {
-        if (!open) {
-          handleClose();
-          setIsEdit(false);
-          setShowModal(false);
-        } else {
-          setShowModal(true);
-        }
-      }}
-      title={!isEdit ? "Novo Gasto" : "Editar Gasto"}
-      footer={
-        <>
-          <Button
-            variant="secondary"
-            disabled={loading}
-            onClick={() => {
-              handleClose();
-              setIsEdit(false);
-            }}
-          >
-            Cancelar
-          </Button>
-          <Button
-            variant={confirmZero ? "danger" : "primary"}
-            loading={loading}
-            onClick={handleSalvarOuEditar}
-          >
-            Salvar
-          </Button>
-        </>
-      }
-    >
-      <div className="flex flex-col gap-4">
-        {/* Nome */}
-        <input
-          type="text"
-          placeholder="Descrição do gasto"
-          value={nome}
-          onChange={(e) => {
-            setNome(e.target.value);
-            if (errors.nome) {
-              setErrors((prev) => ({ ...prev, nome: undefined }));
-            }
-          }}
-          className="w-full px-3 py-2 border rounded-xl focus:outline-blue-500 placeholder-gray-400"
-        />
-        {errors.nome && (
-          <span className="text-xs text-red-600 -mt-3 -mb-2">{errors.nome}</span>
-        )}
+    <Dialog open={showModal} onOpenChange={setShowModal}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Editar Registro</DialogTitle>
+        </DialogHeader>
 
-        {/* Valor */}
-        <InputCurrency
-          placeholder="Valor (R$)"
-          value={valor !== null ? valor / 100 : null}
-          onValueChange={(val) =>
-            setValor(val !== null ? Math.round(val * 100) : null)
-          }
-        />
+        <div className="space-y-4">
+          <Input
+            placeholder="Descrição"
+            value={nome}
+            onChange={(e) => setNome(e.target.value)}
+          />
 
-        {/* Data */}
-        <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-gray-700">Data</label>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button className="justify-start rounded-xl">
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {format(data, "dd/MM/yyyy", { locale: ptBR })}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0">
-              <Calendar
-                mode="single"
-                selected={data}
-                onSelect={(d) => d && setData(d)}
-                locale={ptBR}
-                initialFocus
-              />
-            </PopoverContent>
-          </Popover>
+          <Input
+            type="number"
+            placeholder="Valor"
+            value={valor}
+            onChange={(e) => setValor(Number(e.target.value))}
+          />
+
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setShowModal(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={handleSave}>Salvar</Button>
+          </div>
         </div>
-
-        {confirmZero && (
-          <p className="text-sm text-yellow-600">
-            ⚠️ Você tem certeza que deseja salvar um gasto sem{" "}
-            <span className="font-semibold">valor?</span>
-          </p>
-        )}
-      </div>
-    </BaseDialog>
+      </DialogContent>
+    </Dialog>
   );
 }

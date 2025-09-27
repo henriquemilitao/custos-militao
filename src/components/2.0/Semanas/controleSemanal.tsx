@@ -11,7 +11,7 @@ import { ptBR } from "date-fns/locale";
 import { Header } from "./components/header";
 import { ResumoValores } from "./components/resumoValores";
 import { ListagemPorCategoria } from "./components/listagemPorData";
-import { DialogAddGasto } from "./components/dialogAddGasto";
+import { DialogAddEditGasto } from "./components/dialogAddEditGasto";
 import { Button } from "@/components/ui/button";
 
 type ControleSemanalProps = {
@@ -21,7 +21,15 @@ type ControleSemanalProps = {
 
 export default function ControleSemanal({ cicloAtual, mutateCiclo }: ControleSemanalProps) {
   const [open, setOpen] = useState(false);
+  const [isEdit, setIsEdit] = useState<boolean>(false);
   const [semanaSelecionada, setSemanaSelecionada] = useState<string>("");
+  const [currentGasto, setCurrentGasto] = useState<{
+    id: string;
+    name: string;
+    valor: number;
+    data: Date; 
+    gastoId: string
+  } | null>(null);
 
   const totalGoals =
     cicloAtual?.gastosPorMetaTotais?.reduce((acc, gasto) => acc + gasto.totalPlanejado, 0) ?? 0;
@@ -92,7 +100,16 @@ export default function ControleSemanal({ cicloAtual, mutateCiclo }: ControleSem
             {
               valorDisponivel: number;
               gastoNaSemana: number;
-              datas: Record<string, { nome: string; valor: number }[]>;
+              datas: Record<
+                string,
+                {
+                  id: string;
+                  name: string;
+                  valor: number;
+                  data: Date;
+                  gastoId: string;
+                }[]
+              >;
             }
           >,
           meta
@@ -117,8 +134,11 @@ export default function ControleSemanal({ cicloAtual, mutateCiclo }: ControleSem
               }
 
               acc[meta.nome].datas[dataFormatada].push({
-                nome: reg.name,
+                id: reg.id,
+                name: reg.name,
                 valor: reg.valor,
+                data: reg.data,
+                gastoId: reg.gastoId,
               });
             });
 
@@ -127,6 +147,7 @@ export default function ControleSemanal({ cicloAtual, mutateCiclo }: ControleSem
         {}
       )
     : {};
+
 
 
 
@@ -146,7 +167,16 @@ export default function ControleSemanal({ cicloAtual, mutateCiclo }: ControleSem
 
         {/* <GastosPorMeta semanaAtual={semanaAtual} /> */}
 
-        <ListagemPorCategoria gastosPorCategoria={gastosAgrupadosPorGoal} />
+        <ListagemPorCategoria 
+          gastosPorCategoria={gastosAgrupadosPorGoal} 
+          showModal={open}
+          setShowModal={setOpen}
+          cicloAtual={cicloAtual}
+          isEdit={isEdit}
+          setIsEdit={setIsEdit}
+          mutateCiclo={mutateCiclo} 
+          setCurrentGasto={setCurrentGasto}
+        />
 
         <div className="">
           <Button
@@ -158,13 +188,16 @@ export default function ControleSemanal({ cicloAtual, mutateCiclo }: ControleSem
         </div>
       </div>
 
-      <DialogAddGasto
+      <DialogAddEditGasto
         open={open}
         setOpen={setOpen}
+        isEdit={isEdit}
+        setIsEdit={setIsEdit}
         metas={semanaAtual?.gastosMeta || []}
         mutateCiclo={mutateCiclo}
         semanaAtual={semanaAtual}
         cicloAtual={cicloAtual}
+        currentGasto={currentGasto}
       />
     </div>
   );

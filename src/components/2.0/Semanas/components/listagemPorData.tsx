@@ -1,24 +1,44 @@
 import { formatCurrencyFromCents } from "@/lib/formatters/formatCurrency";
-import { MoreVertical } from "lucide-react";
+import { Edit, MoreVertical, Trash2 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import ProgressBar from "@/components/ui/progress-bar";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { CicloAtualDTO } from "@/dtos/ciclo.dto";
+import { useState } from "react";
 
-type Gasto = { nome: string; valor: number };
+type Gasto = { id: string; name: string; valor: number; data: Date; gastoId: string };
 type GastosPorCategoria = Record<
   string,
   {
     valorDisponivel: number;
     gastoNaSemana: number;
     datas: Record<string, Gasto[]>;
+
   }
 >;
 
+type GastosPorCategoriaProps = {
+  gastosPorCategoria: GastosPorCategoria;
+  showModal: boolean;
+  setShowModal: (show: boolean) => void;
+  cicloAtual: CicloAtualDTO | null;
+  mutateCiclo: () => void;
+  isEdit: boolean;
+  setIsEdit: (edit: boolean) => void;
+  setCurrentGasto: (gasto: { id: string; name: string; valor: number; data: Date; gastoId: string } | null) => void;
+};
+
 export function ListagemPorCategoria({
   gastosPorCategoria,
-}: {
-  gastosPorCategoria: GastosPorCategoria;
-}) {
-  console.log(Object.entries(gastosPorCategoria).length);
+  showModal,
+  setShowModal,
+  cicloAtual,
+  mutateCiclo,
+  isEdit,
+  setIsEdit,
+  setCurrentGasto,
+}: GastosPorCategoriaProps) {
+
   return (
     <div className={`space-y-8 ${Object.entries(gastosPorCategoria).length === 0 ? "mb-4" : "mb-11"}`}>
       {Object.entries(gastosPorCategoria).map(
@@ -26,7 +46,7 @@ export function ListagemPorCategoria({
           // dentro do map da categoria
           const porcentagem =
             valorDisponivel > 0 ? (gastoNaSemana / valorDisponivel) * 100 : 0;
-
+          
           return (
             <div key={categoria}>
               {/* Cabeçalho da categoria */}
@@ -62,15 +82,45 @@ export function ListagemPorCategoria({
                           key={i}
                           className="flex justify-between items-center text-sm pr-2"
                         >
-                          <span>{g.nome}</span>
+                          <span>{g.name}</span>
 
                           <div className="flex items-center gap-2">
                             <span className="font-semibold">
                               {formatCurrencyFromCents(g.valor)}
                             </span>
-                            <button className="text-gray-400 hover:text-gray-600">
-                              <MoreVertical size={16} />
-                            </button>
+                            {/* Menu */}
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <button className="p-1 rounded-full hover:bg-gray-200 text-gray-400">
+                                  <MoreVertical size={18} />
+                                </button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="w-32">
+                                <DropdownMenuItem
+                                  onClick={() => {
+                                    setIsEdit(true);
+                                    setCurrentGasto({
+                                      id: g.id,
+                                      name: g.name,
+                                      valor: g.valor,
+                                      data: g.data,
+                                      gastoId: g.gastoId,
+                                    });
+                                    setShowModal(true);
+                                  }}
+                                >
+                                  <Edit size={16} className="text-blue-500" />
+                                  <p className="font-medium text-gray-600">Editar</p>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => {
+                                  // setCurrentGasto(gasto)
+                                  // setShowConfirmDelete(true)
+                                  }}>
+                                  <Trash2 size={16} className="text-red-500" />
+                                  <p className="font-medium text-gray-600">Excluir</p>
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                           </div>
                         </li>
                       ))}
