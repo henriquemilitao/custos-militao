@@ -3,15 +3,15 @@ import { Economia } from "@prisma/client";
 
 // services/economiaService.ts
 export async function createEconomiaService(params: {
-  nome: string;
+  name: string;
   valorCents: number | null;
   cicloId: string;
 }) {
-  const { nome, valorCents, cicloId } = params;
+  const { name, valorCents, cicloId } = params;
 
   return prisma.economia.create({
     data: {
-      nome,
+      nome: name,
       valor: valorCents ?? 0, // null vira 0
       isGuardado: false,
       cicloId,
@@ -20,15 +20,15 @@ export async function createEconomiaService(params: {
 }
 
 export async function editEconomiaService(economiaId: string, params: {
-  nome: string;
+  name: string;
   valorCents: number | null;
 }) {
-  const { nome, valorCents} = params;
+  const { name, valorCents} = params;
 
   return prisma.economia.update({
     where: {id: economiaId},
     data: {
-      nome,
+      nome: name,
       valor: valorCents ?? 0, // null vira 0
     },
   });

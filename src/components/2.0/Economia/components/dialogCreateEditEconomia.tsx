@@ -8,12 +8,19 @@ import { toast } from "sonner";
 import { Economia } from "@prisma/client";
 import { InputCurrency } from "../../InputCurrency";
 import { Button } from "@/components/common/Button";
+import { z } from "zod";
+import {
+  createEconomiaSchema,
+  editEconomiaSchema,
+  CreateEconomiaDTO,
+  EditEconomiaDTO,
+} from "@/dtos/economia.schema";
 
 type DialogCreateEditEconomiaProps = {
   showModal: boolean;
   setShowModal: (show: boolean) => void;
   cicloAtual: CicloAtualDTO | null;
-  mutateCiclo: () => void; // <- novo
+  mutateCiclo: () => void;
   isEdit: boolean;
   setIsEdit: (edit: boolean) => void;
   economia: Economia | null;
@@ -31,7 +38,7 @@ export function DialogCreateEditEconomia({
   const [nome, setNome] = useState("");
   const [valor, setValor] = useState<number | null>(null); // cents
   const [confirmZero, setConfirmZero] = useState(false);
-  const [errors, setErrors] = useState<{ nome?: string }>({});
+  const [errors, setErrors] = useState<{ name?: string; valorCents?: string }>({});
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -52,25 +59,65 @@ export function DialogCreateEditEconomia({
     setErrors({});
   }
 
-  async function handleSalvar() {
-    if (!cicloAtual?.id) {
+  const errorMessages: Record<string, string> = {
+    name: "Nome é obrigatório",
+    valorCents: "Digite um valor",
+    cicloId: "Ciclo inválido",
+  };
+
+  async function handleSalvarOuEditar() {
+    if (!cicloAtual?.id && !isEdit) {
       toast.error("Nenhum ciclo ativo selecionado.");
       return;
     }
 
-    if (!nome.trim()) {
-      setErrors({ nome: "Nome é obrigatório" });
+    setErrors({});
+    setConfirmZero(false);
+
+    // Payload base
+    const payload = {
+      name: nome.trim(),
+      valorCents: valor ?? null,
+      ...(isEdit ? {} : { cicloId: cicloAtual?.id ?? "" }),
+    };
+
+    // Escolhe schema de acordo com o modo
+    const schema = isEdit ? editEconomiaSchema : createEconomiaSchema;
+    const parsed = schema.safeParse(payload);
+
+    if (!parsed.success) {
+      const fieldErrors: Record<string, string> = {};
+      parsed.error.issues.forEach((issue) => {
+        const path = issue.path[0] as string;
+        fieldErrors[path] = errorMessages[path] ?? issue.message;
+      });
+      setErrors(fieldErrors);
+      setLoading(false);
       return;
     }
 
-    if ((valor === null || valor === 0) && !confirmZero) {
+    // Confirm zero/null
+    const valorValid = parsed.data.valorCents;
+    if ((valorValid === null || valorValid === 0) && !confirmZero) {
       setConfirmZero(true);
       return;
     }
 
+    if (isEdit) {
+      await handleEditar(parsed.data as EditEconomiaDTO);
+    } else {
+      await handleCriar(parsed.data as CreateEconomiaDTO);
+    }
+  }
+
+  async function handleCriar(data: CreateEconomiaDTO) {
     setLoading(true);
     try {
-      const body = { nome: nome.trim(), valorCents: Math.round(valor ?? 0), cicloId: cicloAtual.id };
+      const body = {
+        name: data.name,
+        valorCents: data.valorCents ?? 0,
+        cicloId: data.cicloId,
+      };
 
       const res = await fetch("/api/economias", {
         method: "POST",
@@ -78,73 +125,54 @@ export function DialogCreateEditEconomia({
         body: JSON.stringify(body),
       });
 
-      const data = await res.json().catch(() => null);
-      if (!res.ok) {
-        toast.error(data?.error || "Erro desconhecido");
-        return;
-      }
+      const json = await res.json().catch(() => null);
+      if (!res.ok) throw new Error(json?.error || "Erro desconhecido");
 
       toast.success("Economia salva com sucesso!", {
-        style: {
-          background: "#dcfce7", // verdinho claro
-          color: "#166534", // texto verde escuro
-        },
+        style: { background: "#dcfce7", color: "#166534" },
       });
-      mutateCiclo();
 
+      mutateCiclo();
       handleClose();
       setIsEdit(false);
-    } catch (err) {
-      toast.error("Não foi possível salvar a economia");
+    } catch (err: any) {
+      toast.error(err.message || "Não foi possível salvar a economia");
     } finally {
       setLoading(false);
     }
   }
 
-  async function handleEditar() {
-    if (!cicloAtual?.id) {
-      toast.error("Nenhum ciclo ativo selecionado.");
-      return;
-    }
-
-    if (!nome.trim()) {
-      setErrors({ nome: "Nome é obrigatório" });
-      return;
-    }
-
-    if ((valor === null || valor === 0) && !confirmZero) {
-      setConfirmZero(true);
+  async function handleEditar(data: EditEconomiaDTO) {
+    if (!economia?.id) {
+      toast.error("Economia inválida para edição.");
       return;
     }
 
     setLoading(true);
     try {
-      const body = { nome: nome.trim(), valorCents: Math.round(valor ?? 0) };
+      const body = {
+        name: data.name,
+        valorCents: data.valorCents ?? 0,
+      };
 
-      const res = await fetch(`/api/economias/${economia?.id}`, {
+      const res = await fetch(`/api/economias/${economia.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
 
-      const data = await res.json().catch(() => null);
-      if (!res.ok) {
-        toast.error(data?.error || "Erro desconhecido");
-        return;
-      }
+      const json = await res.json().catch(() => null);
+      if (!res.ok) throw new Error(json?.error || "Erro desconhecido");
 
       toast.success("Economia alterada com sucesso!", {
-        style: {
-          background: "#dcfce7",
-          color: "#166534",
-        },
+        style: { background: "#dcfce7", color: "#166534" },
       });
-      mutateCiclo();
 
+      mutateCiclo();
       handleClose();
       setIsEdit(false);
-    } catch (err) {
-      toast.error("Não foi possível editar a economia");
+    } catch (err: any) {
+      toast.error(err.message || "Não foi possível editar a economia");
     } finally {
       setLoading(false);
     }
@@ -154,26 +182,30 @@ export function DialogCreateEditEconomia({
     <BaseDialog
       open={showModal}
       onOpenChange={(open) => {
-        // Quando fechar: limpar e reconfigurar isEdit
         if (!open) {
           handleClose();
           setIsEdit(false);
-          setShowModal(false);
-        } else {
-          setShowModal(true);
         }
+        setShowModal(open);
       }}
       title={!isEdit ? "Nova Economia" : "Editar Economia"}
       footer={
         <>
-          <Button variant="secondary" disabled={loading} 
-              onClick={() => {
-                handleClose();
-                setIsEdit(false);
-              }}>
-              Cancelar
+          <Button
+            variant="secondary"
+            disabled={loading}
+            onClick={() => {
+              handleClose();
+              setIsEdit(false);
+            }}
+          >
+            Cancelar
           </Button>
-          <Button variant={confirmZero ? 'danger' : 'primary'} loading={loading} onClick={isEdit ? handleEditar : handleSalvar}>
+          <Button
+            variant={confirmZero ? "danger" : "primary"}
+            loading={loading}
+            onClick={handleSalvarOuEditar}
+          >
             Salvar
           </Button>
         </>
@@ -186,23 +218,27 @@ export function DialogCreateEditEconomia({
           value={nome}
           onChange={(e) => {
             setNome(e.target.value);
-            if (errors.nome) {
-              setErrors((prev) => ({ ...prev, nome: undefined }));
-            }
+            if (errors.name) setErrors((prev) => ({ ...prev, name: undefined }));
           }}
           className="w-full px-3 py-2 border rounded-xl focus:outline-blue-500 placeholder-gray-400"
         />
-        {errors.nome && <span className="text-xs text-red-600 -mt-3 -mb-2">{errors.nome}</span>}
+        {errors.name && (
+          <span className="text-xs text-red-600 -mt-3 -mb-2">{errors.name}</span>
+        )}
 
         <InputCurrency
           placeholder="Valor (R$)"
           value={valor !== null ? valor / 100 : null} // mostra em reais
-          onValueChange={(val) => setValor(val !== null ? Math.round(val * 100) : null)} // salva em centavos
+          onValueChange={(val) =>{
+            setConfirmZero(false)
+            setValor(val !== null ? Math.round(val * 100) : null)
+          }}
         />
 
         {confirmZero && (
-          <p className="text-sm text-yellow-600">
-            ⚠️ Você tem certeza que deseja salvar uma economia sem <span className="text-base font-semibold">valor/meta?</span>
+          <p className="text-sm text-yellow-600 -mt-2">
+            ⚠️ Você tem certeza que deseja salvar uma economia sem{" "}
+            <span className="text-base font-semibold">valor?</span>
           </p>
         )}
       </div>

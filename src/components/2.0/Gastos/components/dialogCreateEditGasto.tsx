@@ -1,23 +1,28 @@
-// components/economias/components/dialogCreateEditGasto.tsx
 "use client";
 
 import { useEffect, useState } from "react";
 import { BaseDialog } from "@/components/common/BaseDialog";
 import { CicloAtualDTO } from "@/dtos/ciclo.dto";
 import { toast } from "sonner";
-import { Gasto, Prisma, TipoGasto } from "@prisma/client";
+import { Gasto, TipoGasto } from "@prisma/client";
 import { InputCurrency } from "../../InputCurrency";
 import { Button } from "@/components/common/Button";
 import { TipoGastoSelect } from "../../testeTipoGastoSelect";
 import { DialogBlockTipoChange } from "./dialogBlockTipoChange";
 import { DialogAvisoMigracaoTipoChange } from "./dialogAvisoMigracaoTipoChange";
 import { formatDateShort } from "@/lib/formatters/formatDate";
+import {
+  createGastoSchema,
+  editGastoSchema,
+  CreateGastoDTO,
+  EditGastoDTO,
+} from "@/dtos/gasto.schema";
 
 type DialogCreateEditGastoProps = {
   showModal: boolean;
   setShowModal: (show: boolean) => void;
   cicloAtual: CicloAtualDTO | null;
-  mutateCiclo: () => void; // <- novo
+  mutateCiclo: () => void;
   isEdit: boolean;
   setIsEdit: (edit: boolean) => void;
   gasto: Gasto | null;
@@ -33,16 +38,15 @@ export function DialogCreateEditGasto({
   gasto,
 }: DialogCreateEditGastoProps) {
   const [name, setName] = useState("");
-  const [valor, setValor] = useState<number | null>(null); // cents
+  const [valor, setValor] = useState<number | null>(null);
+  const [tipoGasto, setTipoGasto] = useState<TipoGasto | null>(null);
   const [confirmZero, setConfirmZero] = useState(false);
-  const [errors, setErrors] = useState<{ name?: string, tipoGasto?: string } >({});
+  const [errors, setErrors] = useState<{ name?: string; tipoGasto?: string }>({});
   const [loading, setLoading] = useState(false);
-  const [tipoGasto, setTipoGasto] = useState<TipoGasto | null>(null)
-  // dentro do componente DialogCreateEditGasto
+
   const [showBlockModal, setShowBlockModal] = useState(false);
   const [showAvisoMigracaoModal, setShowAvisoMigracaoModal] = useState(false);
   const [forcarMigracao, setForcarMigracao] = useState(false);
-
 
   useEffect(() => {
     if (isEdit && gasto) {
@@ -52,7 +56,7 @@ export function DialogCreateEditGasto({
     } else {
       setName("");
       setValor(null);
-      setTipoGasto(null)
+      setTipoGasto(null);
     }
   }, [isEdit, gasto, showModal]);
 
@@ -60,100 +64,98 @@ export function DialogCreateEditGasto({
     setShowModal(false);
     setName("");
     setValor(null);
-    setTipoGasto(null)
+    setTipoGasto(null);
     setConfirmZero(false);
     setErrors({});
   }
 
-  async function handleSalvar() {
-    if (!cicloAtual?.id) {
+  const errorMessages: Record<string, string> = {
+    name: "Nome é obrigatório",
+    tipoGasto: "Selecione um tipo de Gasto",
+  };
+
+  async function handleSalvarOuEditar() {
+    if (!cicloAtual?.id && !isEdit) {
       toast.error("Nenhum ciclo ativo selecionado.");
       return;
     }
 
-    if (!name.trim()) {
-      setErrors({ name: "name é obrigatório" });
+    setErrors({});
+    setConfirmZero(false);
+
+    // monta payload base
+    const payload = {
+      name: name.trim(),
+      valorCents: valor ?? null,
+      tipoGasto,
+      ...(isEdit ? {} : { cicloId: cicloAtual?.id ?? "" }),
+    };
+
+    // escolhe schema
+    const schema = isEdit ? editGastoSchema : createGastoSchema;
+    const parsed = schema.safeParse(payload);
+
+    if (!parsed.success) {
+      const fieldErrors: Record<string, string> = {};
+      parsed.error.issues.forEach((issue) => {
+        const path = issue.path[0] as string;
+        fieldErrors[path] = errorMessages[path] ?? issue.message;
+      });
+      setErrors(fieldErrors);
+      setLoading(false);
       return;
     }
 
-    if (!tipoGasto){
-      setErrors({ tipoGasto: "Selecione um Tipo de Gasto"})
-      return;
-    }
-
-    if ((valor === null || valor === 0) && !confirmZero) {
+    if ((parsed.data.valorCents ?? 0) === 0 && !confirmZero) {
       setConfirmZero(true);
       return;
     }
 
+    if (isEdit) {
+      await handleEditar(parsed.data as EditGastoDTO);
+    } else {
+      await handleCriar(parsed.data as CreateGastoDTO);
+    }
+  }
+
+  async function handleCriar(data: CreateGastoDTO) {
     setLoading(true);
     try {
-      const body = { nome: name.trim(), valorCents: Math.round(valor ?? 0), cicloId: cicloAtual.id, tipoGasto: tipoGasto};
-
       const res = await fetch("/api/gastos", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
+        body: JSON.stringify(data),
       });
 
-      const data = await res.json().catch(() => null);
-      if (!res.ok) {
-        toast.error(data?.error || "Erro desconhecido");
-        return;
-      }
+      const json = await res.json().catch(() => null);
+      if (!res.ok) throw new Error(json?.error || "Erro desconhecido");
 
       toast.success("Gasto salvo com sucesso!", {
-        style: {
-          background: "#dcfce7", // verdinho claro
-          color: "#166534", // texto verde escuro
-        },
+        style: { background: "#dcfce7", color: "#166534" },
       });
-      mutateCiclo();
 
+      mutateCiclo();
       handleClose();
       setIsEdit(false);
-    } catch (err) {
-      toast.error("Não foi possível salvar seu gasto");
+    } catch (err: any) {
+      toast.error(err.message || "Não foi possível salvar seu gasto");
     } finally {
       setLoading(false);
     }
   }
 
-  async function handleEditar() {
-    if (!cicloAtual?.id) {
-      toast.error("Nenhum ciclo ativo selecionado.");
-      return;
-    }
-
-    if (!name.trim()) {
-      setErrors({ name: "Nome é obrigatório" });
-      return;
-    }
-
-    if ((valor === null || valor === 0) && !confirmZero) {
-      setConfirmZero(true);
-      return;
-    }
-
-    if (!tipoGasto){
-      setErrors({ tipoGasto: "Selecione um Tipo de Gasto"})
-      return;
-    }
-
+  async function handleEditar(data: EditGastoDTO) {
     const jaTevePagamentosNoMes = cicloAtual?.gastosPorMetaTotais.find(
       (gastoMeta) => gastoMeta.id === gasto?.id
     );
-
     const tevePagamento = (jaTevePagamentosNoMes?.totalJaGasto ?? 0) > 0;
-    const tipoAlterado = gasto?.tipo !== tipoGasto;
+    const tipoAlterado = gasto?.tipo !== data.tipoGasto;
 
-    // Recorrente -> Único já com registros
     if (!forcarMigracao && tevePagamento && tipoAlterado) {
       setShowBlockModal(true);
       return;
     }
 
-    // Único -> Recorrente já pago
     if (!forcarMigracao && gasto?.isPago && tipoAlterado) {
       setShowAvisoMigracaoModal(true);
       return;
@@ -161,35 +163,27 @@ export function DialogCreateEditGasto({
 
     setLoading(true);
     try {
-      const body = { name: name.trim(), valorCents: Math.round(valor ?? 0), tipoGasto };
-
       const res = await fetch(`/api/gastos/${gasto?.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
+        body: JSON.stringify(data),
       });
 
-      const data = await res.json().catch(() => null);
-      if (!res.ok) {
-        toast.error(data?.error || "Erro desconhecido");
-        return;
-      }
+      const json = await res.json().catch(() => null);
+      if (!res.ok) throw new Error(json?.error || "Erro desconhecido");
 
       toast.success("Gasto alterado com sucesso!", {
-        style: {
-          background: "#dcfce7",
-          color: "#166534",
-        },
+        style: { background: "#dcfce7", color: "#166534" },
       });
-      mutateCiclo();
 
+      mutateCiclo();
       handleClose();
       setIsEdit(false);
-    } catch (err) {
-      toast.error("Não foi possível editar seu gasto");
+    } catch (err: any) {
+      toast.error(err.message || "Não foi possível editar seu gasto");
     } finally {
       setLoading(false);
-      setForcarMigracao(false)
+      setForcarMigracao(false);
     }
   }
 
@@ -197,29 +191,30 @@ export function DialogCreateEditGasto({
     <BaseDialog
       open={showModal}
       onOpenChange={(open) => {
-        // Quando fechar: limpar e reconfigurar isEdit
         if (!open) {
           handleClose();
           setIsEdit(false);
-          setShowModal(false);
-        } else {
-          setShowModal(true);
         }
+        setShowModal(open);
       }}
-      title={!isEdit ? "Novo Gasto" : "Editar Gasto"}
+      title={!isEdit ? "Criar Gasto" : "Editar Gasto"}
       footer={
         <>
-          <Button variant="secondary" disabled={loading} 
-              onClick={() => {
-                handleClose();
-                setIsEdit(false);
-              }}>
-              Cancelar
+          <Button
+            variant="secondary"
+            disabled={loading}
+            onClick={() => {
+              handleClose();
+              setIsEdit(false);
+            }}
+          >
+            Cancelar
           </Button>
-          <Button variant={confirmZero ? 'danger' : 'primary'} 
-            loading={loading} 
-              onClick={isEdit ? handleEditar : handleSalvar}
-            >
+          <Button
+            variant={confirmZero ? "danger" : "primary"}
+            loading={loading}
+            onClick={handleSalvarOuEditar}
+          >
             Salvar
           </Button>
         </>
@@ -232,43 +227,53 @@ export function DialogCreateEditGasto({
           value={name}
           onChange={(e) => {
             setName(e.target.value);
-            if (errors.name) {
-              setErrors((prev) => ({ ...prev, name: undefined }));
-            }
+            if (errors.name) setErrors((prev) => ({ ...prev, name: undefined }));
           }}
           className="w-full px-3 py-2 border rounded-xl focus:outline-blue-500 placeholder-gray-400"
         />
-        {errors.name && <span className="text-xs text-red-600 -mt-3 -mb-2">{errors.name}</span>}
+        {errors.name && (
+          <span className="text-xs text-red-600 -mt-4">{errors.name}</span>
+        )}
 
         <InputCurrency
           placeholder="Valor (R$)"
-          value={valor !== null ? valor / 100 : null} // mostra em reais
-          onValueChange={(val) => setValor(val !== null ? Math.round(val * 100) : null)} // salva em centavos
+          value={valor !== null ? valor / 100 : null}
+          onValueChange={(val) => {
+            setConfirmZero(false);
+            setValor(val !== null ? Math.round(val * 100) : null);
+          }}
         />
 
-        <TipoGastoSelect tipoGasto={tipoGasto} setTipoGasto={setTipoGasto} setErrors={setErrors} gasto={gasto} isEdit={isEdit}/>
-        {errors.tipoGasto && <span className="text-xs font-semibold text-red-600 -mt-7 -mb-2">{errors.tipoGasto}</span>}
-        
         {confirmZero && (
-          <p className="text-sm text-yellow-600 -mt-5 -mb-4">
-            ⚠️ Você tem certeza que deseja salvar um gasto sem <span className="text-base font-semibold">valor/meta?</span>
+          <p className="text-sm text-yellow-600 -mt-3">
+            ⚠️ Você tem certeza que deseja {isEdit ? 'salvar' : 'criar '} um gasto sem 
+            <span className="text-base font-semibold"> valor?</span>
           </p>
         )}
 
+        <TipoGastoSelect
+          tipoGasto={tipoGasto}
+          setTipoGasto={setTipoGasto}
+          setErrors={setErrors}
+          gasto={gasto}
+          isEdit={isEdit}
+        />
+        {errors.tipoGasto && (
+          <span className="text-xs text-red-600 -mt-7">{errors.tipoGasto}</span>
+        )}
       </div>
 
       <DialogBlockTipoChange
-        showModal={showBlockModal} 
-        setShowModal={setShowBlockModal} 
+        showModal={showBlockModal}
+        setShowModal={setShowBlockModal}
       />
-
       <DialogAvisoMigracaoTipoChange
         showModal={showAvisoMigracaoModal}
         setShowModal={setShowAvisoMigracaoModal}
         onConfirm={() => {
           setForcarMigracao(true);
           setShowAvisoMigracaoModal(false);
-          handleEditar();
+          handleSalvarOuEditar();
         }}
         dataPago={gasto?.dataPago ? formatDateShort(gasto?.dataPago) : undefined}
       />

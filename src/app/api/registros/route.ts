@@ -17,10 +17,7 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     console.log(body)
-    const parsed = createRegistroGastoSchema.parse({
-      ...body,
-      data: new Date(body.data)
-    });
+    const parsed = createRegistroGastoSchema.parse(body);
 
     // garantir que não venha float do front
     const valorCents = Math.round(parsed.valorCents ?? 0);

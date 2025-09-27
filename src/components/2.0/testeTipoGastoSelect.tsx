@@ -45,7 +45,7 @@ export function TipoGastoSelect({
     },
     {
       value: TipoGasto.goal,
-      title: "Gasto com Meta",
+      title: "Gasto Recorrente",
       desc: "Pago várias vezes ao longo do mês (ex.: mercado, combustível).",
       icon: <BarChart className="w-5 h-5" />,
     },

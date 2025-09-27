@@ -56,16 +56,16 @@ export async function getGastosByCicloId(cicloId: string): Promise<GastoWithRegi
 }
 
 export async function createGastoService(params: {
-  nome: string;
+  name: string;
   valorCents: number | null;
   cicloId: string;
   tipoGasto: TipoGasto
 }) {
-  const { nome, valorCents, cicloId, tipoGasto } = params;
+  const { name, valorCents, cicloId, tipoGasto } = params;
 
   return prisma.gasto.create({
     data: {
-      name: nome,
+      name,
       valor: valorCents ?? 0, // null vira 0
       isPago: false,
       tipo: tipoGasto,
@@ -76,35 +76,39 @@ export async function createGastoService(params: {
 
 export async function editGastoService(
   gastoId: string,
-  params: { name: string; valorCents: number | null; tipoGasto: TipoGasto }
+  params: { name: string; valorCents: number | null; tipoGasto: TipoGasto; }
 ) {
-  const { name, valorCents, tipoGasto } = params;
+  const { name, valorCents, tipoGasto, } = params;
 
   const gasto = await prisma.gasto.findUnique({ where: { id: gastoId } });
   if (!gasto) return null;
 
   // Caso específico: único pago -> recorrente
   if (gasto.tipo === TipoGasto.single && tipoGasto === TipoGasto.goal && gasto.isPago) {
+    const dataPago = gasto.dataPago ?? new Date();
+
+    // 🔎 buscar semana correspondente
+    const semana = await prisma.semana.findFirst({
+      where: {
+        cicloId: gasto.cicloId,
+        dataInicio: { lte: dataPago },
+        dataFim: { gte: dataPago },
+      },
+      select: { id: true },
+    });
+
+    if (!semana) {
+      throw new Error("Não foi encontrada semana correspondente à data do gasto");
+    }
+
     await prisma.$transaction([
       prisma.registroGasto.create({
         data: {
           name: gasto.name,
           gastoId: gasto.id,
           valor: gasto.valor,
-          data: gasto.dataPago ?? new Date(),
-          semanaId: 'e88d8ed1-aafc-470a-b0f8-d7dc6c5ac217' //ALTERAR ESSA MERDA DEPOIS PQP
-           //ALTERAR ESSA MERDA DEPOIS PQP
-            //ALTERAR ESSA MERDA DEPOIS PQP
-             //ALTERAR ESSA MERDA DEPOIS PQP
-              //ALTERAR ESSA MERDA DEPOIS PQP
-               //ALTERAR ESSA MERDA DEPOIS PQP
-                //ALTERAR ESSA MERDA DEPOIS PQP
-                 //ALTERAR ESSA MERDA DEPOIS PQP
-                  //ALTERAR ESSA MERDA DEPOIS PQP
-                   //ALTERAR ESSA MERDA DEPOIS PQP
-                    //ALTERAR ESSA MERDA DEPOIS PQP
-                     //ALTERAR ESSA MERDA DEPOIS PQP
-                      //ALTERAR ESSA MERDA DEPOIS PQP
+          data: dataPago,
+          semanaId: semana.id,
         },
       }),
       prisma.gasto.update({
@@ -119,12 +123,12 @@ export async function editGastoService(
       }),
     ]);
 
-    return { 
-      ...gasto, 
+    return {
+      ...gasto,
       valor: valorCents,
       tipo: tipoGasto,
       isPago: false,
-      dataPago: null
+      dataPago: null,
     };
   }
 

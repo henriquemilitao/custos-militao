@@ -111,7 +111,7 @@ export default function ControleSemanal({ cicloAtual, mutateCiclo }: ControleSem
 
         <ListagemPorData gastosPorData={gastosPorData} />
 
-        <div className="mt-10">
+        <div className="">
           <Button
             onClick={() => setOpen(true)}
             className="w-full rounded-xl bg-blue-500 text-white shadow hover:bg-blue-600 active:scale-95 transition"
