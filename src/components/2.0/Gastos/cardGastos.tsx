@@ -12,8 +12,8 @@ import { formatCurrencyFromCents } from "@/lib/formatters/formatCurrency";
 import ProgressBar from "@/components/ui/progress-bar";
 
 const getBgClass = (percent: number) => {
-  if (percent > 100) return "bg-red-100 border-2 border-red-600"; // passou da meta
-  if (percent > 80) return "bg-red-100 border-red-300";
+  if (percent > 100) return "bg-red-100 border-red-300"; // passou da meta
+  if (percent > 80) return "bg-red-50 border-red-200";
   if (percent >= 70) return "bg-orange-50 border-orange-200";
   if (percent >= 60) return "bg-yellow-50 border-yellow-200";
   if (percent === 0) return "bg-gray-50 border-gray-200";
@@ -111,7 +111,7 @@ export default function GastosCard({ cicloAtual, mutateCiclo }: GastosCardProps)
                   key={gasto.id}
                   className={`p-3 rounded-xl border flex justify-between items-start ${
                     gasto.tipo === "single" && gasto.isPago
-                      ? "bg-green-100 border-green-300 opacity-90"
+                      ? "bg-green-200 border-green-400 opacity-70"
                       : gasto.tipo === "goal"
                       ? getBgClass(percentRaw) // <<< usa a função de cor
                       : "bg-gray-50 border-gray-200"
