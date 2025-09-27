@@ -7,6 +7,44 @@ import { CicloAtualDTO } from "@/dtos/ciclo.dto";
 import { useState } from "react";
 import { DialogConfirmDelete, TipoItemDelete } from "@/components/common/dialogConfirmDelete";
 
+import { parse, format, isValid } from "date-fns"
+import { ptBR } from "date-fns/locale"
+
+function capitalizeWords(str: string) {
+  return str.replace(/\b\w/g, (char) => char.toUpperCase())
+}
+
+function formatarData(data: string | Date) {
+  let dateObj: Date
+
+  if (typeof data === "string") {
+    dateObj = parse(data, "yyyy-MM-dd", new Date())
+    if (!isValid(dateObj)) {
+      dateObj = parse(data, "dd/MM/yyyy", new Date())
+    }
+  } else {
+    dateObj = data
+  }
+
+  if (!isValid(dateObj)) return data.toString()
+
+  const hoje = new Date()
+  const ontem = new Date()
+  ontem.setDate(hoje.getDate() - 1)
+  const amanha = new Date()
+  amanha.setDate(hoje.getDate() + 1)
+
+  if (dateObj.toDateString() === hoje.toDateString()) return "Hoje"
+  if (dateObj.toDateString() === ontem.toDateString()) return "Ontem"
+  if (dateObj.toDateString() === amanha.toDateString()) return "Amanhã"
+
+  const formatted = format(dateObj, "dd/MM - EEEE", { locale: ptBR })
+  return capitalizeWords(formatted)
+}
+
+
+
+
 type Gasto = { id: string; name: string; valor: number; data: Date; gastoId: string };
 type GastosPorCategoria = Record<
   string,
@@ -45,7 +83,7 @@ export function ListagemPorCategoria({
   const [showConfirmDelete, setShowConfirmDelete] = useState(false)
 
   return (
-    <div className={`space-y-8 ${Object.entries(gastosPorCategoria).length === 0 ? "mb-4" : "mb-11"}`}>
+    <div className={`space-y-8 ${Object.entries(gastosPorCategoria).length === 0 ? "mb-4" : "mb-6"}`}>
       {Object.entries(gastosPorCategoria).map(
         ([categoria, { valorDisponivel, gastoNaSemana, datas }]) => {
           // dentro do map da categoria
@@ -77,7 +115,7 @@ export function ListagemPorCategoria({
                   <div key={data}>
                     {/* Data */}
                     <div className="bg-gray-50 text-xs text-gray-500 px-2 py-1 rounded-md ml-2 mb-1">
-                      📅 {data}
+                      📅 {formatarData(data)}
                     </div>
 
                     {/* Itens */}

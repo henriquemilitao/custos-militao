@@ -16,6 +16,24 @@ import { CicloAtualDTO } from "@/dtos/ciclo.dto";
 import { formatDateDayMonth, formatPeriodoDayMonth } from "@/lib/formatters/formatDate";
 import { formatarName } from "@/lib/formatters/formatName";
 
+
+// Helpers para data
+const hoje = new Date();
+const ontem = new Date(hoje);
+ontem.setDate(hoje.getDate() - 1);
+const anteontem = new Date(hoje);
+anteontem.setDate(hoje.getDate() - 2);
+const amanha = new Date(hoje);
+amanha.setDate(hoje.getDate() + 1);
+
+function formatarData(data: Date) {
+  if (data.toDateString() === hoje.toDateString()) return "Hoje";
+  if (data.toDateString() === ontem.toDateString()) return "Ontem";
+  if (data.toDateString() === anteontem.toDateString()) return "Anteontem";
+  if (data.toDateString() === amanha.toDateString()) return "Amanhã";
+  return format(data, "dd/MM/yyyy", { locale: ptBR });
+}
+
 type Meta = {
   id: string;
   nome: string;
@@ -292,7 +310,9 @@ export function DialogAddEditGasto({
               <Button2 variant="outline" className="px-3 py-2 w-full justify-start rounded-xl h-[42px]">
                 <CalendarIcon className="mr-2 h-4 w-4" color="black" />
                 <span className="text-black-600 font-semibold">
-                  {data ? format(data, "dd/MM/yyyy", { locale: ptBR }) : "Escolha"}
+                  {/* {data ? format(data, "dd/MM/yyyy", { locale: ptBR }) : "Escolha"} */}
+                  {data ? formatarData(data) : <span>Escolha</span>}
+
                 </span>
               </Button2>
             </PopoverTrigger>
