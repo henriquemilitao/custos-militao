@@ -1,4 +1,4 @@
-function formatarName(texto: string) {
+export function formatarName(texto: string) {
   return texto
     .toLowerCase() // deixa tudo minúsculo
     .split(" ") // separa pelas palavras

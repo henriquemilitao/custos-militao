@@ -17,6 +17,7 @@ import {
   CreateGastoDTO,
   EditGastoDTO,
 } from "@/dtos/gasto.schema";
+import { formatarName } from "@/lib/formatters/formatName";
 
 type DialogCreateEditGastoProps = {
   showModal: boolean;

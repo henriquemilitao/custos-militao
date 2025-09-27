@@ -15,6 +15,7 @@ import {
   CreateEconomiaDTO,
   EditEconomiaDTO,
 } from "@/dtos/economia.schema";
+import { formatarName } from "@/lib/formatters/formatName";
 
 type DialogCreateEditEconomiaProps = {
   showModal: boolean;

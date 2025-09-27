@@ -16,6 +16,7 @@ import { CicloAtualDTO } from "@/dtos/ciclo.dto";
 import { formatDateDayMonth, formatPeriodoDayMonth } from "@/lib/formatters/formatDate";
 import { permission } from "process";
 import { set } from "zod";
+import { formatarName } from "@/lib/formatters/formatName";
 
 type Meta = {
   id: string;

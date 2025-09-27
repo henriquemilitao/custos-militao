@@ -5,14 +5,12 @@ import { Plus } from "lucide-react";
 import { CicloAtualDTO } from "@/dtos/ciclo.dto";
 import { TipoGasto } from "@prisma/client";
 import { formatPeriodoDayMonth } from "@/lib/formatters/formatDate";
-import { formatCurrencyFromCents } from "@/lib/formatters/formatCurrency";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 import { Header } from "./components/header";
 import { ResumoValores } from "./components/resumoValores";
-import { GastosPorMeta } from "./components/gastosPorMeta";
-import { ListagemPorData } from "./components/listagemPorData";
+import { ListagemPorCategoria } from "./components/listagemPorData";
 import { DialogAddGasto } from "./components/dialogAddGasto";
 import { Button } from "@/components/ui/button";
 
@@ -86,14 +84,53 @@ export default function ControleSemanal({ cicloAtual, mutateCiclo }: ControleSem
     }
   }, [semanas, semanaSelecionada]);
 
-  const gastosPorData = semanaAtual
-    ? semanaAtual?.registros.reduce((acc: Record<string, { nome: string; valor: number }[]>, reg) => {
-        const dataFormatada = format(new Date(reg.data), "dd/MM/yyyy", { locale: ptBR });
-        if (!acc[dataFormatada]) acc[dataFormatada] = [];
-        acc[dataFormatada].push({ nome: reg.name, valor: reg.valor });
-        return acc;
-      }, {})
+  const gastosAgrupadosPorGoal = semanaAtual
+    ? semanaAtual.gastosMeta.reduce(
+        (
+          acc: Record<
+            string,
+            {
+              valorDisponivel: number;
+              gastoNaSemana: number;
+              datas: Record<string, { nome: string; valor: number }[]>;
+            }
+          >,
+          meta
+        ) => {
+          // cria sempre a categoria, mesmo sem gasto
+          acc[meta.nome] = {
+            valorDisponivel: meta.valorDisponivelMeta ?? 0,
+            gastoNaSemana: meta.gastoNaSemana ?? 0,
+            datas: {},
+          };
+
+          // preenche se houver registros
+          (semanaAtual.registros || [])
+            .filter((r) => r.gastoId === meta.id)
+            .forEach((reg) => {
+              const dataFormatada = format(new Date(reg.data), "dd/MM/yyyy", {
+                locale: ptBR,
+              });
+
+              if (!acc[meta.nome].datas[dataFormatada]) {
+                acc[meta.nome].datas[dataFormatada] = [];
+              }
+
+              acc[meta.nome].datas[dataFormatada].push({
+                nome: reg.name,
+                valor: reg.valor,
+              });
+            });
+
+          return acc;
+        },
+        {}
+      )
     : {};
+
+
+
+
 
   return (
     <div className="p-4 max-w-sm mx-auto">
@@ -107,9 +144,9 @@ export default function ControleSemanal({ cicloAtual, mutateCiclo }: ControleSem
 
         <ResumoValores semanaAtual={semanaAtual} />
 
-        <GastosPorMeta semanaAtual={semanaAtual} />
+        {/* <GastosPorMeta semanaAtual={semanaAtual} /> */}
 
-        <ListagemPorData gastosPorData={gastosPorData} />
+        <ListagemPorCategoria gastosPorCategoria={gastosAgrupadosPorGoal} />
 
         <div className="">
           <Button

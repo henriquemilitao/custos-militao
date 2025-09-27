@@ -9,6 +9,18 @@ import { Gasto } from "@prisma/client";
 import { toast } from "sonner";
 import { DialogConfirmDelete, TipoItemDelete } from "@/components/common/dialogConfirmDelete";
 import { formatCurrencyFromCents } from "@/lib/formatters/formatCurrency";
+import ProgressBar from "@/components/ui/progress-bar";
+
+const getBgClass = (percent: number) => {
+  if (percent > 100) return "bg-red-100 border-2 border-red-600"; // passou da meta
+  if (percent > 80) return "bg-red-100 border-red-300";
+  if (percent >= 70) return "bg-orange-50 border-orange-200";
+  if (percent >= 60) return "bg-yellow-50 border-yellow-200";
+  if (percent === 0) return "bg-gray-50 border-gray-200";
+  return "bg-green-50 border-green-200";
+};
+
+
 
 type GastosCardProps = {
   cicloAtual: CicloAtualDTO | null;
@@ -25,11 +37,11 @@ export default function GastosCard({ cicloAtual, mutateCiclo }: GastosCardProps)
     return cicloAtual?.gastosPorMetaTotais.find((g) => g.id === gastoId);
   };
 
-  const ProgressBar = ({ percent }: { percent: number }) => (
-    <div className="w-full bg-gray-200 rounded-full h-2">
-      <div className="bg-blue-500 h-2 rounded-full" style={{ width: `${percent}%` }} />
-    </div>
-  );
+  // const ProgressBar = ({ percent }: { percent: number }) => (
+  //   <div className="w-full bg-gray-200 rounded-full h-2">
+  //     <div className="bg-blue-500 h-2 rounded-full" style={{ width: `${percent}%` }} />
+  //   </div>
+  // );
 
   
   const handleGuardarGasto = async (gasto: Gasto) => {
@@ -100,10 +112,8 @@ export default function GastosCard({ cicloAtual, mutateCiclo }: GastosCardProps)
                   className={`p-3 rounded-xl border flex justify-between items-start ${
                     gasto.tipo === "single" && gasto.isPago
                       ? "bg-green-100 border-green-300 opacity-90"
-                      : gasto.tipo === "goal" && percentRaw === 100
-                      ? "bg-green-100 border-green-300 opacity-90"
-                      : gasto.tipo === "goal" && percentRaw > 100
-                      ? "bg-red-100 border-red-300 opacity-90"
+                      : gasto.tipo === "goal"
+                      ? getBgClass(percentRaw) // <<< usa a função de cor
                       : "bg-gray-50 border-gray-200"
                   }`}
                 >
@@ -155,7 +165,7 @@ export default function GastosCard({ cicloAtual, mutateCiclo }: GastosCardProps)
                             {formatCurrencyFromCents(disponivelCents)}
                           </span>
                         </p>
-                        <ProgressBar percent={percentBar} />
+                        <ProgressBar percent={percentRaw} />
                         <p className="text-xs text-gray-400">
                           Gastei {percentRaw.toFixed(0)}%
                         </p>
