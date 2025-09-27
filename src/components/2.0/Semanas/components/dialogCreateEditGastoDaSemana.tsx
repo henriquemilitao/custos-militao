@@ -79,7 +79,7 @@ export function DialogCreateEditGasto({
     setLoading(true);
     try {
       const body = {
-        name: nome.trim(),
+        name: formatarName(nome.trim()),
         valor: Math.round(valor ?? 0),
         data,
         cicloId: cicloAtual.id,

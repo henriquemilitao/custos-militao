@@ -16,22 +16,27 @@ function zodErrorToMessage(err: ZodError) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    console.log(body)
     const parsed = createRegistroGastoSchema.parse(body);
 
-    // garantir que não venha float do front
     const valorCents = Math.round(parsed.valorCents ?? 0);
 
-    const registro = await createRegistroGastoService({
+    const result = await createRegistroGastoService({
       ...parsed,
       valorCents,
     });
 
-    return created(registro);
+    if (!result.ok) {
+      return NextResponse.json(
+        { error: result.message, type: result.type },
+        { status: 400 }
+      );
+    }
+
+    return created(result.data);
   } catch (err: any) {
     if (err instanceof ZodError) {
       return NextResponse.json(
-        { error: zodErrorToMessage(err) },
+        { error: err.issues.map((e) => e.message) },
         { status: 422 }
       );
     }
@@ -41,3 +46,5 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
+

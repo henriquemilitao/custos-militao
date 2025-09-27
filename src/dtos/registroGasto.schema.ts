@@ -1,3 +1,4 @@
+import { permission } from "process";
 import { z } from "zod";
 
 export const createRegistroGastoSchema = z.object({
@@ -13,6 +14,8 @@ export const createRegistroGastoSchema = z.object({
     .min(1, { message: "Categoria é obrigatória" })
     .uuid({ message: "Categoria inválida" }),
   semanaId: z.string().uuid({ message: "Semana inválida" }),
+  permission: z.boolean().optional(), // só para controle no front, permite 
+  // ação de salvar mesmo com data de gasto fora do semana atual
 });
 
 export type CreateRegistroGastoDTO = z.infer<typeof createRegistroGastoSchema>;

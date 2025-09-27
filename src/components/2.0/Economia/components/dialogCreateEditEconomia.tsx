@@ -114,7 +114,7 @@ export function DialogCreateEditEconomia({
     setLoading(true);
     try {
       const body = {
-        name: data.name,
+        name: formatarName(data.name),
         valorCents: data.valorCents ?? 0,
         cicloId: data.cicloId,
       };
@@ -151,7 +151,7 @@ export function DialogCreateEditEconomia({
     setLoading(true);
     try {
       const body = {
-        name: data.name,
+        name: formatarName(data.name),
         valorCents: data.valorCents ?? 0,
       };
 

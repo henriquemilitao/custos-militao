@@ -85,7 +85,7 @@ export function DialogCreateEditGasto({
 
     // monta payload base
     const payload = {
-      name: name.trim(),
+      name: formatarName(name.trim()),
       valorCents: valor ?? null,
       tipoGasto,
       ...(isEdit ? {} : { cicloId: cicloAtual?.id ?? "" }),

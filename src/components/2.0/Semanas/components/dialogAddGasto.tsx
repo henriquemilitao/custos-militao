@@ -12,6 +12,10 @@ import { InputCurrency } from "../../InputCurrency";
 import { createRegistroGastoSchema } from "@/dtos/registroGasto.schema";
 import { toast } from "sonner";
 import { BaseDialog } from "@/components/common/BaseDialog";
+import { CicloAtualDTO } from "@/dtos/ciclo.dto";
+import { formatDateDayMonth, formatPeriodoDayMonth } from "@/lib/formatters/formatDate";
+import { permission } from "process";
+import { set } from "zod";
 
 type Meta = {
   id: string;
@@ -37,15 +41,22 @@ type Props = {
   metas: Meta[];
   mutateCiclo: () => void;
   semanaAtual: semanaAtual;
+  cicloAtual?: CicloAtualDTO | null;
 };
 
-export function DialogAddGasto({ open, setOpen, metas, mutateCiclo, semanaAtual }: Props) {
+export function DialogAddGasto({ open, setOpen, metas, mutateCiclo, semanaAtual, cicloAtual }: Props) {
   const [name, setName] = useState("");
   const [valor, setValor] = useState<number | null>(null);
   const [data, setData] = useState<Date | null>(new Date());
   const [gastoId, setGastoId] = useState<string | null>(null);
   const [errors, setErrors] = useState<{ name?: string; valorCents?: string; data?: string; gastoId?: string; semanaId?: string }>({});
   const [loading, setLoading] = useState(false);
+  const [showConfirm, setShowConfirm] = useState<{
+    message: string;
+    body: any;
+  } | null>(null);
+  const [openCalendar, setOpenCalendar] = useState(false);
+
 
   const hoje = new Date();
   const ontem = new Date(hoje); ontem.setDate(hoje.getDate() - 1);
@@ -73,7 +84,7 @@ export function DialogAddGasto({ open, setOpen, metas, mutateCiclo, semanaAtual 
     setErrors({});
 
     const body = {
-      name: name.trim(),
+      name: formatarName(name.trim()),
       valorCents: valor,
       data,
       gastoId: gastoId ?? "",
@@ -103,7 +114,23 @@ export function DialogAddGasto({ open, setOpen, metas, mutateCiclo, semanaAtual 
       const dataRes = await res.json().catch(() => null);
 
       if (!res.ok) {
-        toast.error(dataRes?.error || "Erro ao salvar gasto");
+        if (dataRes?.type === "fora-ciclo") {
+          // ❌ não permite continuar
+          // toast.error(dataRes.error || "A data não pertence ao ciclo atual.");
+          toast("A data escolhida não pertence ao ciclo atual.", {
+                    description: `Defina uma data entre 
+                    ${formatPeriodoDayMonth(cicloAtual?.dataInicio, cicloAtual?.dataFim)}.`,
+                    style: { background: "#fee2e2", color: "#b91c1c" },
+                  });
+        } else if (dataRes?.type === "fora-semana") {
+          // ⚠️ abre modal de confirmação
+          setShowConfirm({
+            message: dataRes.error,
+            body: {... parsed.data, permission: true},
+          });
+        } else {
+          toast.error(dataRes?.error || "Erro ao salvar gasto");
+        }
         setLoading(false);
         return;
       }
@@ -179,7 +206,7 @@ export function DialogAddGasto({ open, setOpen, metas, mutateCiclo, semanaAtual 
         </div>
 
         <div className="flex-1 space-y-1">
-          <Popover>
+          <Popover open={openCalendar} onOpenChange={setOpenCalendar}>
             <PopoverTrigger asChild>
               <Button2
                 variant="outline"
@@ -207,7 +234,12 @@ export function DialogAddGasto({ open, setOpen, metas, mutateCiclo, semanaAtual 
               <Calendar
                 mode="single"
                 selected={data!}
-                onSelect={(d) => d && setData(d)}
+                onSelect={(d) => {
+                  setTimeout(() => {
+                    setOpenCalendar(false)
+                   }, 200);
+                  d && setData(d)
+                }}
                 locale={ptBR}
                 initialFocus
                 className="p-2 text-xs" // deixa o calendário um pouco menor
@@ -219,7 +251,6 @@ export function DialogAddGasto({ open, setOpen, metas, mutateCiclo, semanaAtual 
               />
             </PopoverContent>
           </Popover>
-
         </div>
       </div>
 
@@ -248,6 +279,65 @@ export function DialogAddGasto({ open, setOpen, metas, mutateCiclo, semanaAtual 
       <div className="-mt-3">
         {errors.gastoId && <span className="text-xs text-red-600 mt-1">{errors.gastoId}</span>}
       </div>
+
+
+      {showConfirm && (
+        <BaseDialog
+          open={true}
+          onOpenChange={() => setShowConfirm(null)}
+          title="Data de outra semana"
+          footer={
+            <>
+              <Button variant="secondary" onClick={() => setShowConfirm(null)}>
+                Cancelar
+              </Button>
+              <Button
+                variant="primary"
+                onClick={async () => {
+                  const res = await fetch("/api/registros", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(showConfirm.body),
+                  });
+                  if (res.ok) {
+                    toast.success(`Gasto adicionado com sucesso na semana do dia ${formatDateDayMonth(data)}`, {
+                      style: { background: "#dcfce7", color: "#166534" },
+                    });
+                    mutateCiclo();
+                    handleClose();
+                  } else {
+                    toast.error("Erro ao adicionar gasto");
+                  }
+                  setShowConfirm(null);
+                }}
+              >
+                Continuar
+              </Button>
+            </>
+          }
+        >
+          <div className="space-y-3">
+            {/* Destaque em vermelho/amarelo */}
+            <div className="p-3 rounded-lg bg-yellow-50 border border-yellow-300 text-sm text-yellow-800 flex items-start gap-2">
+              <span className="text-yellow-600 text-lg">⚠️</span>
+              <div>
+                <p className="font-semibold">Atenção!</p>
+                <p>{showConfirm.message}</p>
+              </div>
+            </div>
+
+            <p className="text-sm text-gray-700 leading-relaxed">
+              Se você confirmar, o gasto será automaticamente adicionado{" "}
+              <strong className="text-blue-600">na semana correspondente ao dia
+                <strong className="text-blue-800 text-sm">
+                 {''} {formatDateDayMonth(data)}
+                </strong>
+              </strong>.
+            </p>
+          </div>
+        </BaseDialog>
+      )}
+
 
     </BaseDialog>
   );

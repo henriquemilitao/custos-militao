@@ -127,6 +127,7 @@ export default function ControleSemanal({ cicloAtual, mutateCiclo }: ControleSem
         metas={semanaAtual?.gastosMeta || []}
         mutateCiclo={mutateCiclo}
         semanaAtual={semanaAtual}
+        cicloAtual={cicloAtual}
       />
     </div>
   );
