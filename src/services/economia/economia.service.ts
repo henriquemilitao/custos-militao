@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { Economia } from "@prisma/client";
+import { syncAleatorio } from "../aleatorio/aleatorio.service";
 
 // services/economiaService.ts
 export async function createEconomiaService(params: {
@@ -8,6 +9,8 @@ export async function createEconomiaService(params: {
   cicloId: string;
 }) {
   const { name, valorCents, cicloId } = params;
+
+  await syncAleatorio(cicloId);
 
   return prisma.economia.create({
     data: {
@@ -25,6 +28,12 @@ export async function editEconomiaService(economiaId: string, params: {
 }) {
   const { name, valorCents} = params;
 
+  const economia = await prisma.economia.findUnique({ where: { id: economiaId } });
+  
+  if (!economia) return null;
+  
+  await syncAleatorio(economia.cicloId);
+
   return prisma.economia.update({
     where: {id: economiaId},
     data: {
@@ -39,7 +48,6 @@ export async function toggleGuardarEconomiaService(economiaId: string) {
     where: { id: economiaId },
   });
 
-  console.log(economia)
   if (!economia) return null;
 
   return prisma.economia.update({
@@ -54,7 +62,19 @@ export async function toggleGuardarEconomiaService(economiaId: string) {
 }
 
 export async function deleteEconomiaService(economiaId: string){
+
+  const economia = await prisma.economia.findUnique({ 
+    where: { 
+      id: economiaId 
+    },
+    select: { cicloId: true } 
+  });
+
+  if (!economia) return null;
+
+  await syncAleatorio(economia.cicloId);
+
   return prisma.economia.delete({
-    where: {id: economiaId}
+    where: {  id: economiaId  }
   });
 }

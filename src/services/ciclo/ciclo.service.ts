@@ -2,6 +2,7 @@ import { CicloAtualDTO } from "@/dtos/ciclo.dto";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { gerarSemanasParaCiclo, getMesAtualTimeZone } from "./utils";
+import { syncAleatorio } from "../aleatorio/aleatorio.service";
 
 
 export async function getCicloById(cicloId: string) {
@@ -107,6 +108,7 @@ export async function getCicloAtual(userId: string | undefined): Promise<CicloAt
       };
     });
 
+  await syncAleatorio(ciclo.id);
 
   return {
     ...ciclo,
@@ -193,8 +195,14 @@ export async function updateCicloValorTotalService(params: {
     throw new Error("Usuário não autenticado");
   }
 
+  const ciclo = await prisma.ciclo.findUnique({
+    where: { id: cicloId },
+  });
+
+  if (!ciclo) return null;
+
   // atualiza somente se o ciclo for do usuário logado
-  const ciclo = await prisma.ciclo.updateMany({
+  const cicloAtualizado = await prisma.ciclo.updateMany({
     where: {
       id: cicloId,
       userId: session.user.id,
@@ -204,12 +212,12 @@ export async function updateCicloValorTotalService(params: {
     },
   });
 
-  if (ciclo.count === 0) {
+  if (cicloAtualizado.count === 0) {
     throw new Error("Ciclo não encontrado ou não pertence ao usuário");
   }
+  
+  await syncAleatorio(ciclo.id);
 
   // retorna o ciclo atualizado
-  return prisma.ciclo.findUnique({
-    where: { id: cicloId },
-  });
+  return cicloAtualizado
 }

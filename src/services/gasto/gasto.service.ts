@@ -1,6 +1,7 @@
 // src/services/gasto/gasto.service.ts
 import { prisma } from "@/lib/prisma";
 import { TipoGasto } from "@prisma/client";
+import { syncAleatorio } from "../aleatorio/aleatorio.service";
 
 export type GastoWithRegistrosSum = {
   id: string;
@@ -63,6 +64,11 @@ export async function createGastoService(params: {
 }) {
   const { name, valorCents, cicloId, tipoGasto } = params;
 
+  
+  if (name !== "Aleatório") {
+    await syncAleatorio(cicloId);
+  }
+
   return prisma.gasto.create({
     data: {
       name,
@@ -123,6 +129,10 @@ export async function editGastoService(
       }),
     ]);
 
+    if (name !== "Aleatório") {
+      await syncAleatorio(gasto.cicloId);
+    }
+
     return {
       ...gasto,
       valor: valorCents,
@@ -164,7 +174,6 @@ export async function togglePagarGastoService(gastoId: string) {
 export async function deleteGastoService(gastoId: string){
   const gasto = await prisma.gasto.findUnique({
     where: { id: gastoId},
-    select: { tipo: true }
   })
   
   if (!gasto) throw new Error("Gasto não encontrado");
@@ -176,6 +185,10 @@ export async function deleteGastoService(gastoId: string){
     });
   }
 
+  if (gasto.name !== "Aleatório") {
+    await syncAleatorio(gasto.cicloId);
+  }
+  
   return prisma.gasto.delete({
     where: {id: gastoId}
   });
