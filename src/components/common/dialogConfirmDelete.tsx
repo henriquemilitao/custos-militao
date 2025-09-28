@@ -22,7 +22,6 @@ type DialogConfirmDeleteProps = {
 };
 
 export function DialogConfirmDelete({ showModal, setShowModal, mutateCiclo, item, tipoItem }: DialogConfirmDeleteProps) {
-  console.log('aaaaa')
   const [loading, setLoading] = useState(false);
 
   // pega o nome certo independente do tipo

@@ -115,7 +115,8 @@ export default function GastosCard({ cicloAtual, mutateCiclo }: GastosCardProps)
 
               // mas a barra de progresso não pode passar de 100%
               const percentBar = Math.min(percentRaw, 100);
-              
+              console.log(gasto.name === "Aleatório")
+              console.log('aaaaaaaaaaaaaaaaaaaa')
               return (
                 <div
                   key={gasto.id}
@@ -182,44 +183,47 @@ export default function GastosCard({ cicloAtual, mutateCiclo }: GastosCardProps)
                       </div>
                     )}
                   </div>
-
+                  
                   {/* Menu */}
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <button className="p-1 rounded-full hover:bg-gray-200">
-                        <MoreVertical size={18} />
-                      </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-32">
-                      {gasto.tipo === "single" && (
-                        <DropdownMenuItem
-                          onClick={() => handleGuardarGasto(gasto)}
-                        >
-                          {!gasto.isPago ?
-                            <CheckCircle size={16} className="text-green-500" />
-                            :
-                            <RotateCcw size={16} className="text-yellow-500" />
-                          }                          
-                          <p className="font-medium text-gray-600">{!gasto.isPago ? 'Pagar' : 'Reverter'}</p>
+                  {gasto.name != "Aleatório" && (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <button className="p-1 rounded-full hover:bg-gray-200">
+                          <MoreVertical size={18} />
+                        </button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-32">
+                        {gasto.tipo === "single" && (
+                          <DropdownMenuItem
+                            onClick={() => handleGuardarGasto(gasto)}
+                          >
+                            {!gasto.isPago ?
+                              <CheckCircle size={16} className="text-green-500" />
+                              :
+                              <RotateCcw size={16} className="text-yellow-500" />
+                            }                          
+                            <p className="font-medium text-gray-600">{!gasto.isPago ? 'Pagar' : 'Reverter'}</p>
+                          </DropdownMenuItem>
+                        )}
+                        <DropdownMenuItem onClick={() => { 
+                          setIsEdit(true); 
+                          setCurrentGasto(gasto); 
+                          setShowModal(true); 
+                          }}>
+                          <Edit size={16} className="text-blue-500" />
+                          <p className="font-medium text-gray-600">Editar</p>
                         </DropdownMenuItem>
-                      )}
-                      <DropdownMenuItem onClick={() => { 
-                        setIsEdit(true); 
-                        setCurrentGasto(gasto); 
-                        setShowModal(true); 
-                        }}>
-                        <Edit size={16} className="text-blue-500" />
-                        <p className="font-medium text-gray-600">Editar</p>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => {
-                        setCurrentGasto(gasto)
-                        setShowConfirmDelete(true)
-                        }}>
-                        <Trash2 size={16} className="text-red-500" />
-                        <p className="font-medium text-gray-600">Excluir</p>
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                        <DropdownMenuItem onClick={() => {
+                          setCurrentGasto(gasto)
+                          setShowConfirmDelete(true)
+                          }}>
+                          <Trash2 size={16} className="text-red-500" />
+                          <p className="font-medium text-gray-600">Excluir</p>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  )}
+
                 </div>
               );
             })

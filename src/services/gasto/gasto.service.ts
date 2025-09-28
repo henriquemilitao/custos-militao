@@ -189,11 +189,13 @@ export async function deleteGastoService(gastoId: string){
     });
   }
 
+  const gastoDeleted = await prisma.gasto.delete({
+    where: {id: gastoId}
+  });
+
   if (gasto.name !== "Aleatório") {
     await syncAleatorio(gasto.cicloId);
   }
-  
-  return prisma.gasto.delete({
-    where: {id: gastoId}
-  });
+
+  return gastoDeleted;
 }

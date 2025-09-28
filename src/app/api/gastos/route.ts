@@ -16,24 +16,17 @@ function zodErrorToMessage(err: ZodError) {
 
 export async function POST(req: NextRequest) {
     try {
-    console.log('a')
     const body = await req.json();
-    console.log('b')
-    console.log(body)
     const parsed = createGastoSchema.parse(body);
-    console.log('c')
     const valorCents = Math.round(parsed.valorCents ?? 0);
-    console.log('d')   
 
     const gasto = await createGastoService({
       ...parsed,
       valorCents,
     });
-    console.log('e')   
 
     return created(gasto);
   } catch (err: any) {
-    console.log(zodErrorToMessage(err))
     if (err instanceof ZodError) {
       return NextResponse.json({ error: zodErrorToMessage(err) }, { status: 422 });
     }

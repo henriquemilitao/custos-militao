@@ -72,13 +72,6 @@ export async function getCicloAtual(userId: string | undefined): Promise<CicloAt
   const gastoTotalJaRealizado = gastosUnicosJaRealizados + gastosPorMetaJaRealizados;
   const disponivelMes = (ciclo.valorTotal * 100 - economiasJaGuardadas - gastoTotalJaRealizado);
 
-  
-    console.log({
-      disponivelMes,
-      cicloValorTotal: ciclo.valorTotal * 100,
-      economiasJaGuardadas,
-      gastoTotalJaRealizado
-    })
   // --- gastos por meta enriquecidos ---
   const registrosAgrupados = await prisma.registroGasto.groupBy({
     by: ["gastoId"],

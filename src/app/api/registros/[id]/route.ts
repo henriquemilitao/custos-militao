@@ -10,14 +10,12 @@ export async function PATCH(req: NextRequest, context: { params: Promise<{ id: s
 
     const body = await req.json();
     const parsed = editRegistroGastoSchema.parse(body);
-    console.log('registroId', registroId, parsed)
     const valorCents = Math.round(parsed.valorCents ?? 0);
 
     const result = await editRegistroGastoService(registroId, {
       ...parsed,
       valorCents,
     });
-    console.log('result', result)
     if (!result.ok) {
       return NextResponse.json(
         { error: result.message, type: result.type },

@@ -88,7 +88,6 @@ export function DialogAddEditGasto({
 
   // preencher quando for edição
   useEffect(() => {
-    console.log({ isEdit, currentGasto });
     if (isEdit && currentGasto) {
       setName(currentGasto.name);
       setValor(currentGasto.valor);
@@ -222,7 +221,6 @@ export function DialogAddEditGasto({
       const json = await res.json().catch(() => null);
 
       if (!res.ok) {
-        console.log({ json, res, jsonType: json.type });
         if (json?.type === "fora-ciclo") {
           toast("A data escolhida não pertence ao ciclo atual.", {
             description: `Defina uma data entre 
@@ -230,7 +228,6 @@ export function DialogAddEditGasto({
             style: { background: "#fee2e2", color: "#b91c1c" },
           });
         } else if (json?.type === "fora-semana") {
-          console.log('oiiiiiiZ')
           setShowConfirm({
             message: json.error,
             body: { ...data, permission: true },
