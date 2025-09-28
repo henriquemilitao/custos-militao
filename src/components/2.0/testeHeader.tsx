@@ -1,24 +1,62 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from "@/components/ui/sheet";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ChevronLeft, ChevronRight, Settings, LogOut, CalendarIcon } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/popover";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetFooter,
+} from "@/components/ui/sheet";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Settings,
+  LogOut,
+  CalendarIcon,
+} from "lucide-react";
 import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import { ptBR, ro, se } from "date-fns/locale";
 import { Calendar } from "../ui/calendar";
+
+// 🟢 importei o cliente de auth
+import { authClient } from "@/lib/auth-client";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useRouter } from "next/navigation";
 
 export default function HeaderSistema() {
   const [configOpen, setConfigOpen] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [mesAtual, setMesAtual] = useState(new Date());
-  const [tipoCiclo, setTipoCiclo] = useState<"mensal" | "personalizado">("mensal");
+  const [tipoCiclo, setTipoCiclo] = useState<"mensal" | "personalizado">(
+    "mensal"
+  );
   const [dataInicio, setDataInicio] = useState<Date | undefined>(undefined);
   const [dataFim, setDataFim] = useState<Date | undefined>(undefined);
 
+  // 🟢 pega session atual
+  const { data: session } = authClient.useSession();
+  const router = useRouter();
 
   const handleMesAnterior = () => {
     const novo = new Date(mesAtual);
@@ -36,7 +74,12 @@ export default function HeaderSistema() {
     <div className="flex items-center justify-between px-4 py-3 bg-white shadow-sm rounded-2xl mb-4">
       {/* Navegação de mês */}
       <div className="flex items-center gap-2">
-        <Button variant="outline" size="sm" onClick={handleMesAnterior} className="rounded-lg">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleMesAnterior}
+          className="rounded-lg"
+        >
           <ChevronLeft className="h-4 w-4" />
         </Button>
 
@@ -49,7 +92,10 @@ export default function HeaderSistema() {
           <PopoverContent className="w-60">
             <div className="flex gap-2">
               {/* Mês */}
-              <Select defaultValue={String(mesAtual.getMonth())} onValueChange={() => {}}>
+              <Select
+                defaultValue={String(mesAtual.getMonth())}
+                onValueChange={() => {}}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Mês" />
                 </SelectTrigger>
@@ -63,7 +109,10 @@ export default function HeaderSistema() {
               </Select>
 
               {/* Ano */}
-              <Select defaultValue={String(mesAtual.getFullYear())} onValueChange={() => {}}>
+              <Select
+                defaultValue={String(mesAtual.getFullYear())}
+                onValueChange={() => {}}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Ano" />
                 </SelectTrigger>
@@ -82,19 +131,33 @@ export default function HeaderSistema() {
           </PopoverContent>
         </Popover>
 
-        <Button variant="outline" size="sm" onClick={handleMesProximo} className="rounded-lg">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleMesProximo}
+          className="rounded-lg"
+        >
           <ChevronRight className="h-4 w-4" />
         </Button>
       </div>
 
-      {/* Avatar fake */}
-      <Button variant="ghost" size="sm" className="rounded-full" onClick={() => setSheetOpen(true)}>
-        <img
-          src="https://ui-avatars.com/api/?name=Lucy+Vizotto"
-          alt="user"
-          className="h-8 w-8 rounded-full"
-        />
-      </Button>
+      {/* Avatar dinâmico */}
+      {session?.user && (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="rounded-full"
+          onClick={() => setSheetOpen(true)}
+        >
+          <Avatar>
+            <AvatarImage src={session.user.image as string | undefined} />
+            <AvatarFallback>
+              {session.user.name?.split(" ")?.[0]?.[0]}
+              {session.user.name?.split(" ")?.[1]?.[0]}
+            </AvatarFallback>
+          </Avatar>
+        </Button>
+      )}
 
       {/* Sheet lateral */}
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
@@ -103,32 +166,45 @@ export default function HeaderSistema() {
             <SheetTitle>Minha conta</SheetTitle>
           </SheetHeader>
 
-          <div className="flex flex-col items-center gap-2 mt-4">
-            <img
-              src="https://ui-avatars.com/api/?name=Lucy+Vizotto"
-              alt="user"
-              className="h-16 w-16 rounded-full"
-            />
-            <p className="font-medium">Lucy Vizotto</p>
-            <p className="text-sm text-gray-500">lucy@email.com</p>
-          </div>
+          {session?.user ? (
+            <div className="flex flex-col items-center gap-2 mt-4">
+              <Avatar className="h-16 w-16">
+                <AvatarImage src={session.user.image as string | undefined} />
+                <AvatarFallback>
+                  {session.user.name?.split(" ")?.[0]?.[0]}
+                  {session.user.name?.split(" ")?.[1]?.[0]}
+                </AvatarFallback>
+              </Avatar>
+              <p className="font-medium">{session.user.name}</p>
+              <p className="text-sm text-gray-500">{session.user.email}</p>
+            </div>
+          ) : (
+            <p className="text-center mt-6 text-gray-500">
+              Nenhum usuário logado
+            </p>
+          )}
 
-          <div className="mt-6 space-y-2 px-5">
-            <Button
-              variant="outline"
-              className="w-full flex items-center gap-2 rounded-xl"
-              onClick={() => setConfigOpen(true)}
-            >
-              <Settings className="h-4 w-4" /> Configurações
-            </Button>
-            <Button
-              variant="destructive"
-              className="w-full flex items-center gap-2 rounded-xl"
-              onClick={() => alert("Logout")}
-            >
-              <LogOut className="h-4 w-4" /> Sair
-            </Button>
-          </div>
+          {session?.user && (
+            <div className="mt-6 space-y-2 px-5">
+              <Button
+                variant="outline"
+                className="w-full flex items-center gap-2 rounded-xl"
+                onClick={() => setConfigOpen(true)}
+              >
+                <Settings className="h-4 w-4" /> Configurações
+              </Button>
+              <Button
+                variant="destructive"
+                className="w-full flex items-center gap-2 rounded-xl"
+                onClick={async () => {
+                  await authClient.signOut();
+                  router.push('/authentication');
+                }}
+              >
+                <LogOut className="h-4 w-4" /> Sair
+              </Button>
+            </div>
+          )}
 
           <SheetFooter />
         </SheetContent>
@@ -136,7 +212,6 @@ export default function HeaderSistema() {
 
       {/* Modal Configuração */}
       <Dialog open={configOpen} onOpenChange={setConfigOpen}>
-        {/* limitei a largura com max-w-md + padding, mobile-first */}
         <DialogContent className="w-[92%] max-w-md rounded-2xl p-6">
           <DialogHeader>
             <DialogTitle>Configurar ciclo financeiro</DialogTitle>
@@ -144,7 +219,8 @@ export default function HeaderSistema() {
 
           <div className="space-y-4">
             <p className="text-sm text-gray-600">
-              Escolha se deseja usar ciclo mensal padrão ou definir suas próprias datas.
+              Escolha se deseja usar ciclo mensal padrão ou definir suas próprias
+              datas.
             </p>
 
             {/* Tipo de ciclo */}
@@ -157,7 +233,9 @@ export default function HeaderSistema() {
                   checked={tipoCiclo === "mensal"}
                   onChange={() => setTipoCiclo("mensal")}
                 />
-                <span className="text-sm text-neutral-700">Mensal (1º até fim do mês)</span>
+                <span className="text-sm text-neutral-700">
+                  Mensal (1º até fim do mês)
+                </span>
               </label>
 
               <label className="flex items-center gap-2">
@@ -168,22 +246,32 @@ export default function HeaderSistema() {
                   checked={tipoCiclo === "personalizado"}
                   onChange={() => setTipoCiclo("personalizado")}
                 />
-                <span className="text-sm text-neutral-700">Personalizado (definir datas)</span>
+                <span className="text-sm text-neutral-700">
+                  Personalizado (definir datas)
+                </span>
               </label>
             </div>
 
             {/* Datas só aparecem se for personalizado */}
             {tipoCiclo === "personalizado" && (
-              // mantenho os inputs sempre inline: flex sem wrap, cada filho com min-w-0 pra encolher corretamente
               <div className="flex gap-3 mt-3 flex-nowrap">
                 {/* Início */}
                 <div className="flex-1 min-w-0 space-y-1">
-                  <label className="text-base text-neutral-700">Início do ciclo</label>
+                  <label className="text-base text-neutral-700">
+                    Início do ciclo
+                  </label>
                   <Popover>
                     <PopoverTrigger asChild>
-                      <Button variant="outline" className="w-full justify-start rounded-xl">
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start rounded-xl"
+                      >
                         <CalendarIcon className="mr-2 h-4 w-4" />
-                        {dataInicio ? format(dataInicio, "dd/MM/yyyy", { locale: ptBR }) : <span>Escolha</span>}
+                        {dataInicio ? (
+                          format(dataInicio, "dd/MM/yyyy", { locale: ptBR })
+                        ) : (
+                          <span>Escolha</span>
+                        )}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
@@ -200,12 +288,21 @@ export default function HeaderSistema() {
 
                 {/* Fim */}
                 <div className="flex-1 min-w-0 space-y-1">
-                  <label className="text-base text-neutral-700">Fim do ciclo</label>
+                  <label className="text-base text-neutral-700">
+                    Fim do ciclo
+                  </label>
                   <Popover>
                     <PopoverTrigger asChild>
-                      <Button variant="outline" className="w-full justify-start rounded-xl">
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start rounded-xl"
+                      >
                         <CalendarIcon className="mr-2 h-4 w-4" />
-                        {dataFim ? format(dataFim, "dd/MM/yyyy", { locale: ptBR }) : <span>Escolha</span>}
+                        {dataFim ? (
+                          format(dataFim, "dd/MM/yyyy", { locale: ptBR })
+                        ) : (
+                          <span>Escolha</span>
+                        )}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
@@ -221,13 +318,8 @@ export default function HeaderSistema() {
                 </div>
               </div>
             )}
-
           </div>
 
-          {/* Footer responsivo:
-              - mobile: coluna (botões empilhados, legível)
-              - sm+  : linha (botões lado a lado) e sem wrap pra evitar "quebra" quando ampliar tela
-          */}
           <DialogFooter className="mt-4 flex flex-col sm:flex-row sm:flex-nowrap sm:justify-end gap-2">
             <Button
               variant="outline"

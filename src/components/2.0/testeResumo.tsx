@@ -18,7 +18,6 @@ export default function ResumoMesCard({cicloAtual}: ResumoMesCardProps) {
   // const disponivelMes = valorMesTotal - economiasMesTotal - gastosMesTotal
   
 
-
   const data = [
     { name: "Gastos", value: cicloAtual?.gastoTotalJaRealizado, color: "#ef4444" },
     { name: "Economias", value: cicloAtual?.economiasJaGuardadas, color: "#3b82f6" },
@@ -34,32 +33,36 @@ export default function ResumoMesCard({cicloAtual}: ResumoMesCardProps) {
             Resumo do Mês 
             
           </h2>
+        {cicloAtual?.id &&  
           <p className="text-sm text-gray-500 mb-2">{cicloAtual && `${formatPeriodoDayMonth(cicloAtual?.dataInicio, cicloAtual?.dataFim)}`}</p>
+        }
         </div>
 
         {/* Gráfico */}
-        <div className="h-57 flex items-center justify-center">
-          <ResponsiveContainer>
-            <PieChart>
-              <Pie
-                data={data}
-                cx="50%"
-                cy="50%"
-                labelLine={false}
-                outerRadius={80}
-                dataKey="value"
-                label={({ percent }: any) =>
-                  `${(percent * 100).toFixed(0)}%`
-                }
-              >
-                {data.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Pie>
-              <Tooltip formatter={(value) => `R$ ${value}`} />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
+        {cicloAtual?.id &&  
+          <div className="h-57 flex items-center justify-center">
+            <ResponsiveContainer>
+              <PieChart>
+                <Pie
+                  data={data}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  outerRadius={80}
+                  dataKey="value"
+                  label={({ percent }: any) =>
+                    `${(percent * 100).toFixed(0)}%`
+                  }
+                >
+                  {data.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip formatter={(value) => `R$ ${value}`} />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        }
 
         {/* Infos principais */}
         <div className="grid grid-cols-2 gap-3 text-sm mt-5">

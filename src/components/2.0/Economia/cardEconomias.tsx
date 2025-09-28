@@ -63,7 +63,7 @@ export default function EconomiasCard({ cicloAtual, mutateCiclo }: EconomiasCard
         </div>
 
         {/* Listagem */}
-        <div className="space-y-3 min-h-[100px] flex flex-col justify-center">
+        <div className="space-y-3 min-h-[40px] flex flex-col justify-center">
           {!cicloAtual ? (
             <p className="text-xs text-gray-400 text-center">Carregando ciclo...</p>
           ) : isEmpty ? (

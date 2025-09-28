@@ -96,7 +96,7 @@ const SignUpForm = () => {
                 <FormItem>
                   <FormLabel>Nome</FormLabel>
                   <FormControl>
-                    <Input placeholder="Digite seu nome" value="teste" {...field} />
+                    <Input placeholder="Digite seu nome" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -109,7 +109,7 @@ const SignUpForm = () => {
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input placeholder="Digite seu email"  value="teste@teste.com" {...field} />
+                    <Input placeholder="Digite seu email" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -125,7 +125,6 @@ const SignUpForm = () => {
                     <Input
                       placeholder="Digite sua senha"
                       type="password"
-                      value="12345678"
                       {...field}
                     />
                   </FormControl>
@@ -143,7 +142,6 @@ const SignUpForm = () => {
                     <Input
                       placeholder="Confirme sua senha"
                       type="password"
-                      value="12345678"
                       {...field}
                     />
                   </FormControl>
