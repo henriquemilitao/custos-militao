@@ -134,7 +134,7 @@ model Semana {
   updatedAt      DateTime @updatedAt @map("updated_at")
 
   cicloId String
-  ciclo   Ciclo   @relation(fields: [cicloId], references: [id]), onDelete: Cascade)
+  ciclo   Ciclo   @relation(fields: [cicloId], references: [id])
 
   registros RegistroGasto[]
 
