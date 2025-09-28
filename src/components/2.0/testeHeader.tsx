@@ -37,7 +37,7 @@ import { useRouter } from "next/navigation";
 export default function HeaderSistema() {
   const [configOpen, setConfigOpen] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
-  const [mesAtual, setMesAtual] = useState(new Date());
+  const [mesAtual, _] = useState(new Date());
   const [tipoCiclo, setTipoCiclo] = useState<"mensal" | "personalizado">(
     "mensal"
   );

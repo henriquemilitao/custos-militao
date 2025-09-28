@@ -7,6 +7,19 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import EditableCurrency from "../EditableCurrency";
 import { toast } from "sonner";
 
+// No início do arquivo testeResumo.tsx, adicione esta interface:
+interface PieLabelProps {
+  cx?: number;
+  cy?: number;
+  midAngle?: number;
+  innerRadius?: number;
+  outerRadius?: number;
+  percent?: number;
+  index?: number;
+  name?: string;
+  value?: number;
+}
+
 type ResumoMesCardProps = {
   mutateCiclo: () => void
   cicloAtual: CicloAtualDTO | null
@@ -48,7 +61,7 @@ export default function ResumoMesCard({cicloAtual, mutateCiclo}: ResumoMesCardPr
         style: { background: "#dcfce7", color: "#166534" },
       });
 
-      mutateCiclo(undefined, { revalidate: true });
+      mutateCiclo();
     } catch {
       toast.error("Não foi possível criar o ciclo");
     }
@@ -114,9 +127,9 @@ export default function ResumoMesCard({cicloAtual, mutateCiclo}: ResumoMesCardPr
                   labelLine={false}
                   outerRadius={80}
                   dataKey="value"
-                  label={({ percent }) =>
-                    `${(percent * 100).toFixed(0)}%`
-                  }
+                  // label={(entry) =>
+                  //   `${((entry as any).percent * 100).toFixed(0)}%`
+                  // }
                 >
                   {data.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />

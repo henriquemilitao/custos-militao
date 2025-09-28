@@ -1,6 +1,34 @@
 import { formatCurrencyFromCents } from "@/lib/formatters/formatCurrency";
 
-export function ResumoValores({ semanaAtual }: { semanaAtual }) {
+// Defina o tipo baseado na estrutura que você está usando
+interface SemanaProcessada {
+  id: string;
+  label: string;
+  periodo: string;
+  valorGasto: number;
+  valorTotal: number;
+  gastosMeta: {
+    id: string;
+    nome: string;
+    totalPlanejado: number;
+    gastoNaSemana: number;
+    gastoAnteriorMeta: number;
+    valorDisponivelMeta: number;
+  }[];
+  registros?: {
+    id: string;
+    name: string;
+    valor: number;
+    data: Date;
+    gastoId: string;
+  }[];
+}
+
+interface ResumoValoresProps {
+  semanaAtual: SemanaProcessada | null;
+}
+
+export function ResumoValores({ semanaAtual }: ResumoValoresProps) {
   return (
     <div className="grid grid-cols-3 gap-2 text-center mb-6">
       <div>

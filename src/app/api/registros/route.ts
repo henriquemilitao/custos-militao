@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { ZodError, ZodIssue } from "zod";
+import { ZodError} from "zod";
 import { createRegistroGastoSchema } from "@/dtos/registroGasto.schema";
 import { createRegistroGastoService } from "@/services/registroGasto/registroGasto.service";
 import { created } from "@/lib/http";
@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    return created(result.data);
+    return NextResponse.json(result.data, { status: 201 });
   } catch (err) {
     if (err instanceof ZodError) {
       return NextResponse.json(

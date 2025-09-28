@@ -7,7 +7,7 @@ import { formatPeriodoDayMonth } from "@/lib/formatters/formatDate";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
-import { CategoriAgrupada, Header, RegistroGasto, SemanaProcessada } from "./components/header";
+import { CategoriAgrupada, Header, RegistroGasto} from "./components/header";
 import { ResumoValores } from "./components/resumoValores";
 import { ListagemPorCategoria } from "./components/listagemPorData";
 import { DialogAddEditGasto } from "./components/dialogAddEditGasto";

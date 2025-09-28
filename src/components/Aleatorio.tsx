@@ -1,18 +1,18 @@
 // components/Aleatorio.tsx
 "use client";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import type { GastoItem } from "@/types/budget";
-import { Plus, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import ConfigGastoAleatorio from "./ConfigGastoAleatorio";
 import { moedaBRL } from "@/lib/formatters/currency";
 
 const PESOS = [1, 1, 1, 1.5] as const;
 
-function dataHojeCampoGrande(): string {
-  return new Date().toLocaleDateString("pt-BR", { timeZone: "America/Campo_Grande" });
-}
+// function dataHojeCampoGrande(): string {
+//   return new Date().toLocaleDateString("pt-BR", { timeZone: "America/Campo_Grande" });
+// }
 
 /**
  * Regra de ouro:

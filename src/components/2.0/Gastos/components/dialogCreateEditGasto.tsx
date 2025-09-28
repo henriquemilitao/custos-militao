@@ -139,7 +139,8 @@ export function DialogCreateEditGasto({
       handleClose();
       setIsEdit(false);
     } catch (err) {
-      toast.error(err.message || "Não foi possível salvar seu gasto");
+      console.log(err)
+      toast.error("Não foi possível salvar seu gasto");
     } finally {
       setLoading(false);
     }
@@ -181,7 +182,8 @@ export function DialogCreateEditGasto({
       handleClose();
       setIsEdit(false);
     } catch (err) {
-      toast.error(err.message || "Não foi possível editar seu gasto");
+      console.log(err)
+      toast.error("Não foi possível editar seu gasto");
     } finally {
       setLoading(false);
       setForcarMigracao(false);

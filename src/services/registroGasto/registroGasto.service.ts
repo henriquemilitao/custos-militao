@@ -1,11 +1,29 @@
 // services/registroGasto/registroGasto.service.ts
+
 import { prisma } from "@/lib/prisma";
 import { CreateRegistroGastoDTO, EditRegistroGastoDTO } from "@/dtos/registroGasto.schema";
 import { startOfDay } from "date-fns";
+import { syncAleatorio } from "../aleatorio/aleatorio.service";
 
-type ServiceResult<T> =
-  | { ok: true; data: T }
-  | { ok: false; message: string; type: "fora-ciclo" | "fora-semana" };
+// Tipo específico para o registro retornado pelo Prisma
+interface RegistroGasto {
+  id: string;
+  name: string;
+  valor: number;
+  data: Date;
+  gastoId: string;
+  semanaId: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// Interface para o resultado do service
+interface RegistroGastoResult {
+  ok: boolean;
+  data?: RegistroGasto;
+  message?: string;
+  type?: "fora-ciclo" | "fora-semana";
+}
 
 function normalize(d: Date) {
   return startOfDay(new Date(d));
@@ -13,7 +31,7 @@ function normalize(d: Date) {
 
 export async function createRegistroGastoService(
   params: CreateRegistroGastoDTO
-): Promise<ServiceResult> {
+): Promise<RegistroGastoResult> {
   const { name, valorCents, data, gastoId, semanaId, permission } = params;
 
   const semana = await prisma.semana.findUnique({
@@ -86,7 +104,7 @@ export async function createRegistroGastoService(
 export async function editRegistroGastoService(
   registroId: string,
   params: EditRegistroGastoDTO
-): Promise<ServiceResult> {
+): Promise<RegistroGastoResult> {
   const registro = await prisma.registroGasto.findUnique({
     where: { id: registroId },
     include: { semana: { include: { ciclo: true } } },
@@ -157,10 +175,28 @@ export async function editRegistroGastoService(
       semanaId: semanaCorreta.id,
     },
   });
+  
+  // if (name !== "Aleatório") {
+  //     await syncAleatorio(semana.cicloId);
+  //   }
 
   return { ok: true, data: updated };
 }
 
 export async function deleteRegistroGastoService(registroId: string) {
-  return prisma.registroGasto.delete({ where: { id: registroId } });
+  
+  const registro = await prisma.registroGasto.findUnique({
+    where: { id: registroId },
+  });
+
+  if (!registro) {
+    return { ok: false, message: "Semana não encontrada.", type: "fora-semana" };
+  }
+  const registroDeleted = prisma.registroGasto.delete({ where: { id: registroId } });
+  
+  // if (name !== "Aleatório") {
+  //     await syncAleatorio(semana.cicloId);
+  //   }
+  
+  return registroDeleted
 }

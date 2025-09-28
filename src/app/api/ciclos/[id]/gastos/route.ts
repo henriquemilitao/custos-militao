@@ -2,9 +2,10 @@
 import { NextResponse } from "next/server";
 import { getGastosByCicloId } from "@/services/gasto/gasto.service";
 
-export async function GET(_: Request, context: { params: { id: string } } ) {
+export async function GET(_: Request, context: { params: Promise<{ id: string }> } ) {
   try {
-    const cicloId = context?.params?.id;
+    const cicloId = (await context.params).id
+
     if (!cicloId) {
       return NextResponse.json({ error: "cicloId is required" }, { status: 400 });
     }

@@ -51,14 +51,15 @@ export async function PATCH(req: NextRequest, context: { params: Promise<{ id: s
     
     if (!ciclo) return notFound()
 
-    return ok("Mês alterado com sucesso");
+    return NextResponse.json(ciclo, { status: 200 });
+
   } catch (err) {
     if (err instanceof ZodError) {
       return NextResponse.json({ error: zodErrorToMessage(err) }, { status: 422 });
     }
-    if (err?.name === "AuthError") {
-      return NextResponse.json({ error: err.message }, { status: 401 });
-    }
+    // if (err?.name === "AuthError") {
+    //   return NextResponse.json({ error: err.message }, { status: 401 });
+    // }
     console.error("API /economias error:", err);
     return NextResponse.json({ error: "Erro interno do servidor" }, { status: 500 });
   }

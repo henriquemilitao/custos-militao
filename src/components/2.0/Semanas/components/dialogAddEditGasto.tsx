@@ -83,7 +83,10 @@ export function DialogAddEditGasto({
   const [loading, setLoading] = useState(false);
   const [confirmCategoria, setConfirmCategoria] = useState(false);
   
-  const [showConfirm, setShowConfirm] = useState<{ message: string; body: any } | null>(null);
+  const [showConfirm, setShowConfirm] = useState<{
+    message: string;
+    body: (CreateRegistroGastoDTO | EditRegistroGastoDTO) & { permission?: boolean };
+  } | null>(null);
   const [openCalendar, setOpenCalendar] = useState(false);
 
   // preencher quando for edição

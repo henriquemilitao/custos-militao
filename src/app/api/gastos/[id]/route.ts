@@ -29,14 +29,14 @@ export async function PATCH(req: NextRequest, context: { params: Promise<{ id: s
 
     if (!gasto) return notFound()
 
-    return ok("Gasto alterado com sucesso");
+    return NextResponse.json(gasto, { status: 200 });
   } catch (err) {
     if (err instanceof ZodError) {
       return NextResponse.json({ error: zodErrorToMessage(err) }, { status: 422 });
     }
-    if (err?.name === "AuthError") {
-      return NextResponse.json({ error: err.message }, { status: 401 });
-    }
+    // if (err?.name === "AuthError") {
+    //   return NextResponse.json({ error: err.message }, { status: 401 });
+    // }
     console.error("API /gastos error:", err);
     return NextResponse.json({ error: "Erro interno do servidor" }, { status: 500 });
   }
@@ -52,5 +52,5 @@ export async function DELETE(req: NextRequest, context: { params: Promise<{ id: 
     return notFound()
   }
 
-  return ok(gasto)
+  return NextResponse.json(gasto, { status: 200 });
 }

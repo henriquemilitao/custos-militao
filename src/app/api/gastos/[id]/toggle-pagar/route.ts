@@ -1,4 +1,4 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { badRequest, notFound, ok, serverError } from "@/lib/http";
 import { togglePagarGastoService } from "@/services/gasto/gasto.service";
 
@@ -19,7 +19,7 @@ export async function PATCH(
       return notFound();
     }
 
-    return ok(gasto); // helper já retorna JSON + 200
+    return NextResponse.json(gasto, { status: 200 });
   } catch (error) {
     console.error(error);
     return serverError();

@@ -136,7 +136,8 @@ export function DialogCreateEditEconomia({
       handleClose();
       setIsEdit(false);
     } catch (err) {
-      toast.error(err.message || "Não foi possível salvar a economia");
+      console.log(err)
+      toast.error("Não foi possível salvar a economia");
     } finally {
       setLoading(false);
     }
@@ -172,7 +173,8 @@ export function DialogCreateEditEconomia({
       handleClose();
       setIsEdit(false);
     } catch (err) {
-      toast.error(err.message || "Não foi possível editar a economia");
+      console.log(err)
+      toast.error("Não foi possível editar a economia");
     } finally {
       setLoading(false);
     }

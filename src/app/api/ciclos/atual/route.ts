@@ -1,6 +1,6 @@
 import { notFound, ok } from "@/lib/http";
 import { getCicloAtual } from "@/services/ciclo/ciclo.service";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
     // const { userId } = await req.json()
@@ -14,5 +14,5 @@ export async function GET(req: NextRequest) {
         return notFound()
     }
 
-    return ok(cicloAtual)
+    return NextResponse.json(cicloAtual, { status: 200 });
 }

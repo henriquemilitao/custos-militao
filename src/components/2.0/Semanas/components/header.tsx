@@ -1,5 +1,7 @@
 // types/controle-semanal.types.ts
 
+import { CicloAtualDTO } from "@/dtos/ciclo.dto";
+
 interface GastoMeta {
   id: string;
   nome: string;
@@ -91,7 +93,7 @@ type ListagemPorCategoriaProps = {
   gastosPorCategoria: Record<string, CategoriAgrupada>;
   showModal: boolean;
   setShowModal: (show: boolean) => void;
-  cicloAtual: any; // Mantenha este any se CicloAtualDTO for muito complexo
+  cicloAtual: CicloAtualDTO;
   isEdit: boolean;
   setIsEdit: (edit: boolean) => void;
   mutateCiclo: () => void;

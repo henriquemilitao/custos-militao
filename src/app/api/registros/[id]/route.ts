@@ -42,5 +42,5 @@ export async function DELETE(req: NextRequest, context: { params: Promise<{ id: 
     return notFound()
   }
 
-  return ok(registro)
+  return NextResponse.json(registro, { status: 200 });
 }
