@@ -335,10 +335,11 @@ export function DialogAddEditGasto({
       </div>
 
       {/* Categorias */}
-      <div className="space-y-1 mt-3">
-        <label className="text-base text-neutral-700 font-semibold mb-1">Selecione o tipo:</label>
-        <div className="grid grid-cols-2 gap-2">
-          {metas.map((opt) => (
+      <div className="space-y-2 mt-3">
+        <label className="text-base font-semibold mb-1">Selecione o tipo:</label>
+        <div className="grid grid-cols-2 gap-2 mt-1">
+          {metas.map((opt) => {
+            return (
             <button
               key={opt.id}
               onClick={() => {
@@ -349,10 +350,10 @@ export function DialogAddEditGasto({
                 gastoId === opt.id ? "border-blue-500 bg-blue-50" : ""
               }`}
             >
-              <div className="font-medium">{opt.nome}</div>
-              <div className="text-xs text-gray-500">Disponível: R$ {(opt.valorDisponivelMeta / 100).toFixed(2)}</div>
+              <div className="font-medium text-center text-neutral-700">{opt.nome}</div>
+              {/* <div className="text-xs text-gray-500">Disponível: R$ {(opt.valorDisponivelMeta / 100).toFixed(2)}</div> */}
             </button>
-          ))}
+          )})}
         </div>
       </div>
       <div className="-mt-3">{errors.gastoId && <span className="text-xs text-red-600 mt-1">{errors.gastoId}</span>}</div>
