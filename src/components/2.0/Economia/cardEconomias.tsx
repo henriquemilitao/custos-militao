@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { MoreVertical, Edit, Trash2, CheckCircle, Plus, Delete, DeleteIcon, X, RotateCcw } from "lucide-react";
+import { MoreVertical, Edit, Trash2, CheckCircle, Plus, RotateCcw } from "lucide-react";
 import { CicloAtualDTO } from "@/dtos/ciclo.dto";
 import { formatCurrencyFromCents } from "@/lib/formatters/formatCurrency";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../ui/dropdown-menu";
@@ -11,7 +11,7 @@ import { DialogConfirmDelete, TipoItemDelete } from "../../common/dialogConfirmD
 
 type EconomiasCardProps = {
   cicloAtual: CicloAtualDTO | null
-  mutateCiclo: () => void  // <- novo
+  mutateCiclo: () => void
 }
 
 export default function EconomiasCard({ cicloAtual, mutateCiclo }: EconomiasCardProps) {
@@ -22,33 +22,32 @@ export default function EconomiasCard({ cicloAtual, mutateCiclo }: EconomiasCard
 
   const handleGuardarEconomia = async (economia: Economia) => {
     try {
-
-      const res = await fetch(`/api/economias/${economia.id}/toggle-guardar`, {
-        method: "PATCH",
-      });
-
+      const res = await fetch(`/api/economias/${economia.id}/toggle-guardar`, { method: "PATCH" });
       const data = await res.json().catch(() => null);
+
       if (!res.ok) {
         toast.error(data?.error || "Erro ao atualizar economia");
         return;
       }
 
       toast.success(
-        economia.isGuardado
-          ? "Economia revertida com sucesso!"
-          : "Dinheiro guardado com sucesso!",
+        economia.isGuardado ? "Economia revertida com sucesso!" : "Dinheiro guardado com sucesso!",
         {
           style: economia.isGuardado
-            ? { background: "#fff7ed", color: "#92400e" } // laranja/quase warning
-            : { background: "#dcfce7", color: "#166534" }, // verdinho
+            ? { background: "#fff7ed", color: "#92400e" }
+            : { background: "#dcfce7", color: "#166534" },
         }
       );
 
       mutateCiclo();
-    } catch (err) {
+    } catch {
       toast.error("Não foi possível atualizar a economia");
     }
-  }
+  };
+
+  // --- estados auxiliares ---
+  const economias = cicloAtual?.economias ?? [];
+  const isEmpty = economias.length === 0;
 
   return (
     <div className="p-4 max-w-sm mx-auto">
@@ -64,95 +63,104 @@ export default function EconomiasCard({ cicloAtual, mutateCiclo }: EconomiasCard
         </div>
 
         {/* Listagem */}
-        <div className="space-y-3">
-          {cicloAtual ? cicloAtual.economias.map((economia) => (
-            <div
-              key={economia.id}
-              className={`p-3 rounded-xl border flex justify-between items-center ${
-                economia.isGuardado
-                  ? "bg-green-100 border-green-300 opacity-90"
-                  : "bg-gray-50 border-gray-200"
-              }`}
-            >
-              <div className="flex flex-col">
-                <div className="flex items-center gap-2">
-                  {economia.isGuardado && <CheckCircle size={18} className="text-green-600" />}
-                  <p
-                    className={`font-medium text-gray-800 ${
-                      economia.isGuardado ? "line-through text-gray-600" : ""
-                    }`}
-                  >
-                    {economia.nome}
+        <div className="space-y-3 min-h-[100px] flex flex-col justify-center">
+          {!cicloAtual ? (
+            <p className="text-xs text-gray-400 text-center">Carregando ciclo...</p>
+          ) : isEmpty ? (
+            <p className="text-xs text-gray-400 text-center">Nenhuma economia registrada.</p>
+          ) : (
+            economias.map((economia) => (
+              <div
+                key={economia.id}
+                className={`p-3 rounded-xl border flex justify-between items-center ${
+                  economia.isGuardado
+                    ? "bg-green-100 border-green-300 opacity-90"
+                    : "bg-gray-50 border-gray-200"
+                }`}
+              >
+                <div className="flex flex-col">
+                  <div className="flex items-center gap-2">
+                    {economia.isGuardado && <CheckCircle size={18} className="text-green-600" />}
+                    <p
+                      className={`font-medium text-gray-800 ${
+                        economia.isGuardado ? "line-through text-gray-600" : ""
+                      }`}
+                    >
+                      {economia.nome}
+                    </p>
+                  </div>
+                  <p className="text-sm text-gray-500">
+                    Valor: {formatCurrencyFromCents(economia.valor)} (
+                    {((economia.valor / cicloAtual.valorTotal) * 100).toFixed(1)}%)
                   </p>
+                  {economia.isGuardado && economia.dataGuardado && (
+                    <p className="text-xs text-gray-400">
+                      Guardado em {formatDateShort(economia.dataGuardado)}
+                    </p>
+                  )}
                 </div>
-                <p className="text-sm text-gray-500">
-                  Valor: {formatCurrencyFromCents(economia.valor)} (
-                  {((economia.valor / cicloAtual.valorTotal) * 100).toFixed(1)}%)
-                </p>
-                {economia.isGuardado && economia.dataGuardado && (
-                  <p className="text-xs text-gray-400">
-                    Guardado em {formatDateShort(economia.dataGuardado)}
-                  </p>
-                )}
+
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="p-1 rounded-full hover:bg-gray-200">
+                      <MoreVertical size={18} />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-32">
+                    <DropdownMenuItem onClick={() => handleGuardarEconomia(economia)}>
+                      {!economia.isGuardado ? (
+                        <CheckCircle size={16} className="text-green-500" />
+                      ) : (
+                        <RotateCcw size={16} className="text-yellow-500" />
+                      )}
+                      <p className="font-medium text-gray-600">
+                        {!economia.isGuardado ? "Guardar" : "Reverter"}
+                      </p>
+                    </DropdownMenuItem>
+
+                    <DropdownMenuItem
+                      onClick={() => {
+                        setIsEdit(true);
+                        setShowModal(true);
+                        setCurrentEconomia(economia);
+                      }}
+                    >
+                      <Edit size={16} className="text-blue-500" />
+                      <p className="font-medium text-gray-600">Editar</p>
+                    </DropdownMenuItem>
+
+                    <DropdownMenuItem
+                      onClick={() => {
+                        setCurrentEconomia(economia);
+                        setShowConfirmDelete(true);
+                      }}
+                    >
+                      <Trash2 size={16} className="text-red-500" />
+                      <p className="font-medium text-gray-600">Excluir</p>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
-
-              {/* Botão de menu */}              
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button className="p-1 rounded-full hover:bg-gray-200">
-                    <MoreVertical size={18} />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-32">
-                  <DropdownMenuItem
-                    onClick={() => handleGuardarEconomia(economia)}>
-                    {!economia.isGuardado ?
-                      <CheckCircle size={16} className="text-green-500" />
-                      :
-                      <RotateCcw size={16} className="text-yellow-500" />
-                    }
-                    <p className="font-medium text-gray-600">{!economia.isGuardado ? 'Guardar' : 'Reverter'}</p>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => {
-                    setIsEdit(true)
-                    setShowModal(true)
-                    setCurrentEconomia(economia)
-                  }}>
-                    <Edit size={16} className="text-blue-500" />
-                    <p className="font-medium text-gray-600">Editar</p>
-
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => {
-                      setCurrentEconomia(economia)
-                      setShowConfirmDelete(true)
-                    }}>
-                    <Trash2 size={16} className="text-red-500" />
-                    <p className="font-medium text-gray-600">Excluir</p>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          )) : <p className="text-xs text-gray-400 mt-7">Nenhuma economia registrada.</p>}
+            ))
+          )}
         </div>
       </div>
 
-      {/* Modal passa mutate */}
-      <DialogCreateEditEconomia 
-        showModal={showModal} 
-        setShowModal={setShowModal} 
-        cicloAtual={cicloAtual} 
+      <DialogCreateEditEconomia
+        showModal={showModal}
+        setShowModal={setShowModal}
+        cicloAtual={cicloAtual}
         mutateCiclo={mutateCiclo}
         isEdit={isEdit}
         setIsEdit={setIsEdit}
         economia={currentEconomia}
       />
 
-       {/* Modal passa mutate */}
       <DialogConfirmDelete
-        showModal={showConfirmDelete} 
+        showModal={showConfirmDelete}
         setShowModal={(open) => {
           setShowConfirmDelete(open);
-          if (!open) setCurrentEconomia(null); // limpa quando fechar
+          if (!open) setCurrentEconomia(null);
         }}
         mutateCiclo={mutateCiclo}
         item={currentEconomia}

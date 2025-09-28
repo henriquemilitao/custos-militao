@@ -35,18 +35,18 @@ export default function ControleSemanal({ cicloAtual, mutateCiclo }: ControleSem
     cicloAtual?.gastosPorMetaTotais?.reduce((acc, gasto) => acc + gasto.totalPlanejado, 0) ?? 0;
 
   const semanas =
-    cicloAtual?.semanas.map((semana, index) => {
+    (cicloAtual?.semanas ?? []).map((semana, index) => {
       const valorGasto = semana.registros?.reduce((acc, gasto) => acc + gasto.valor, 0) ?? 0;
-      const gastoAnterior = cicloAtual.semanas
+      const gastoAnterior = (cicloAtual?.semanas ?? [])
         .slice(0, index)
         .flatMap((s) => s.registros || [])
         .reduce((acc, gasto) => acc + gasto.valor, 0);
 
-      const semanasRestantes = cicloAtual.semanas.length - index;
+      const semanasRestantes = (cicloAtual?.semanas ?? []).length - index;
       const valorTotal = semanasRestantes > 0 ? Math.floor((totalGoals - gastoAnterior) / semanasRestantes) : 0;
 
-      const gastosMeta = cicloAtual.gastosPorMetaTotais.map((meta) => {
-        const gastoAnteriorMeta = cicloAtual.semanas
+      const gastosMeta = (cicloAtual?.gastosPorMetaTotais ?? []).map((meta) => {
+        const gastoAnteriorMeta = (cicloAtual?.semanas ?? [])
           .slice(0, index)
           .flatMap((s) => s.registros || [])
           .filter((r) => r.gastoId === meta.id)
@@ -57,7 +57,7 @@ export default function ControleSemanal({ cicloAtual, mutateCiclo }: ControleSem
             .filter((r) => r.gastoId === meta.id)
             .reduce((acc, r) => acc + r.valor, 0);
 
-        const semanasRestantesMeta = cicloAtual.semanas.length - index;
+        const semanasRestantesMeta = (cicloAtual?.semanas ?? []).length - index;
         const valorDisponivelMeta =
           semanasRestantesMeta > 0
             ? Math.floor((meta.totalPlanejado - gastoAnteriorMeta) / semanasRestantesMeta)
