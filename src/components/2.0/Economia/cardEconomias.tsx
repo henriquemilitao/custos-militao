@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { formatDateShort } from "@/lib/formatters/formatDate";
 import { Economia } from "@prisma/client";
 import { DialogConfirmDelete, TipoItemDelete } from "../../common/dialogConfirmDelete";
+import { PersonilazedDialog } from "@/components/common/personalized-dialog";
 
 type EconomiasCardProps = {
   cicloAtual: CicloAtualDTO | null
@@ -19,6 +20,8 @@ export default function EconomiasCard({ cicloAtual, mutateCiclo }: EconomiasCard
   const [showConfirmDelete, setShowConfirmDelete] = useState(false)
   const [isEdit, setIsEdit] = useState(false)
   const [currentEconomia, setCurrentEconomia] = useState<Economia | null>(null)
+  const [showModalSemCiclo, setShowModalSemCiclo] = useState(false)
+
 
   const handleGuardarEconomia = async (economia: Economia) => {
     try {
@@ -55,7 +58,13 @@ export default function EconomiasCard({ cicloAtual, mutateCiclo }: EconomiasCard
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-semibold text-gray-800">Economias</h2>
           <button
-            onClick={() => setShowModal(true)}
+            onClick={() => {
+              if (!cicloAtual?.id) {
+                setShowModalSemCiclo(true);
+                return;
+              }
+              setShowModal(true)
+            }}
             className="bg-blue-500 text-white w-8 h-8 flex items-center justify-center rounded-full hover:bg-blue-600"
           >
             <Plus size={15} />
@@ -165,6 +174,14 @@ export default function EconomiasCard({ cicloAtual, mutateCiclo }: EconomiasCard
         mutateCiclo={mutateCiclo}
         item={currentEconomia}
         tipoItem={TipoItemDelete.ECONOMIAS}
+      />
+
+      <PersonilazedDialog
+        open={showModalSemCiclo}
+        onOpenChange={setShowModalSemCiclo}
+        title="Valor indisponível"
+        description="Você precisa adicionar quanto você recebe nesse mês para começar a guardar dinheiro."
+    
       />
     </div>
   );

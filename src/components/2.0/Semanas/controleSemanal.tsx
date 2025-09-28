@@ -13,6 +13,7 @@ import { ResumoValores } from "./components/resumoValores";
 import { ListagemPorCategoria } from "./components/listagemPorData";
 import { DialogAddEditGasto } from "./components/dialogAddEditGasto";
 import { Button } from "@/components/ui/button";
+import { PersonilazedDialog } from "@/components/common/personalized-dialog";
 
 type ControleSemanalProps = {
   cicloAtual: CicloAtualDTO | null;
@@ -23,6 +24,7 @@ export default function ControleSemanal({ cicloAtual, mutateCiclo }: ControleSem
   const [open, setOpen] = useState(false);
   const [isEdit, setIsEdit] = useState<boolean>(false);
   const [semanaSelecionada, setSemanaSelecionada] = useState<string>("");
+  const [showModalSemCiclo, setShowModalSemCiclo] = useState(false)
   const [currentGasto, setCurrentGasto] = useState<{
     id: string;
     name: string;
@@ -167,7 +169,13 @@ export default function ControleSemanal({ cicloAtual, mutateCiclo }: ControleSem
 
         <div className="">
           <Button
-            onClick={() => setOpen(true)}
+            onClick={() => {
+              if (!cicloAtual?.id) {
+                setShowModalSemCiclo(true);
+                return;
+              }
+              setOpen(true)
+            }}
             className="w-full rounded-xl bg-blue-500 text-white shadow hover:bg-blue-600 active:scale-95 transition mb-8"
           >
             <Plus size={16} className="mr-2" /> Adicionar gasto
@@ -198,6 +206,14 @@ export default function ControleSemanal({ cicloAtual, mutateCiclo }: ControleSem
         semanaAtual={semanaAtual}
         cicloAtual={cicloAtual}
         currentGasto={currentGasto}
+      />
+
+      <PersonilazedDialog
+        open={showModalSemCiclo}
+        onOpenChange={setShowModalSemCiclo}
+        title="Valor indisponível"
+        description="Você precisa adicionar quanto você recebe nesse mês para começar a adicionar seus gastos."
+    
       />
     </div>
   );

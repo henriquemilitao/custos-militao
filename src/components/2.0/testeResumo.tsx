@@ -2,21 +2,87 @@
 
 import { CicloAtualDTO } from "@/dtos/ciclo.dto";
 import { formatCurrencyFromCents } from "@/lib/formatters/formatCurrency";
-import { formatDateDayMonth, formatPeriodoDayMonth } from "@/lib/formatters/formatDate";
+import { formatDateDayMonth, formatIsoToDayMonth, formatPeriodoDayMonth } from "@/lib/formatters/formatDate";
 import { Ciclo } from "@prisma/client";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, PieLabelRenderProps } from "recharts";
+import EditableCurrency from "../EditableCurrency";
+import { toast } from "sonner";
 
 type ResumoMesCardProps = {
+  mutateCiclo: () => void
   cicloAtual: CicloAtualDTO | null
 }
 
-export default function ResumoMesCard({cicloAtual}: ResumoMesCardProps) {
+export default function ResumoMesCard({cicloAtual, mutateCiclo}: ResumoMesCardProps) {
 
   // const economiasMesTotal = cicloAtual?.economias.reduce((acc, economia) => economia.valor + acc, 0) ?? 0
   // const gastosMesTotal = cicloAtual?.gastos?.reduce((acc, gasto) => gasto.valor + acc, 0) ?? 0
   // const valorMesTotal = cicloAtual?.valorTotal ?? 0
   // const disponivelMes = valorMesTotal - economiasMesTotal - gastosMesTotal
-  
+  async function changeTotalCiclo(novoTotal: number) {
+    if (!cicloAtual?.id) {
+      // se não tem ciclo ainda → cria
+      return createCiclo(novoTotal);
+    }
+
+    // se já tem ciclo → atualiza
+    return updateCiclo(cicloAtual.id, novoTotal);
+  }
+
+  async function createCiclo(novoTotal: number) {
+    try {
+      const res = await fetch(`/api/ciclos`, {
+        method: "POST",
+        body: JSON.stringify({ valorCents: novoTotal }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const data = await res.json().catch(() => null);
+
+      if (!res.ok) {
+        toast.error(data?.error || "Erro ao criar ciclo");
+        return;
+      }
+
+      toast.success("Ciclo criado com sucesso!", {
+        style: { background: "#dcfce7", color: "#166534" },
+      });
+
+      mutateCiclo();
+    } catch {
+      toast.error("Não foi possível criar o ciclo");
+    }
+  }
+
+  async function updateCiclo(cicloId: string, novoTotal: number) {
+    try {
+      const res = await fetch(`/api/ciclos/${cicloId}`, {
+        method: "PATCH",
+        body: JSON.stringify({ valorCents: novoTotal }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const data = await res.json().catch(() => null);
+
+      if (!res.ok) {
+        toast.error(data?.error || "Erro ao atualizar ciclo");
+        return;
+      }
+
+      toast.success("Ciclo atualizado com sucesso!", {
+        style: { background: "#dcfce7", color: "#166534" },
+      });
+
+      mutateCiclo();
+    } catch {
+      toast.error("Não foi possível atualizar o ciclo");
+    }
+  }
+
 
   const data = [
     { name: "Gastos", value: cicloAtual?.gastoTotalJaRealizado, color: "#ef4444" },
@@ -34,7 +100,7 @@ export default function ResumoMesCard({cicloAtual}: ResumoMesCardProps) {
             
           </h2>
         {cicloAtual?.id &&  
-          <p className="text-sm text-gray-500 mb-2">{cicloAtual && `${formatPeriodoDayMonth(cicloAtual?.dataInicio, cicloAtual?.dataFim)}`}</p>
+          <p className="text-sm text-gray-500 mb-2">{cicloAtual && `${formatIsoToDayMonth(cicloAtual?.dataInicio)} - ${formatIsoToDayMonth(cicloAtual?.dataFim)}`}</p>
         }
         </div>
 
@@ -68,7 +134,8 @@ export default function ResumoMesCard({cicloAtual}: ResumoMesCardProps) {
         <div className="grid grid-cols-2 gap-3 text-sm mt-5">
           <div className="rounded-xl p-3 text-center bg-gray-50">
             <p className="text-gray-500">Recebido</p>
-            <p className="font-semibold text-gray-800">{formatCurrencyFromCents(cicloAtual?.valorTotal ?? 0)}</p>
+            {/* <p className="font-semibold text-gray-800">{formatCurrencyFromCents(cicloAtual?.valorTotal ?? 0)}</p> */}
+            <EditableCurrency value={cicloAtual?.valorTotal ?? 0} onChange={changeTotalCiclo} />
           </div>
           <div className="rounded-xl p-3 text-center bg-red-50">
             <p className="text-gray-500">Gastos</p>

@@ -1,5 +1,8 @@
 import { CicloAtualDTO } from "@/dtos/ciclo.dto";
+import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { getMesAtualTimeZone } from "./utils";
+
 
 export async function getCicloById(cicloId: string) {
   return prisma.ciclo.findUnique({
@@ -122,16 +125,67 @@ export async function getCicloAnterior(userId: string, cicloId: string) {
   });
 }
 
-// ciclo imediatamente posterior
-export async function getCicloProximo(userId: string, cicloId: string) {
-  const cicloAtual = await prisma.ciclo.findUnique({ where: { id: cicloId } });
-  if (!cicloAtual) return null;
+export async function createCicloByValorTotalService(params: {
+  valorCents: number | null;
+  req: Request; // Next.js request
+}) {
+  const { valorCents, req } = params;
+  console.log({ valorCents, req })
+  // aqui pega a sessão do usuário logado
+  const session = await auth.api.getSession({
+    headers: req.headers, // importante!!
+  });
 
-  return prisma.ciclo.findFirst({
-    where: {
-      userId,
-      dataInicio: { gt: cicloAtual.dataFim },
+  if (!session?.user) {
+    throw new Error("Usuário não autenticado");
+  }
+
+  const { dataInicio, dataFim } = getMesAtualTimeZone("America/Campo_Grande");
+
+  return prisma.ciclo.create({
+    data: {
+      valorTotal: valorCents ?? 0,
+      dataInicio,
+      dataFim,
+      quantidadeSemanas: 4,
+      userId: session.user.id,
     },
-    orderBy: { dataInicio: "asc" },
+  });
+}
+
+export async function updateCicloValorTotalService(params: {
+  cicloId: string;
+  valorCents: number | null;
+  req: Request; // Next.js request
+}) {
+  const { cicloId, valorCents, req } = params;
+
+  // pega a sessão do usuário logado
+  const session = await auth.api.getSession({
+    headers: req.headers,
+  });
+
+  if (!session?.user) {
+    throw new Error("Usuário não autenticado");
+  }
+
+  // atualiza somente se o ciclo for do usuário logado
+  const ciclo = await prisma.ciclo.updateMany({
+    where: {
+      id: cicloId,
+      userId: session.user.id,
+    },
+    data: {
+      valorTotal: valorCents ?? 0,
+    },
+  });
+
+  if (ciclo.count === 0) {
+    throw new Error("Ciclo não encontrado ou não pertence ao usuário");
+  }
+
+  // retorna o ciclo atualizado
+  return prisma.ciclo.findUnique({
+    where: { id: cicloId },
   });
 }

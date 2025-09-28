@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { DialogConfirmDelete, TipoItemDelete } from "@/components/common/dialogConfirmDelete";
 import { formatCurrencyFromCents } from "@/lib/formatters/formatCurrency";
 import ProgressBar from "@/components/ui/progress-bar";
+import { PersonilazedDialog } from "@/components/common/personalized-dialog";
 
 const getBgClass = (percent: number) => {
   if (percent > 100) return "bg-red-100 border-red-300"; // passou da meta
@@ -32,6 +33,7 @@ export default function GastosCard({ cicloAtual, mutateCiclo }: GastosCardProps)
   const [showConfirmDelete, setShowConfirmDelete] = useState(false)
   const [isEdit, setIsEdit] = useState<boolean>(false);
   const [currentGasto, setCurrentGasto] = useState<Gasto | null>(null);
+  const [showModalSemCiclo, setShowModalSemCiclo] = useState(false)
 
   const findTotalGastoPorMeta = (gastoId: string) => {
     return cicloAtual?.gastosPorMetaTotais.find((g) => g.id === gastoId);
@@ -81,7 +83,13 @@ export default function GastosCard({ cicloAtual, mutateCiclo }: GastosCardProps)
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-semibold text-gray-800">Gastos</h2>
           <button
-            onClick={() => setShowModal(true)}
+            onClick={() => {
+              if (!cicloAtual?.id) {
+                setShowModalSemCiclo(true);
+                return;
+              }
+              setShowModal(true)
+            }}
             className="bg-blue-500 text-white w-8 h-8 flex items-center justify-center rounded-full hover:bg-blue-600"
           >
             <Plus size={15} />
@@ -242,6 +250,14 @@ export default function GastosCard({ cicloAtual, mutateCiclo }: GastosCardProps)
         mutateCiclo={mutateCiclo}
         item={currentGasto}
         tipoItem={TipoItemDelete.GASTOS}
+      />
+
+      <PersonilazedDialog
+        open={showModalSemCiclo}
+        onOpenChange={setShowModalSemCiclo}
+        title="Valor indisponível"
+        description="Você precisa adicionar quanto você recebe nesse mês para começar a adicionar seus gastos."
+    
       />
     </div>
   );
