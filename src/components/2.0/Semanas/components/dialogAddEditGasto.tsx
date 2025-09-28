@@ -196,8 +196,9 @@ export function DialogAddEditGasto({
 
       mutateCiclo();
       handleClose();
-    } catch (err: any) {
-      toast.error(err.message || "Erro inesperado");
+    } catch (err) {
+      console.log(err)
+      toast.error( "Erro inesperado");
     } finally {
       setLoading(false);
     }
@@ -244,8 +245,9 @@ export function DialogAddEditGasto({
 
       mutateCiclo();
       handleClose();
-    } catch (err: any) {
-      toast.error(err.message || "Erro inesperado");
+    } catch (err) {
+      console.log(err)
+      toast.error("Erro inesperado");
     } finally {
       setLoading(false);
       setConfirmCategoria(false);

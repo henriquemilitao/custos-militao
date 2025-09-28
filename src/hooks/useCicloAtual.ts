@@ -1,4 +1,4 @@
-import useSWR, { SWRResponse } from "swr";
+import useSWR from "swr";
 import { CicloAtualDTO } from "@/dtos/ciclo.dto";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());

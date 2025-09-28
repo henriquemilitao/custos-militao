@@ -4,15 +4,6 @@ import { createRegistroGastoSchema } from "@/dtos/registroGasto.schema";
 import { createRegistroGastoService } from "@/services/registroGasto/registroGasto.service";
 import { created } from "@/lib/http";
 
-function zodErrorToMessage(err: ZodError) {
-  return err.issues
-    .map((issue: ZodIssue) => {
-      const path = issue.path.length ? issue.path.join(".") : "body";
-      return `${path}: ${issue.message}`;
-    })
-    .join(" | ");
-}
-
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -33,7 +24,7 @@ export async function POST(req: NextRequest) {
     }
 
     return created(result.data);
-  } catch (err: any) {
+  } catch (err) {
     if (err instanceof ZodError) {
       return NextResponse.json(
         { error: err.issues.map((e) => e.message) },

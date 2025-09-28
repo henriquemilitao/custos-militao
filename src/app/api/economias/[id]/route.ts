@@ -31,7 +31,7 @@ export async function PATCH(req: NextRequest, context: { params: Promise<{ id: s
     if (!economia) return notFound()
 
     return ok("Economia alterada com sucesso");
-  } catch (err: any) {
+  } catch (err) {
     if (err instanceof ZodError) {
       return NextResponse.json({ error: zodErrorToMessage(err) }, { status: 422 });
     }

@@ -24,7 +24,7 @@ export async function PATCH(req: NextRequest, context: { params: Promise<{ id: s
     }
 
     return NextResponse.json(result.data, { status: 200 });
-  } catch (err: any) {
+  } catch (err) {
     if (err instanceof ZodError) {
       return NextResponse.json({ error: err.issues.map((e) => e.message) }, { status: 422 });
     }

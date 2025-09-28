@@ -6,7 +6,6 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
-import { Button } from "@/components/ui/button";
 import { Button as Button2 } from "@/components/common/Button";
 
 import {
@@ -75,11 +74,11 @@ const SignInForm = () => {
     });
   }
 
-  const handleSignInWithGoogle = async () => {
-    await authClient.signIn.social({
-      provider: "google",
-    });
-  };
+  // const handleSignInWithGoogle = async () => {
+  //   await authClient.signIn.social({
+  //     provider: "google",
+  //   });
+  // };
 
   return (
     <Card>

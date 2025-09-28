@@ -8,7 +8,6 @@ import { toast } from "sonner";
 import { Economia } from "@prisma/client";
 import { InputCurrency } from "../../InputCurrency";
 import { Button } from "@/components/common/Button";
-import { z } from "zod";
 import {
   createEconomiaSchema,
   editEconomiaSchema,
@@ -136,7 +135,7 @@ export function DialogCreateEditEconomia({
       mutateCiclo();
       handleClose();
       setIsEdit(false);
-    } catch (err: any) {
+    } catch (err) {
       toast.error(err.message || "Não foi possível salvar a economia");
     } finally {
       setLoading(false);
@@ -172,7 +171,7 @@ export function DialogCreateEditEconomia({
       mutateCiclo();
       handleClose();
       setIsEdit(false);
-    } catch (err: any) {
+    } catch (err) {
       toast.error(err.message || "Não foi possível editar a economia");
     } finally {
       setLoading(false);

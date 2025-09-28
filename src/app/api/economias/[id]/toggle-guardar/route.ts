@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { toggleGuardarEconomiaService } from "@/services/economia/economia.service";
 import { badRequest, notFound, ok, serverError } from "@/lib/http";
 

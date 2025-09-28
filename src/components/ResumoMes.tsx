@@ -6,10 +6,10 @@ import EditableCurrency from "./EditableCurrency";
 import { moedaBRL } from "@/lib/formatters/currency";
 import ProgressBar from "@/components/ui/progress-bar";
 
-function clamp(n: number) {
-  if (!isFinite(n)) return 0;
-  return Math.max(0, n);
-}
+// function clamp(n: number) {
+//   if (!isFinite(n)) return 0;
+//   return Math.max(0, n);
+// }
 
 export default function ResumoMes({
   saldoInicial,

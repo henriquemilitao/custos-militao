@@ -13,7 +13,7 @@ function normalize(d: Date) {
 
 export async function createRegistroGastoService(
   params: CreateRegistroGastoDTO
-): Promise<ServiceResult<any>> {
+): Promise<ServiceResult> {
   const { name, valorCents, data, gastoId, semanaId, permission } = params;
 
   const semana = await prisma.semana.findUnique({
@@ -86,7 +86,7 @@ export async function createRegistroGastoService(
 export async function editRegistroGastoService(
   registroId: string,
   params: EditRegistroGastoDTO
-): Promise<ServiceResult<any>> {
+): Promise<ServiceResult> {
   const registro = await prisma.registroGasto.findUnique({
     where: { id: registroId },
     include: { semana: { include: { ciclo: true } } },

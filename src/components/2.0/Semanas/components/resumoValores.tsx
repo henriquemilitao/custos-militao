@@ -1,6 +1,6 @@
 import { formatCurrencyFromCents } from "@/lib/formatters/formatCurrency";
 
-export function ResumoValores({ semanaAtual }: { semanaAtual: any }) {
+export function ResumoValores({ semanaAtual }: { semanaAtual }) {
   return (
     <div className="grid grid-cols-3 gap-2 text-center mb-6">
       <div>

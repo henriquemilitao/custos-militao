@@ -30,7 +30,7 @@ export async function PATCH(req: NextRequest, context: { params: Promise<{ id: s
     if (!gasto) return notFound()
 
     return ok("Gasto alterado com sucesso");
-  } catch (err: any) {
+  } catch (err) {
     if (err instanceof ZodError) {
       return NextResponse.json({ error: zodErrorToMessage(err) }, { status: 422 });
     }

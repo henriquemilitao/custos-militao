@@ -138,7 +138,7 @@ export function DialogCreateEditGasto({
       mutateCiclo();
       handleClose();
       setIsEdit(false);
-    } catch (err: any) {
+    } catch (err) {
       toast.error(err.message || "Não foi possível salvar seu gasto");
     } finally {
       setLoading(false);
@@ -180,7 +180,7 @@ export function DialogCreateEditGasto({
       mutateCiclo();
       handleClose();
       setIsEdit(false);
-    } catch (err: any) {
+    } catch (err) {
       toast.error(err.message || "Não foi possível editar seu gasto");
     } finally {
       setLoading(false);

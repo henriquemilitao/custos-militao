@@ -51,6 +51,6 @@ export function formatIsoToDayMonth(date?: string | Date | null): string {
   // Se for Date, converte pra ISO
   const iso = date instanceof Date ? date.toISOString() : date;
 
-  const [ano, mes, dia] = iso.split("T")[0].split("-");
+  const [_, mes, dia] = iso.split("T")[0].split("-");
   return `${dia}/${mes}`;
 }

@@ -3,12 +3,11 @@
 import { useState, useEffect } from "react";
 import { Plus } from "lucide-react";
 import { CicloAtualDTO } from "@/dtos/ciclo.dto";
-import { TipoGasto } from "@prisma/client";
 import { formatPeriodoDayMonth } from "@/lib/formatters/formatDate";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
-import { Header } from "./components/header";
+import { CategoriAgrupada, Header, RegistroGasto, SemanaProcessada } from "./components/header";
 import { ResumoValores } from "./components/resumoValores";
 import { ListagemPorCategoria } from "./components/listagemPorData";
 import { DialogAddEditGasto } from "./components/dialogAddEditGasto";
@@ -25,13 +24,8 @@ export default function ControleSemanal({ cicloAtual, mutateCiclo }: ControleSem
   const [isEdit, setIsEdit] = useState<boolean>(false);
   const [semanaSelecionada, setSemanaSelecionada] = useState<string>("");
   const [showModalSemCiclo, setShowModalSemCiclo] = useState(false)
-  const [currentGasto, setCurrentGasto] = useState<{
-    id: string;
-    name: string;
-    valor: number;
-    data: Date; 
-    gastoId: string
-  } | null>(null);
+  const [currentGasto, setCurrentGasto] = useState<RegistroGasto | null>(null);
+
 
   const totalGoals =
     cicloAtual?.gastosPorMetaTotais?.reduce((acc, gasto) => acc + gasto.totalPlanejado, 0) ?? 0;
@@ -169,7 +163,7 @@ export default function ControleSemanal({ cicloAtual, mutateCiclo }: ControleSem
     }
   }, [semanas, semanaSelecionada]);
 
-  const gastosAgrupadosPorGoal = semanaAtual
+  const gastosAgrupadosPorGoal:Record<string, CategoriAgrupada> = semanaAtual
     ? semanaAtual.gastosMeta.reduce(
         (
           acc: Record<

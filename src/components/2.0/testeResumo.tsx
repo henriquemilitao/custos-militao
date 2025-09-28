@@ -2,9 +2,8 @@
 
 import { CicloAtualDTO } from "@/dtos/ciclo.dto";
 import { formatCurrencyFromCents } from "@/lib/formatters/formatCurrency";
-import { formatDateDayMonth, formatIsoToDayMonth, formatPeriodoDayMonth } from "@/lib/formatters/formatDate";
-import { Ciclo } from "@prisma/client";
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, PieLabelRenderProps } from "recharts";
+import { formatIsoToDayMonth} from "@/lib/formatters/formatDate";
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import EditableCurrency from "../EditableCurrency";
 import { toast } from "sonner";
 
@@ -115,7 +114,7 @@ export default function ResumoMesCard({cicloAtual, mutateCiclo}: ResumoMesCardPr
                   labelLine={false}
                   outerRadius={80}
                   dataKey="value"
-                  label={({ percent }: any) =>
+                  label={({ percent }) =>
                     `${(percent * 100).toFixed(0)}%`
                   }
                 >

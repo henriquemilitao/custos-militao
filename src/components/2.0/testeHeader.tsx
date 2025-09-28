@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -22,21 +22,11 @@ import {
   SheetFooter,
 } from "@/components/ui/sheet";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  ChevronLeft,
-  ChevronRight,
-  Settings,
   LogOut,
   CalendarIcon,
 } from "lucide-react";
 import { format } from "date-fns";
-import { ptBR, ro, se } from "date-fns/locale";
+import { ptBR} from "date-fns/locale";
 import { Calendar } from "../ui/calendar";
 
 // 🟢 importei o cliente de auth
@@ -57,18 +47,6 @@ export default function HeaderSistema() {
   // 🟢 pega session atual
   const { data: session } = authClient.useSession();
   const router = useRouter();
-
-  const handleMesAnterior = () => {
-    const novo = new Date(mesAtual);
-    novo.setMonth(mesAtual.getMonth() - 1);
-    setMesAtual(novo);
-  };
-
-  const handleMesProximo = () => {
-    const novo = new Date(mesAtual);
-    novo.setMonth(mesAtual.getMonth() + 1);
-    setMesAtual(novo);
-  };
 
   return (
     <div className="flex items-center justify-between px-4 py-3 bg-white shadow-sm rounded-2xl mb-4">

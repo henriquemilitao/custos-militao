@@ -1,8 +1,4 @@
 
-// utils/semanas.ts
-import * as tz from "date-fns-tz";
-
-
 // services/utils.ts
 export function getMesAtualTimeZone(tz: string) {
   const agora = new Date();
@@ -19,7 +15,7 @@ export function getMesAtualTimeZone(tz: string) {
   const partes = formatador.formatToParts(agora);
   const ano = Number(partes.find((p) => p.type === "year")?.value);
   const mes = Number(partes.find((p) => p.type === "month")?.value) - 1; // zero-based
-  const dia = Number(partes.find((p) => p.type === "day")?.value);
+  // const dia = Number(partes.find((p) => p.type === "day")?.value);
 
   // início do mês local
   const dataInicio = new Date(Date.UTC(ano, mes, 1, 0, 0, 0));

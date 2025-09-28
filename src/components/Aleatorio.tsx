@@ -84,7 +84,6 @@ export default function Aleatorio({
   meta,
   semanas,
   fechadas,
-  fixas, // mantido por compatibilidade, não usado nessa lógica
   onAddGasto,
   onRemoveGasto,
   onToggleFechar,
@@ -99,60 +98,60 @@ export default function Aleatorio({
 }) {
   const totaisPorSemana = semanas.map((items) => items.reduce((s, it) => s + it.valor, 0));
 
-  const { metas, concluida, currentIdx } = useMemo(
+  const { metas, currentIdx } = useMemo(
     () => calcularMetasPorSemana(meta, totaisPorSemana, fechadas),
     [meta, totaisPorSemana, fechadas]
   );
 
-  function AddForm({ index }: { index: number }) {
-    const [desc, setDesc] = useState("");
-    const [valor, setValor] = useState("");
+  // function AddForm({ index }: { index: number }) {
+  //   const [desc, setDesc] = useState("");
+  //   const [valor, setValor] = useState("");
 
-    // bloquear adição em semana concluída (passada) ou fechada
-    const bloqueada = fechadas[index] || index < currentIdx;
+  //   // bloquear adição em semana concluída (passada) ou fechada
+  //   const bloqueada = fechadas[index] || index < currentIdx;
 
-    return (
-      <div className="flex flex-col sm:flex-row gap-2 mt-2">
-        <input
-          className="border rounded-xl px-3 py-1.5 flex-1 w-full"
-          placeholder="Com o que vc gastou?"
-          value={desc}
-          onChange={(e) => setDesc(e.target.value)}
-          disabled={bloqueada}
-        />
-        <input
-          type="number"
-          inputMode="decimal"
-          className="border rounded-xl px-3 py-1.5 w-32"
-          placeholder="R$ 0,00"
-          value={valor}
-          onChange={(e) => setValor(e.target.value)}
-          disabled={bloqueada}
-        />
-        <Button
-          size="icon"
-          // className="w-10 h-10 rounded-full bg-blue-500 text-white shadow hover:bg-blue-600 active:scale-95 transition"
-          className="w-10 h-10 w-full sm:w-auto rounded-full bg-blue-500 text-white shadow hover:bg-blue-600 active:scale-95 transition"
+  //   return (
+  //     <div className="flex flex-col sm:flex-row gap-2 mt-2">
+  //       <input
+  //         className="border rounded-xl px-3 py-1.5 flex-1 w-full"
+  //         placeholder="Com o que vc gastou?"
+  //         value={desc}
+  //         onChange={(e) => setDesc(e.target.value)}
+  //         disabled={bloqueada}
+  //       />
+  //       <input
+  //         type="number"
+  //         inputMode="decimal"
+  //         className="border rounded-xl px-3 py-1.5 w-32"
+  //         placeholder="R$ 0,00"
+  //         value={valor}
+  //         onChange={(e) => setValor(e.target.value)}
+  //         disabled={bloqueada}
+  //       />
+  //       <Button
+  //         size="icon"
+  //         // className="w-10 h-10 rounded-full bg-blue-500 text-white shadow hover:bg-blue-600 active:scale-95 transition"
+  //         className="w-10 h-10 w-full sm:w-auto rounded-full bg-blue-500 text-white shadow hover:bg-blue-600 active:scale-95 transition"
 
-          disabled={bloqueada}
-          onClick={() => {
-            const v = Number(valor) || 0;
-            if (!desc.trim() || v <= 0) return;
-            onAddGasto(index, {
-              id: crypto.randomUUID(),
-              descricao: desc.trim(),
-              valor: v,
-              dataPtBr: dataHojeCampoGrande(),
-            });
-            setDesc("");
-            setValor("");
-          }}
-        >
-          <Plus className="w-5 h-5" />
-        </Button>
-      </div>
-    );
-  }
+  //         disabled={bloqueada}
+  //         onClick={() => {
+  //           const v = Number(valor) || 0;
+  //           if (!desc.trim() || v <= 0) return;
+  //           onAddGasto(index, {
+  //             id: crypto.randomUUID(),
+  //             descricao: desc.trim(),
+  //             valor: v,
+  //             dataPtBr: dataHojeCampoGrande(),
+  //           });
+  //           setDesc("");
+  //           setValor("");
+  //         }}
+  //       >
+  //         <Plus className="w-5 h-5" />
+  //       </Button>
+  //     </div>
+  //   );
+  // }
 
   return (
     <Card className="rounded-2xl shadow-sm">

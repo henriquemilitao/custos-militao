@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
     });
 
     return created(economia);
-  } catch (err: any) {
+  } catch (err) {
     if (err instanceof ZodError) {
       return NextResponse.json({ error: zodErrorToMessage(err) }, { status: 422 });
     }

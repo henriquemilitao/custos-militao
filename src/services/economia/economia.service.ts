@@ -1,5 +1,4 @@
 import { prisma } from "@/lib/prisma";
-import { Economia } from "@prisma/client";
 import { syncAleatorio } from "../aleatorio/aleatorio.service";
 
 // services/economiaService.ts

@@ -72,6 +72,7 @@ export default function GastosCard({ cicloAtual, mutateCiclo }: GastosCardProps)
 
       mutateCiclo();
     } catch (err) {
+      console.log(err)
       toast.error("Não foi possível atualizar a gasto");
     }
   }
@@ -113,10 +114,6 @@ export default function GastosCard({ cicloAtual, mutateCiclo }: GastosCardProps)
               // calcula o percent real, sem travar em 100
               const percentRaw = metaCents > 0 ? (jaGastoCents / metaCents) * 100 : 0;
 
-              // mas a barra de progresso não pode passar de 100%
-              const percentBar = Math.min(percentRaw, 100);
-              console.log(gasto.name === "Aleatório")
-              console.log('aaaaaaaaaaaaaaaaaaaa')
               return (
                 <div
                   key={gasto.id}

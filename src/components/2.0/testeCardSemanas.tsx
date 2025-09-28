@@ -47,7 +47,7 @@ export default function testeCardSemanas() {
   ];
 
   // Agrupando por data
-  const gastosPorData = gastos.reduce((acc: Record<string, any[]>, gasto) => {
+  const gastosPorData = gastos.reduce((acc: Record, gasto) => {
     const chave = formatarData(gasto.data);
     if (!acc[chave]) acc[chave] = [];
     acc[chave].push(gasto);

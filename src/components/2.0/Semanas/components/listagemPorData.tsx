@@ -1,6 +1,5 @@
 import { formatCurrencyFromCents } from "@/lib/formatters/formatCurrency";
 import { Edit, MoreVertical, Trash2 } from "lucide-react";
-import { Progress } from "@/components/ui/progress";
 import ProgressBar from "@/components/ui/progress-bar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { CicloAtualDTO } from "@/dtos/ciclo.dto";
@@ -70,11 +69,8 @@ type GastosPorCategoriaProps = {
 
 export function ListagemPorCategoria({
   gastosPorCategoria,
-  showModal,
   setShowModal,
-  cicloAtual,
   mutateCiclo,
-  isEdit,
   setIsEdit,
   setCurrentGasto,
   currentGasto

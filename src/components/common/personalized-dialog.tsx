@@ -1,11 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 
 import { Button } from "@/components/common/Button";
-import { Button as Button2 } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogTitle } from "@/components/ui/dialog";
 
 interface PersonilazedDialogProps {
@@ -17,7 +14,6 @@ interface PersonilazedDialogProps {
 }
 
 export function PersonilazedDialog({ open, onOpenChange, title = "Faça login para continuar", description = "Você precisa estar logado para adicionar produtos ao carrinho ou finalizar sua compra.", buttonText = "Ok" }: PersonilazedDialogProps) {
-  const router = useRouter();
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="text-center">

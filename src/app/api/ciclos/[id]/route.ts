@@ -1,4 +1,4 @@
-import { badRequest, notFound, ok, serverError } from "@/lib/http"
+import { notFound, ok, serverError } from "@/lib/http"
 import { getCicloById, updateCicloValorTotalService } from "@/services/ciclo/ciclo.service"
 import { NextRequest, NextResponse } from "next/server"
 import { ZodError, ZodIssue } from "zod";
@@ -27,6 +27,7 @@ export async function GET(_: NextRequest, context: { params: Promise<{ id: strin
         {status: 200})
 
     } catch (error) {
+        console.log(error)
         return serverError()
     }
 }
@@ -39,7 +40,7 @@ export async function PATCH(req: NextRequest, context: { params: Promise<{ id: s
     const body = await req.json();
 
     // 3)
-    const valorCents = Math.round((body.valorCents ?? 0)); // garante number (não null)
+    // const valorCents = Math.round((body.valorCents ?? 0)); // garante number (não null)
 
     // // 4) salvar via service
     const ciclo = await updateCicloValorTotalService({
@@ -51,7 +52,7 @@ export async function PATCH(req: NextRequest, context: { params: Promise<{ id: s
     if (!ciclo) return notFound()
 
     return ok("Mês alterado com sucesso");
-  } catch (err: any) {
+  } catch (err) {
     if (err instanceof ZodError) {
       return NextResponse.json({ error: zodErrorToMessage(err) }, { status: 422 });
     }

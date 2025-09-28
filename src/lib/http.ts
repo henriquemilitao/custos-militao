@@ -1,11 +1,11 @@
 // lib/http.ts
 import { NextResponse } from "next/server";
 
-export function ok(data: any = null) {
+export function ok(data = null) {
   return NextResponse.json(data, { status: 200 });
 }
 
-export function created(data: any = null) {
+export function created(data = null) {
   return NextResponse.json(data, { status: 201 });
 }
 
