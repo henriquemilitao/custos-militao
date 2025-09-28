@@ -154,7 +154,7 @@ export async function createCicloByValorTotalService(params: {
   const semanas = gerarSemanasParaCiclo(dataInicio, dataFim);
 
   // Cria o ciclo com as semanas em uma transação
-  return prisma.$transaction(async (tx) => {
+  const ciclo = await prisma.$transaction(async (tx) => {
     const ciclo = await tx.ciclo.create({
       data: {
         valorTotal: valorCents ?? 0,
@@ -177,6 +177,9 @@ export async function createCicloByValorTotalService(params: {
 
     return ciclo;
   });
+  
+  await syncAleatorio(ciclo.id);
+  return ciclo;
 }
 
 export async function updateCicloValorTotalService(params: {

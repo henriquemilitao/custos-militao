@@ -64,12 +64,8 @@ export async function createGastoService(params: {
 }) {
   const { name, valorCents, cicloId, tipoGasto } = params;
 
-  
-  if (name !== "Aleatório") {
-    await syncAleatorio(cicloId);
-  }
 
-  return prisma.gasto.create({
+  const gasto = await prisma.gasto.create({
     data: {
       name,
       valor: valorCents ?? 0, // null vira 0
@@ -78,6 +74,12 @@ export async function createGastoService(params: {
       cicloId,
     },
   });
+
+  if (name !== "Aleatório") {
+    await syncAleatorio(cicloId);
+  }
+
+  return gasto;
 }
 
 export async function editGastoService(
@@ -129,10 +131,6 @@ export async function editGastoService(
       }),
     ]);
 
-    if (name !== "Aleatório") {
-      await syncAleatorio(gasto.cicloId);
-    }
-
     return {
       ...gasto,
       valor: valorCents,
@@ -143,7 +141,7 @@ export async function editGastoService(
   }
 
   // Demais casos normais
-  return prisma.gasto.update({
+  const gastoAtualizado = await prisma.gasto.update({
     where: { id: gastoId },
     data: {
       name,
@@ -151,6 +149,12 @@ export async function editGastoService(
       tipo: tipoGasto,
     },
   });
+  
+  if (name !== "Aleatório") {
+    await syncAleatorio(gasto.cicloId);
+  }
+  
+  return gastoAtualizado;
 }
 
 export async function togglePagarGastoService(gastoId: string) {

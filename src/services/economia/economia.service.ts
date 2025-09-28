@@ -10,9 +10,7 @@ export async function createEconomiaService(params: {
 }) {
   const { name, valorCents, cicloId } = params;
 
-  await syncAleatorio(cicloId);
-
-  return prisma.economia.create({
+  const economia = await prisma.economia.create({
     data: {
       nome: name,
       valor: valorCents ?? 0, // null vira 0
@@ -20,6 +18,9 @@ export async function createEconomiaService(params: {
       cicloId,
     },
   });
+
+  await syncAleatorio(cicloId);
+  return economia;
 }
 
 export async function editEconomiaService(economiaId: string, params: {
@@ -32,15 +33,17 @@ export async function editEconomiaService(economiaId: string, params: {
   
   if (!economia) return null;
   
-  await syncAleatorio(economia.cicloId);
 
-  return prisma.economia.update({
+  const economiaAtualizada = await prisma.economia.update({
     where: {id: economiaId},
     data: {
       nome: name,
       valor: valorCents ?? 0, // null vira 0
     },
   });
+
+  await syncAleatorio(economia.cicloId);
+  return economiaAtualizada;
 }
 
 export async function toggleGuardarEconomiaService(economiaId: string) {
@@ -72,9 +75,10 @@ export async function deleteEconomiaService(economiaId: string){
 
   if (!economia) return null;
 
-  await syncAleatorio(economia.cicloId);
-
-  return prisma.economia.delete({
+  const economiaDeletada = await prisma.economia.delete({
     where: {  id: economiaId  }
   });
+
+  await syncAleatorio(economia.cicloId);
+  return economiaDeletada;
 }
