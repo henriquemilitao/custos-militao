@@ -126,7 +126,7 @@ const SignInForm = () => {
             <Button2 type="submit" className="w-full">
               Entrar
             </Button2>
-            <Button
+            {/* <Button
               variant="outline"
               className="w-full rounded-xl x-4 py-2 font-medium transition-colors disabled:opacity-60 disabled:cursor-not-allowed inline-flex items-center gap-2"
               onClick={handleSignInWithGoogle}
@@ -151,7 +151,7 @@ const SignInForm = () => {
                 />
               </svg>
               Entrar com Google
-            </Button>
+            </Button> */}
           </CardFooter>
         </form>
       </Form>

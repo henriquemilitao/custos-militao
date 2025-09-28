@@ -184,13 +184,13 @@ export default function HeaderSistema() {
 
           {session?.user && (
             <div className="mt-6 space-y-2 px-5">
-              <Button
+              {/* <Button
                 variant="outline"
                 className="w-full flex items-center gap-2 rounded-xl"
                 onClick={() => setConfigOpen(true)}
               >
                 <Settings className="h-4 w-4" /> Configurações
-              </Button>
+              </Button> */}
               <Button
                 variant="destructive"
                 className="w-full flex items-center gap-2 rounded-xl"
