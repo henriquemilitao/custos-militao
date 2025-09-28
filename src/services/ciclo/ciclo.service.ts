@@ -1,7 +1,7 @@
 import { CicloAtualDTO } from "@/dtos/ciclo.dto";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { getMesAtualTimeZone } from "./utils";
+import { gerarSemanasParaCiclo, getMesAtualTimeZone } from "./utils";
 
 
 export async function getCicloById(cicloId: string) {
@@ -69,8 +69,15 @@ export async function getCicloAtual(userId: string | undefined): Promise<CicloAt
   const gastosUnicosJaRealizados = somaGastosUnicosJaRealizados._sum.valor ?? 0;
   const gastosPorMetaJaRealizados = somaGastosPorMetaJaRealizados._sum.valor ?? 0;
   const gastoTotalJaRealizado = gastosUnicosJaRealizados + gastosPorMetaJaRealizados;
-  const disponivelMes = ciclo.valorTotal - economiasJaGuardadas - gastoTotalJaRealizado;
+  const disponivelMes = (ciclo.valorTotal * 100 - economiasJaGuardadas - gastoTotalJaRealizado);
 
+  
+    console.log({
+      disponivelMes,
+      cicloValorTotal: ciclo.valorTotal * 100,
+      economiasJaGuardadas,
+      gastoTotalJaRealizado
+    })
   // --- gastos por meta enriquecidos ---
   const registrosAgrupados = await prisma.registroGasto.groupBy({
     by: ["gastoId"],
@@ -99,6 +106,7 @@ export async function getCicloAtual(userId: string | undefined): Promise<CicloAt
         totalDisponivel: g.valor - totalJaGasto,
       };
     });
+
 
   return {
     ...ciclo,
@@ -130,7 +138,7 @@ export async function createCicloByValorTotalService(params: {
   req: Request; // Next.js request
 }) {
   const { valorCents, req } = params;
-  console.log({ valorCents, req })
+  
   // aqui pega a sessão do usuário logado
   const session = await auth.api.getSession({
     headers: req.headers, // importante!!
@@ -141,15 +149,31 @@ export async function createCicloByValorTotalService(params: {
   }
 
   const { dataInicio, dataFim } = getMesAtualTimeZone("America/Campo_Grande");
+  const semanas = gerarSemanasParaCiclo(dataInicio, dataFim);
 
-  return prisma.ciclo.create({
-    data: {
-      valorTotal: valorCents ?? 0,
-      dataInicio,
-      dataFim,
-      quantidadeSemanas: 4,
-      userId: session.user.id,
-    },
+  // Cria o ciclo com as semanas em uma transação
+  return prisma.$transaction(async (tx) => {
+    const ciclo = await tx.ciclo.create({
+      data: {
+        valorTotal: valorCents ?? 0,
+        dataInicio,
+        dataFim,
+        quantidadeSemanas: semanas.length,
+        userId: session.user.id,
+      },
+    });
+
+    // Cria as semanas para o ciclo
+    await tx.semana.createMany({
+      data: semanas.map((semana, index) => ({
+        cicloId: ciclo.id,
+        qualSemanaCiclo: index + 1,
+        dataInicio: semana.inicio,
+        dataFim: semana.fim,
+      })),
+    });
+
+    return ciclo;
   });
 }
 

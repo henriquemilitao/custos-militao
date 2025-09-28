@@ -34,39 +34,39 @@ export function getMesAtualTimeZone(tz: string) {
 //  * Gera as semanas para um ciclo baseado na data de início e fim
 //  * A última semana pode ter mais de 7 dias para cobrir todo o período do ciclo
 //  */
-// export function gerarSemanasParaCiclo(dataInicio: Date, dataFim: Date) {
-//   const semanas: Array<{ inicio: Date; fim: Date }> = [];
+export function gerarSemanasParaCiclo(dataInicio: Date, dataFim: Date) {
+  const semanas: Array<{ inicio: Date; fim: Date }> = [];
   
-//   // Copia as datas para não modificar as originais
-//   let inicioSemana = new Date(dataInicio);
-//   let semanaAtual = 1;
+  // Copia as datas para não modificar as originais
+  let inicioSemana = new Date(dataInicio);
+  let semanaAtual = 1;
   
-//   while (inicioSemana <= dataFim && semanaAtual <= 4) {
-//     // Para as 3 primeiras semanas, usar exatamente 7 dias
-//     if (semanaAtual <= 3) {
-//       const fimSemana = new Date(inicioSemana);
-//       fimSemana.setUTCDate(inicioSemana.getUTCDate() + 6);
-//       fimSemana.setUTCHours(23, 59, 59, 999);
+  while (inicioSemana <= dataFim && semanaAtual <= 4) {
+    // Para as 3 primeiras semanas, usar exatamente 7 dias
+    if (semanaAtual <= 3) {
+      const fimSemana = new Date(inicioSemana);
+      fimSemana.setUTCDate(inicioSemana.getUTCDate() + 6);
+      fimSemana.setUTCHours(23, 59, 59, 999);
       
-//       semanas.push({
-//         inicio: new Date(inicioSemana),
-//         fim: fimSemana,
-//       });
+      semanas.push({
+        inicio: new Date(inicioSemana),
+        fim: fimSemana,
+      });
       
-//       // Próxima semana começa no dia seguinte
-//       inicioSemana = new Date(fimSemana);
-//       inicioSemana.setUTCDate(inicioSemana.getUTCDate() + 1);
-//       inicioSemana.setUTCHours(0, 0, 0, 0);
-//     } else {
-//       // Última semana: vai até o fim do ciclo
-//       semanas.push({
-//         inicio: new Date(inicioSemana),
-//         fim: new Date(dataFim),
-//       });
-//     }
+      // Próxima semana começa no dia seguinte
+      inicioSemana = new Date(fimSemana);
+      inicioSemana.setUTCDate(inicioSemana.getUTCDate() + 1);
+      inicioSemana.setUTCHours(0, 0, 0, 0);
+    } else {
+      // Última semana: vai até o fim do ciclo
+      semanas.push({
+        inicio: new Date(inicioSemana),
+        fim: new Date(dataFim),
+      });
+    }
     
-//     semanaAtual++;
-//   }
+    semanaAtual++;
+  }
   
-//   return semanas;
-// }
+  return semanas;
+}

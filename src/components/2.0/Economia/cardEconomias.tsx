@@ -83,7 +83,7 @@ export default function EconomiasCard({ cicloAtual, mutateCiclo }: EconomiasCard
                 key={economia.id}
                 className={`p-3 rounded-xl border flex justify-between items-center ${
                   economia.isGuardado
-                    ? "bg-green-100 border-green-300 opacity-90"
+                    ? "bg-green-200 border-green-400 opacity-70"
                     : "bg-gray-50 border-gray-200"
                 }`}
               >
@@ -100,7 +100,7 @@ export default function EconomiasCard({ cicloAtual, mutateCiclo }: EconomiasCard
                   </div>
                   <p className="text-sm text-gray-500">
                     Valor: {formatCurrencyFromCents(economia.valor)} (
-                    {((economia.valor / cicloAtual.valorTotal) * 100).toFixed(1)}%)
+                    {((economia.valor / cicloAtual.valorTotal)).toFixed(1)}%)
                   </p>
                   {economia.isGuardado && economia.dataGuardado && (
                     <p className="text-xs text-gray-400">
