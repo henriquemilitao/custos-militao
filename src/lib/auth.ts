@@ -1,28 +1,30 @@
-// lib/auth.ts
-import { NextRequest } from "next/server";
-import jwt from "jsonwebtoken";
+import { betterAuth } from "better-auth";
+import { prismaAdapter } from "better-auth/adapters/prisma";
+import { prisma } from "@/lib/prisma"; // sua instância prisma importada
 
-export class AuthError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "AuthError";
-  }
-}
-
-export function verifyTokenFromRequest(req: NextRequest) {
-  const header = req.headers.get("authorization") || req.headers.get("Authorization");
-  if (!header) throw new AuthError("Token ausente");
-
-  const [, token] = header.split(" ");
-  if (!token) throw new AuthError("Token ausente");
-
-  const secret = process.env.JWT_SECRET;
-  if (!secret) throw new Error("JWT_SECRET não configurado");
-
-  try {
-    const payload = jwt.verify(token, secret);
-    return payload;
-  } catch (err) {
-    throw new AuthError("Token inválido");
-  }
-}
+export const auth = betterAuth({
+  emailAndPassword: {
+    enabled: true,
+  },
+  socialProviders: {
+    google: {
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    },
+  },
+  database: prismaAdapter(prisma, {
+    provider: "postgresql", // ou "mysql" / "sqlite", dependendo do seu banco
+  }), 
+  user: {
+    modelName: "User",
+  },
+  session: {
+    modelName: "Session",
+  },
+  account: {
+    modelName: "Account",
+  },
+  verification: {
+    modelName: "Verification",
+  },
+});

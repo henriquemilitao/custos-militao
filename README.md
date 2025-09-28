@@ -13,9 +13,9 @@ pnpm dev
 # or
 bun dev
 ```
-npx prisma migrate reset 
-npx prisma migrate dev --name init                                                                     
-npx prisma generate     
+npx prisma migrate reset
+npx prisma migrate dev --name init
+npx prisma generate
 npx prisma db seed
 
 Refazer banco

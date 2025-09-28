@@ -12,6 +12,8 @@ async function main() {
   const user = await prisma.user.create({
     data: {
       id: "978dbd3e-ff8c-4344-90af-0be8e53a9346",
+      email: 'h@h.com',
+      name: 'Henrique',
     },
   });
 
