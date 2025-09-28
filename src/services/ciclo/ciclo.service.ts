@@ -143,9 +143,9 @@ export async function createCicloByValorTotalService(params: {
     throw new Error("Usuário não autenticado");
   }
 
+
   const { dataInicio, dataFim } = getMesAtualTimeZone("America/Campo_Grande");
   const semanas = gerarSemanasParaCiclo(dataInicio, dataFim);
-
   // Cria o ciclo com as semanas em uma transação
   const ciclo = await prisma.$transaction(async (tx) => {
     const ciclo = await tx.ciclo.create({

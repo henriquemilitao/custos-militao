@@ -49,7 +49,7 @@ export default function ResumoMesCard({cicloAtual, mutateCiclo}: ResumoMesCardPr
         style: { background: "#dcfce7", color: "#166534" },
       });
 
-      mutateCiclo();
+      mutateCiclo(undefined, { revalidate: true });
     } catch {
       toast.error("Não foi possível criar o ciclo");
     }
