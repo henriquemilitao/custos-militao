@@ -2,7 +2,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ZodError, ZodIssue } from "zod";
 import { createEconomiaSchema } from "@/dtos/economia.schema";
-import { verifyTokenFromRequest, AuthError } from "@/lib/auth";
 import { createEconomiaService } from "@/services/economia/economia.service";
 import { created } from "@/lib/http";
 

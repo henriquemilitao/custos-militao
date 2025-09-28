@@ -89,7 +89,7 @@ export default function GastosCard({ cicloAtual, mutateCiclo }: GastosCardProps)
         </div>
 
         {/* Listagem */}
-        <div className="space-y-3 flex flex-col justify-center h-10">
+        <div className="space-y-3 flex flex-col justify-center">
           {!cicloAtual ? (
             <p className="text-xs text-gray-400 text-center">Carregando ciclo...</p>
           ) : cicloAtual.gastos && cicloAtual.gastos.length > 0 ? (
@@ -216,7 +216,7 @@ export default function GastosCard({ cicloAtual, mutateCiclo }: GastosCardProps)
               );
             })
           ) : (
-            <p className="text-xs text-gray-400 mt-2 text-center">Nenhum gasto registrado.</p>
+            <p className="text-xs text-gray-400 mt-7 text-center">Nenhum gasto registrado.</p>
           )}
         </div>
       </div>

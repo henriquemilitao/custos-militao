@@ -74,14 +74,14 @@ export default function HeaderSistema() {
     <div className="flex items-center justify-between px-4 py-3 bg-white shadow-sm rounded-2xl mb-4">
       {/* Navegação de mês */}
       <div className="flex items-center gap-2">
-        <Button
+        {/* <Button
           variant="outline"
           size="sm"
           onClick={handleMesAnterior}
           className="rounded-lg"
         >
           <ChevronLeft className="h-4 w-4" />
-        </Button>
+        </Button> */}
 
         <Popover>
           <PopoverTrigger asChild>
@@ -89,9 +89,8 @@ export default function HeaderSistema() {
               {format(mesAtual, "MMMM/yyyy", { locale: ptBR })}
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-60">
+          {/* <PopoverContent className="w-60">
             <div className="flex gap-2">
-              {/* Mês */}
               <Select
                 defaultValue={String(mesAtual.getMonth())}
                 onValueChange={() => {}}
@@ -108,7 +107,6 @@ export default function HeaderSistema() {
                 </SelectContent>
               </Select>
 
-              {/* Ano */}
               <Select
                 defaultValue={String(mesAtual.getFullYear())}
                 onValueChange={() => {}}
@@ -128,17 +126,17 @@ export default function HeaderSistema() {
                 </SelectContent>
               </Select>
             </div>
-          </PopoverContent>
+          </PopoverContent> */}
         </Popover>
 
-        <Button
+        {/* <Button
           variant="outline"
           size="sm"
           onClick={handleMesProximo}
           className="rounded-lg"
         >
           <ChevronRight className="h-4 w-4" />
-        </Button>
+        </Button> */}
       </div>
 
       {/* Avatar dinâmico */}

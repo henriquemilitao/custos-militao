@@ -164,7 +164,7 @@ export default function EconomiasCard({ cicloAtual, mutateCiclo }: EconomiasCard
         }}
         mutateCiclo={mutateCiclo}
         item={currentEconomia}
-        tipoItem={TipoItemDelete.GASTOS}
+        tipoItem={TipoItemDelete.ECONOMIAS}
       />
     </div>
   );
