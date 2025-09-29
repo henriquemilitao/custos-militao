@@ -28,40 +28,61 @@ export function getMesAtualTimeZone(tz: string) {
 
 export function gerarSemanasParaCiclo(dataInicio: Date, dataFim: Date) {
   const semanas: Array<{ inicio: Date; fim: Date }> = [];
-  
+
   // Adiciona +1 dia na data de início
   const inicioMaisUm = new Date(dataInicio);
   inicioMaisUm.setDate(inicioMaisUm.getDate() + 1);
-  inicioMaisUm.setHours(0, 0, 0, 0);
-  
+  inicioMaisUm.setHours(4, 0, 0, 0); // força 04:00
+
   // Trabalha com as datas +1
-  let inicioSemana = new Date(inicioMaisUm.getFullYear(), inicioMaisUm.getMonth(), inicioMaisUm.getDate());
+  let inicioSemana = new Date(
+    inicioMaisUm.getFullYear(),
+    inicioMaisUm.getMonth(),
+    inicioMaisUm.getDate(),
+    4, 0, 0, 0 // sempre 04:00
+  );
   let semanaAtual = 1;
-  
-  const fimCiclo = new Date(dataFim.getFullYear(), dataFim.getMonth(), dataFim.getDate(), 23, 59, 59, 999);
-  
+
+  // Fim do ciclo em 03:59:59.999
+  const fimCiclo = new Date(
+    dataFim.getFullYear(),
+    dataFim.getMonth(),
+    dataFim.getDate(),
+    3, 59, 59, 999
+  );
+
   while (inicioSemana <= fimCiclo && semanaAtual <= 4) {
     if (semanaAtual <= 3) {
       // Para as 3 primeiras semanas: exatamente 7 dias
-      const fimSemana = new Date(inicioSemana.getFullYear(), inicioSemana.getMonth(), inicioSemana.getDate() + 6, 23, 59, 59, 999);
-      
+      const fimSemana = new Date(
+        inicioSemana.getFullYear(),
+        inicioSemana.getMonth(),
+        inicioSemana.getDate() + 6,
+        3, 59, 59, 999 // sempre 03:59
+      );
+
       semanas.push({
         inicio: new Date(inicioSemana),
         fim: fimSemana,
       });
-      
-      // Próxima semana começa no dia seguinte
-      inicioSemana = new Date(inicioSemana.getFullYear(), inicioSemana.getMonth(), inicioSemana.getDate() + 7);
+
+      // Próxima semana começa no dia seguinte às 04:00
+      inicioSemana = new Date(
+        inicioSemana.getFullYear(),
+        inicioSemana.getMonth(),
+        inicioSemana.getDate() + 7,
+        4, 0, 0, 0
+      );
     } else {
-      // Última semana: vai até o fim do ciclo (+1)
+      // Última semana: vai até o fim do ciclo (03:59)
       semanas.push({
         inicio: new Date(inicioSemana),
         fim: new Date(fimCiclo),
       });
     }
-    
+
     semanaAtual++;
   }
-  
+
   return semanas;
 }
