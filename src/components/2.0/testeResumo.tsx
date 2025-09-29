@@ -2,7 +2,7 @@
 
 import { CicloAtualDTO } from "@/dtos/ciclo.dto";
 import { formatCurrencyFromCents } from "@/lib/formatters/formatCurrency";
-import { formatIsoToDayMonth} from "@/lib/formatters/formatDate";
+import { formatDateDayMonth, formatIsoToDayMonth, formatPeriodoDayMonth} from "@/lib/formatters/formatDate";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import EditableCurrency from "../EditableCurrency";
 import { toast } from "sonner";
@@ -111,7 +111,12 @@ export default function ResumoMesCard({cicloAtual, mutateCiclo}: ResumoMesCardPr
             
           </h2>
         {cicloAtual?.id &&  
-          <p className="text-sm text-gray-500 mb-2">{cicloAtual && `${formatIsoToDayMonth(cicloAtual?.dataInicio)} - ${formatIsoToDayMonth(cicloAtual?.dataFim)}`}</p>
+          <p className="text-sm text-gray-500 mb-2">{
+            cicloAtual && `
+              ${formatPeriodoDayMonth(cicloAtual?.dataInicio, cicloAtual?.dataFim)}
+              ${formatDateDayMonth(cicloAtual?.dataInicio)} - ${formatDateDayMonth(cicloAtual?.dataFim)}
+              `
+            }</p>
         }
         </div>
 
