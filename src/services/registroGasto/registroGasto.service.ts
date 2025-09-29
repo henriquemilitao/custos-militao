@@ -117,7 +117,9 @@ export async function editRegistroGastoService(
     return { ok: false, message: "Registro não encontrado", type: "fora-semana" };
   }
 
-  const { name, valorCents, data, semanaId, permission } = params;
+  const { name, valorCents, data, semanaId, permission, gastoId } = params;
+
+  console.log({dddddd: gastoId})
 
   const semana = await prisma.semana.findUnique({
     where: { id: semanaId },
@@ -178,8 +180,10 @@ export async function editRegistroGastoService(
       valor: valorCents ?? 0,
       data: dataNorm,
       semanaId: semanaCorreta.id,
+      gastoId
     },
   });
+  console.log({eeeeee: updated})
   
   // if (name !== "Aleatório") {
   //     await syncAleatorio(semana.cicloId);

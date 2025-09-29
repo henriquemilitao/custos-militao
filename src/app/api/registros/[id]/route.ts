@@ -12,6 +12,7 @@ export async function PATCH(req: NextRequest, context: { params: Promise<{ id: s
     const parsed = editRegistroGastoSchema.parse(body);
     const valorCents = Math.round(parsed.valorCents ?? 0);
 
+    console.log({bbbbbbbb: parsed.gastoId})
     const result = await editRegistroGastoService(registroId, {
       ...parsed,
       valorCents,

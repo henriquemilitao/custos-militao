@@ -113,7 +113,6 @@ export default function ResumoMesCard({cicloAtual, mutateCiclo}: ResumoMesCardPr
         {cicloAtual?.id &&  
           <p className="text-sm text-gray-500 mb-2">{
             cicloAtual && `
-              ${formatPeriodoDayMonth(cicloAtual?.dataInicio, cicloAtual?.dataFim)}
               ${formatDateDayMonth(cicloAtual?.dataInicio)} - ${formatDateDayMonth(cicloAtual?.dataFim)}
               `
             }</p>

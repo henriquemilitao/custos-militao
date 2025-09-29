@@ -141,6 +141,9 @@ export function DialogAddEditGasto({
       semanaId: semanaAtual?.id ?? "",
     };
 
+    console.log({aaaaaa: gastoId})
+
+
     const schema = isEdit ? editRegistroGastoSchema : createRegistroGastoSchema;
     const parsed = schema.safeParse(payload);
 
