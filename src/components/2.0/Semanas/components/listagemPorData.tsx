@@ -14,32 +14,40 @@ function capitalizeWords(str: string) {
 }
 
 function formatarData(data: string | Date) {
-  let dateObj: Date
+  let dateObj: Date;
 
   if (typeof data === "string") {
-    dateObj = parse(data, "yyyy-MM-dd", new Date())
+    dateObj = parse(data, "yyyy-MM-dd", new Date());
     if (!isValid(dateObj)) {
-      dateObj = parse(data, "dd/MM/yyyy", new Date())
+      dateObj = parse(data, "dd/MM/yyyy", new Date());
     }
   } else {
-    dateObj = data
+    dateObj = data;
   }
 
-  if (!isValid(dateObj)) return data.toString()
+  if (!isValid(dateObj)) return data.toString();
 
-  const hoje = new Date()
-  const ontem = new Date()
-  ontem.setDate(hoje.getDate() - 1)
-  const amanha = new Date()
-  amanha.setDate(hoje.getDate() + 1)
+  const hoje = new Date();
+  const ontem = new Date();
+  ontem.setDate(hoje.getDate() - 1);
+  const amanha = new Date();
+  amanha.setDate(hoje.getDate() + 1);
 
-  if (dateObj.toDateString() === hoje.toDateString()) return "Hoje"
-  if (dateObj.toDateString() === ontem.toDateString()) return "Ontem"
-  if (dateObj.toDateString() === amanha.toDateString()) return "Amanhã"
+  if (dateObj.toDateString() === hoje.toDateString()) return "Hoje";
+  if (dateObj.toDateString() === ontem.toDateString()) return "Ontem";
+  if (dateObj.toDateString() === amanha.toDateString()) return "Amanhã";
 
-  const formatted = format(dateObj, "dd/MM - EEEE", { locale: ptBR })
-  return capitalizeWords(formatted)
+  const formatted = format(dateObj, "dd/MM - EEEE", { locale: ptBR });
+
+  // quebra em duas partes: "21/09" e "domingo"
+  const [dataParte, diaParte] = formatted.split(" - ");
+
+  // capitaliza só o dia da semana
+  const diaCapitalizado = diaParte.charAt(0).toUpperCase() + diaParte.slice(1);
+
+  return `${dataParte} - ${diaCapitalizado}`;
 }
+
 
 
 
