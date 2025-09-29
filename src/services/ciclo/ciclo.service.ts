@@ -130,23 +130,38 @@ export async function getCicloAnterior(userId: string, cicloId: string) {
 
 export async function createCicloByValorTotalService(params: {
   valorCents: number | null;
-  req: Request; // Next.js request
+  req: Request;
 }) {
   const { valorCents, req } = params;
   
-  // aqui pega a sessão do usuário logado
   const session = await auth.api.getSession({
-    headers: req.headers, // importante!!
+    headers: req.headers,
   });
 
   if (!session?.user) {
     throw new Error("Usuário não autenticado");
   }
 
+  // pega início e fim do mês
+  let { dataInicio, dataFim } = getMesAtualTimeZone("America/Campo_Grande");
 
-  const { dataInicio, dataFim } = getMesAtualTimeZone("America/Campo_Grande");
+  // padroniza início e fim no esquema 04:00 -> 03:59
+  dataInicio = new Date(
+    dataInicio.getFullYear(),
+    dataInicio.getMonth(),
+    dataInicio.getDate(),
+    4, 0, 0, 0
+  );
+
+  dataFim = new Date(
+    dataFim.getFullYear(),
+    dataFim.getMonth(),
+    dataFim.getDate(),
+    3, 59, 59, 999
+  );
+
   const semanas = gerarSemanasParaCiclo(dataInicio, dataFim);
-  // Cria o ciclo com as semanas em uma transação
+
   const ciclo = await prisma.$transaction(async (tx) => {
     const ciclo = await tx.ciclo.create({
       data: {
@@ -158,7 +173,6 @@ export async function createCicloByValorTotalService(params: {
       },
     });
 
-    // Cria as semanas para o ciclo
     await tx.semana.createMany({
       data: semanas.map((semana, index) => ({
         cicloId: ciclo.id,
@@ -170,7 +184,7 @@ export async function createCicloByValorTotalService(params: {
 
     return ciclo;
   });
-  
+
   await syncAleatorio(ciclo.id);
   return ciclo;
 }
