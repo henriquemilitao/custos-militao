@@ -156,7 +156,7 @@ export async function createCicloByValorTotalService(params: {
   dataFim = new Date(
     dataFim.getFullYear(),
     dataFim.getMonth(),
-    dataFim.getDate(),
+    dataFim.getDate() + 1,
     3, 59, 59, 999
   );
 
