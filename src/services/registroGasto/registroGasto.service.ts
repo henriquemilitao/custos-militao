@@ -26,7 +26,10 @@ interface RegistroGastoResult {
 }
 
 function normalize(d: Date) {
-  return startOfDay(new Date(d));
+  const date = new Date(d);
+  // força o horário para 04:00:00
+  date.setHours(4, 0, 0, 0);
+  return date;
 }
 
 export async function createRegistroGastoService(
@@ -34,8 +37,6 @@ export async function createRegistroGastoService(
 ): Promise<RegistroGastoResult> {
   const { name, valorCents, data, gastoId, semanaId, permission } = params;
 
-  const dataNormalizada = new Date(data);
-  dataNormalizada.setHours(0, 0, 0, 0);
   const semana = await prisma.semana.findUnique({
     where: { id: semanaId },
     include: { ciclo: true },
@@ -94,7 +95,7 @@ export async function createRegistroGastoService(
     data: {
       name,
       valor: valorCents ?? 0,
-      data: dataNormalizada,
+      data: dataNorm,
       gastoId,
       semanaId: semanaCorreta.id || semanaId,
     },
