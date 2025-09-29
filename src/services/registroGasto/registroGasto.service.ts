@@ -34,6 +34,8 @@ export async function createRegistroGastoService(
 ): Promise<RegistroGastoResult> {
   const { name, valorCents, data, gastoId, semanaId, permission } = params;
 
+  const dataNormalizada = new Date(data);
+  dataNormalizada.setHours(0, 0, 0, 0);
   const semana = await prisma.semana.findUnique({
     where: { id: semanaId },
     include: { ciclo: true },
@@ -92,7 +94,7 @@ export async function createRegistroGastoService(
     data: {
       name,
       valor: valorCents ?? 0,
-      data: dataNorm,
+      data: dataNormalizada,
       gastoId,
       semanaId: semanaCorreta.id || semanaId,
     },

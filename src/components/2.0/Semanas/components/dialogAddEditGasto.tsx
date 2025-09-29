@@ -130,10 +130,13 @@ export function DialogAddEditGasto({
 
     setErrors({});
 
+    let dataNormalizada = data ? new Date(data) : new Date();
+    dataNormalizada.setHours(0, 0, 0, 0);
+
     const payload = {
       name: formatarName(name.trim()),
       valorCents: valor ?? null,
-      data,
+      data: dataNormalizada,
       gastoId: gastoId ?? "",
       semanaId: semanaAtual?.id ?? "",
     };
