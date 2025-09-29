@@ -29,21 +29,16 @@ export function getMesAtualTimeZone(tz: string) {
 export function gerarSemanasParaCiclo(dataInicio: Date, dataFim: Date) {
   const semanas: Array<{ inicio: Date; fim: Date }> = [];
 
-  // Adiciona +1 dia na data de início
-  const inicioMaisUm = new Date(dataInicio);
-  inicioMaisUm.setDate(inicioMaisUm.getDate() + 1);
-  inicioMaisUm.setHours(4, 0, 0, 0); // força 04:00
-
-  // Trabalha com as datas +1
+  // Início do ciclo já às 04:00
   let inicioSemana = new Date(
-    inicioMaisUm.getFullYear(),
-    inicioMaisUm.getMonth(),
-    inicioMaisUm.getDate(),
-    4, 0, 0, 0 // sempre 04:00
+    dataInicio.getFullYear(),
+    dataInicio.getMonth(),
+    dataInicio.getDate(),
+    4, 0, 0, 0
   );
   let semanaAtual = 1;
 
-  // Fim do ciclo em 03:59:59.999
+  // Fim do ciclo às 03:59:59.999
   const fimCiclo = new Date(
     dataFim.getFullYear(),
     dataFim.getMonth(),
@@ -58,7 +53,7 @@ export function gerarSemanasParaCiclo(dataInicio: Date, dataFim: Date) {
         inicioSemana.getFullYear(),
         inicioSemana.getMonth(),
         inicioSemana.getDate() + 6,
-        3, 59, 59, 999 // sempre 03:59
+        3, 59, 59, 999
       );
 
       semanas.push({
@@ -86,3 +81,4 @@ export function gerarSemanasParaCiclo(dataInicio: Date, dataFim: Date) {
 
   return semanas;
 }
+
