@@ -48,11 +48,11 @@ export function gerarSemanasParaCiclo(dataInicio: Date, dataFim: Date) {
 
   while (inicioSemana <= fimCiclo && semanaAtual <= 4) {
     if (semanaAtual <= 3) {
-      // Para as 3 primeiras semanas: exatamente 7 dias
+      // Cada semana dura 7 dias completos (até o próximo dia às 03:59)
       const fimSemana = new Date(
         inicioSemana.getFullYear(),
         inicioSemana.getMonth(),
-        inicioSemana.getDate() + 6,
+        inicioSemana.getDate() + 7, // aqui troquei de +6 -> +7
         3, 59, 59, 999
       );
 
@@ -61,7 +61,7 @@ export function gerarSemanasParaCiclo(dataInicio: Date, dataFim: Date) {
         fim: fimSemana,
       });
 
-      // Próxima semana começa no dia seguinte às 04:00
+      // Próxima semana começa no mesmo dia às 04:00
       inicioSemana = new Date(
         inicioSemana.getFullYear(),
         inicioSemana.getMonth(),
@@ -81,4 +81,5 @@ export function gerarSemanasParaCiclo(dataInicio: Date, dataFim: Date) {
 
   return semanas;
 }
+
 
