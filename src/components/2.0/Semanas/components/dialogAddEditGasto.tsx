@@ -130,7 +130,7 @@ export function DialogAddEditGasto({
 
     setErrors({});
 
-    let dataNormalizada = data ? new Date(data) : new Date();
+    const dataNormalizada = data ? new Date(data) : new Date();
     dataNormalizada.setHours(0, 0, 0, 0);
 
     const payload = {
