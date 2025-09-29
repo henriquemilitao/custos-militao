@@ -128,12 +128,14 @@ export async function editRegistroGastoService(
     return { ok: false, message: "Semana não encontrada.", type: "fora-semana" };
   }
 
-  // 🔹 Normaliza datas
+  // 🔹 Normaliza apenas a data escolhida para evitar ruído de horas
   const dataNorm = normalize(data);
-  const inicioCiclo = normalize(semana.ciclo.dataInicio);
-  const fimCiclo = normalize(semana.ciclo.dataFim);
-  const inicioSemana = normalize(semana.dataInicio);
-  const fimSemana = normalize(semana.dataFim);
+
+  // Mas mantém os limites originais da semana/ciclo
+  const inicioCiclo = semana.ciclo.dataInicio;
+  const fimCiclo = semana.ciclo.dataFim;
+  const inicioSemana = semana.dataInicio;
+  const fimSemana = semana.dataFim;
 
   if (dataNorm < inicioCiclo || dataNorm > fimCiclo) {
     return {
