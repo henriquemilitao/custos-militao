@@ -24,17 +24,23 @@ import {
 import {
   LogOut,
   CalendarIcon,
+  ChevronRight,
+  ChevronLeft,
 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR} from "date-fns/locale";
 import { Calendar } from "../ui/calendar";
-
-// 🟢 importei o cliente de auth
 import { authClient } from "@/lib/auth-client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useRouter } from "next/navigation";
+import { CicloAtualDTO } from "@/dtos/ciclo.dto";
 
-export default function HeaderSistema() {
+type ResumoMesCardProps = {
+  mutateCiclo: () => void
+  cicloAtual: CicloAtualDTO | null
+}
+
+export default function HeaderSistema({mutateCiclo, cicloAtual}: ResumoMesCardProps) {
   const [configOpen, setConfigOpen] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [mesAtual, _] = useState(new Date());
@@ -48,18 +54,32 @@ export default function HeaderSistema() {
   const { data: session } = authClient.useSession();
   const router = useRouter();
 
+  async function handleProximoCiclo() {
+    try {
+      if (cicloAtual?.dataFim) {
+        const res = await fetch(`/api/ciclos/proximo?dataFim=${encodeURIComponent(JSON.stringify(cicloAtual.dataFim))}`, {
+          method: "GET",
+        });
+        const data = await res.json().catch(() => null);
+        console.log(data);
+      }
+    } catch (error) {
+      
+    }
+  }
+
   return (
     <div className="flex items-center justify-between px-4 py-3 bg-white shadow-sm rounded-2xl mb-4">
       {/* Navegação de mês */}
       <div className="flex items-center gap-2">
-        {/* <Button
+        <Button
           variant="outline"
           size="sm"
-          onClick={handleMesAnterior}
+          // onClick={handleMesAnterior}
           className="rounded-lg"
         >
           <ChevronLeft className="h-4 w-4" />
-        </Button> */}
+        </Button>
 
         <Popover>
           <PopoverTrigger asChild>
@@ -107,14 +127,14 @@ export default function HeaderSistema() {
           </PopoverContent> */}
         </Popover>
 
-        {/* <Button
+        <Button
           variant="outline"
           size="sm"
-          onClick={handleMesProximo}
+          onClick={handleProximoCiclo}
           className="rounded-lg"
         >
           <ChevronRight className="h-4 w-4" />
-        </Button> */}
+        </Button>
       </div>
 
       {/* Avatar dinâmico */}

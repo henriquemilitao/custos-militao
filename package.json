@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "prisma generate && next build --turbopack",
-    "start": "next start",
+    "dev": "cross-env TZ=UTC next dev --turbopack",
+    "build": "cross-env TZ=UTC prisma generate && cross-env TZ=UTC next build --turbopack",
+    "start": "cross-env TZ=UTC next start",
     "lint": "eslint"
   },
   "prisma": {
@@ -51,6 +51,7 @@
     "@types/node": "^20.19.17",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "cross-env": "^10.1.0",
     "eslint": "^9",
     "eslint-config-next": "15.5.2",
     "prisma": "^6.16.2",
