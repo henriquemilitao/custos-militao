@@ -233,7 +233,8 @@ export async function updateCicloValorTotalService(params: {
 }
 
 export async function getProximoCiclo(userId: string, dataFimInput: Date | string) {
-  const dataFim = typeof dataFimInput === "string" ? new Date(dataFimInput) : dataFimInput;
+  const dataFim =
+    typeof dataFimInput === "string" ? new Date(dataFimInput) : dataFimInput;
   if (isNaN(dataFim.getTime())) throw new Error("dataFim inválida");
 
   const ONE_DAY_MS = 24 * 60 * 60 * 1000;
@@ -241,26 +242,15 @@ export async function getProximoCiclo(userId: string, dataFimInput: Date | strin
   const ano = logicalDate.getUTCFullYear();
   const mes = logicalDate.getUTCMonth();
 
-  // console.log({
-  //   dataFim,
-  //   logicalDate,
-  //   ano,
-  //   mes
-  // })
-
   const monthStart = new Date(Date.UTC(ano, mes, 1, 0, 0, 0));
   const nextMonthStart = new Date(Date.UTC(ano, mes + 1, 1, 0, 0, 0));
 
-  // console.log({
-  //   monthStart,
-  //   nextMonthStart,
-  // })
-
+  // 🔎 1) Tenta buscar dentro do mesmo mês
   const cicloMesmoMes = await prisma.ciclo.findFirst({
     where: {
       userId,
       dataInicio: {
-        gt: dataFim,         // queremos ciclo após o dataFim atual
+        gt: dataFim,
         gte: monthStart,
         lt: nextMonthStart,
       },
@@ -268,10 +258,18 @@ export async function getProximoCiclo(userId: string, dataFimInput: Date | strin
     orderBy: { dataInicio: "asc" },
   });
 
-  // console.log({
-  //   cicloMesmoMes
-  // })
-  if (cicloMesmoMes) return cicloMesmoMes
+  if (cicloMesmoMes) return cicloMesmoMes;
 
-  
+  // 🔎 2) Se não tiver, busca o primeiro ciclo do mês seguinte em diante
+  const cicloProximoMes = await prisma.ciclo.findFirst({
+    where: {
+      userId,
+      dataInicio: {
+        gte: nextMonthStart, // começa no próximo mês
+      },
+    },
+    orderBy: { dataInicio: "asc" }, // garante que vem o mais cedo possível
+  });
+
+  return cicloProximoMes ?? null; // se ainda não tiver, retorna null
 }
