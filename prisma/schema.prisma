@@ -7,7 +7,6 @@ datasource db {
 generator client {
   provider = "prisma-client-js"
 }
-
 model User {
   id            String   @id @default(uuid())
   name          String
@@ -22,7 +21,6 @@ model User {
   accounts      Account[]
 }
 
-
 model Session {
   id         String   @id @default(uuid())
   token      String   @unique
@@ -34,7 +32,6 @@ model Session {
   createdAt  DateTime @default(now()) @map("created_at")
   updatedAt  DateTime @updatedAt @map("updated_at")
 }
-
 
 model Account {
   id                     String   @id @default(uuid())
@@ -53,7 +50,6 @@ model Account {
   updatedAt              DateTime @updatedAt @map("updated_at")
 }
 
-
 model Verification {
   id         String   @id @default(uuid())
   identifier String
@@ -62,7 +58,6 @@ model Verification {
   createdAt  DateTime @default(now()) @map("created_at")
   updatedAt  DateTime @updatedAt @map("updated_at")
 }
-
 
 model Ciclo {
   id                String   @id @default(uuid())
@@ -74,7 +69,7 @@ model Ciclo {
   updatedAt         DateTime @updatedAt @map("updated_at")
 
   userId  String
-  user    User      @relation(fields: [userId], references: [id])
+  user    User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   economias Economia[]
   gastos    Gasto[]
@@ -91,7 +86,7 @@ model Economia {
   updatedAt    DateTime  @updatedAt @map("updated_at")
 
   cicloId String
-  ciclo   Ciclo   @relation(fields: [cicloId], references: [id])
+  ciclo   Ciclo   @relation(fields: [cicloId], references: [id], onDelete: Cascade)
 }
 
 model Gasto {
@@ -105,7 +100,7 @@ model Gasto {
   updatedAt DateTime  @updatedAt @map("updated_at")
 
   cicloId   String
-  ciclo     Ciclo     @relation(fields: [cicloId], references: [id])
+  ciclo     Ciclo     @relation(fields: [cicloId], references: [id], onDelete: Cascade)
 
   registros RegistroGasto[]
 }
@@ -119,26 +114,26 @@ model RegistroGasto {
   updatedAt DateTime  @updatedAt @map("updated_at")
 
   gastoId  String
-  gasto    Gasto   @relation(fields: [gastoId], references: [id])
+  gasto    Gasto   @relation(fields: [gastoId], references: [id], onDelete: Cascade)
 
   semanaId String
-  semana   Semana  @relation(fields: [semanaId], references: [id])
+  semana   Semana  @relation(fields: [semanaId], references: [id], onDelete: Cascade)
 }
 
 model Semana {
-  id             String   @id @default(uuid())
-  qualSemanaCiclo Int     @map("qual_semana_ciclo") // Ex: 1, 2, 3...
-  dataInicio     DateTime @map("data_inicio")
-  dataFim        DateTime @map("data_fim")
-  createdAt      DateTime @default(now()) @map("created_at")
-  updatedAt      DateTime @updatedAt @map("updated_at")
+  id              String   @id @default(uuid())
+  qualSemanaCiclo Int      @map("qual_semana_ciclo") // Ex: 1, 2, 3...
+  dataInicio      DateTime @map("data_inicio")
+  dataFim         DateTime @map("data_fim")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
 
   cicloId String
-  ciclo   Ciclo   @relation(fields: [cicloId], references: [id])
+  ciclo   Ciclo   @relation(fields: [cicloId], references: [id], onDelete: Cascade)
 
   registros RegistroGasto[]
 
-  @@unique([cicloId, qualSemanaCiclo]) // garante que não exista semana duplicada no mesmo ciclo
+  @@unique([cicloId, qualSemanaCiclo])
 }
 
 enum TipoGasto {
