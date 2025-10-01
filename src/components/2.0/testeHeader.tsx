@@ -25,15 +25,18 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useRouter } from "next/navigation";
 import { CicloAtualDTO } from "@/dtos/ciclo.dto";
 import { KeyedMutator } from "swr";
+import { CicloComMes } from "@/hooks/useCicloAtual";
 
 type ResumoMesCardProps = {
-  mutateCiclo: KeyedMutator<CicloAtualDTO>; // ✅ agora aceita (data, options)
+  mutateCiclo: KeyedMutator<CicloComMes>; // ✅ agora bate com o hook
   cicloAtual: CicloAtualDTO | null;
+  mesReferencia: Date;
 };
 
 export default function HeaderSistema({
   mutateCiclo,
   cicloAtual,
+  mesReferencia,
 }: ResumoMesCardProps) {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [mesAtual, setMesAtual] = useState(new Date());
@@ -43,14 +46,15 @@ export default function HeaderSistema({
   const router = useRouter();
 
   async function handleProximoCiclo() {
-    console.log('aaa')
     try {
+      const referencia = cicloAtual?.dataFim
+        ? cicloAtual.dataFim instanceof Date
+          ? cicloAtual.dataFim.toISOString()
+          : String(cicloAtual.dataFim)
+        : mesReferencia.toISOString();
+
       const res = await fetch(
-        `/api/ciclos/proximo?dataFim=${encodeURIComponent(
-          cicloAtual?.dataFim instanceof Date
-            ? cicloAtual.dataFim.toISOString()
-            : String(cicloAtual?.dataFim || mesAtual.toISOString())
-        )}`,
+        `/api/ciclos/proximo?referencia=${encodeURIComponent(referencia)}&cicloAtual=${!!cicloAtual}`,
         { method: "GET" }
       );
 
@@ -58,9 +62,8 @@ export default function HeaderSistema({
 
       const data = await res.json();
 
-      // ⚡ aqui atualiza o cache do SWR com o novo ciclo
+      // atualiza SWR com o novo ciclo
       mutateCiclo(data, { revalidate: false });
-
 
 
       // if (res.status === 404) {

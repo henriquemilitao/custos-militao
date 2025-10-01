@@ -4,6 +4,10 @@ import { prisma } from "@/lib/prisma";
 import { gerarSemanasParaCiclo, getMesAtualTimeZone } from "./utils";
 import { syncAleatorio } from "../aleatorio/aleatorio.service";
 
+export type CicloComMes = {
+  ciclo: CicloAtualDTO | null;
+  mesReferencia: string; // sempre ISO string de uma data no mês
+};
 
 export async function getCicloById(cicloId: string) {
   return prisma.ciclo.findUnique({
@@ -20,8 +24,13 @@ export async function getCicloById(cicloId: string) {
   });
 }
 
-export async function getCicloAtual(userId: string | undefined): Promise<CicloAtualDTO | null> {
-  if (!userId) return null;
+export async function getCicloAtual(userId: string | undefined): Promise<CicloComMes> {
+  if (!userId) {
+    return {
+      ciclo: null,
+      mesReferencia: new Date().toISOString(),
+    };
+  }
 
   const hoje = new Date();
   const ciclo = await prisma.ciclo.findFirst({
@@ -47,7 +56,13 @@ export async function getCicloAtual(userId: string | undefined): Promise<CicloAt
     },
   });
 
-  if (!ciclo) return null;
+  if (!ciclo) {
+    // Nenhum ciclo encontrado → retorna null + mês de hoje
+    return {
+      ciclo: null,
+      mesReferencia: new Date(Date.UTC(hoje.getUTCFullYear(), hoje.getUTCMonth(), 1)).toISOString(),
+    };
+  }
 
   // --- cálculos agregados ---
   const [
@@ -104,13 +119,16 @@ export async function getCicloAtual(userId: string | undefined): Promise<CicloAt
   await syncAleatorio(ciclo.id);
 
   return {
-    ...ciclo,
-    economiasMesTotal,
-    gastosMesTotal,
-    economiasJaGuardadas,
-    gastoTotalJaRealizado,
-    disponivelMes,
-    gastosPorMetaTotais,
+    ciclo: {
+      ...ciclo,
+      economiasMesTotal,
+      gastosMesTotal,
+      economiasJaGuardadas,
+      gastoTotalJaRealizado,
+      disponivelMes,
+      gastosPorMetaTotais,
+    },
+    mesReferencia: new Date(Date.UTC(ciclo.dataInicio.getUTCFullYear(), ciclo.dataInicio.getUTCMonth(), 1)).toISOString(),
   };
 }
 
@@ -232,44 +250,93 @@ export async function updateCicloValorTotalService(params: {
   return cicloAtualizado
 }
 
-export async function getProximoCiclo(userId: string, dataFimInput: Date | string) {
-  const dataFim =
-    typeof dataFimInput === "string" ? new Date(dataFimInput) : dataFimInput;
-  if (isNaN(dataFim.getTime())) throw new Error("dataFim inválida");
+export async function getProximoCiclo(
+  userId: string,
+  referencia: Date,
+  cicloAtual: boolean
+) {
+  // Função auxiliar → se dataFim cair até 03:59 do primeiro dia do mês,
+  // ajusta para 23:59 do último dia do mês anterior
+  function normalizarDataFim(dataFim: Date) {
+    if (
+      dataFim.getUTCDate() === 1 &&
+      dataFim.getUTCHours() < 4
+    ) {
+      // joga 12h antes
+      return new Date(dataFim.getTime() - 12 * 60 * 60 * 1000);
+    }
+    return dataFim;
+  }
 
-  const ONE_DAY_MS = 24 * 60 * 60 * 1000;
-  const logicalDate = new Date(dataFim.getTime() - ONE_DAY_MS);
-  const ano = logicalDate.getUTCFullYear();
-  const mes = logicalDate.getUTCMonth();
+
+  const referenciaNormalizada = cicloAtual ? normalizarDataFim(referencia) : referencia;
+  const ano = referenciaNormalizada.getUTCFullYear();
+  const mes = referenciaNormalizada.getUTCMonth();
 
   const monthStart = new Date(Date.UTC(ano, mes, 1, 0, 0, 0));
   const nextMonthStart = new Date(Date.UTC(ano, mes + 1, 1, 0, 0, 0));
+  const afterNextMonthStart = new Date(Date.UTC(ano, mes + 2, 1, 0, 0, 0));
 
-  // 🔎 1) Tenta buscar dentro do mesmo mês
-  const cicloMesmoMes = await prisma.ciclo.findFirst({
+  
+
+  
+  // 🚦 Fluxo A: estou em um ciclo
+  if (cicloAtual) {
+    // Procura próximo ciclo no mesmo mês
+    const cicloMesmoMes = await prisma.ciclo.findFirst({
+      where: {
+        userId,
+        dataInicio: {
+          gt: referenciaNormalizada,
+          gte: monthStart,
+          lt: nextMonthStart,
+        },
+      },
+      orderBy: { dataInicio: "asc" },
+    });
+
+    if (cicloMesmoMes) {
+      return { ciclo: cicloMesmoMes, mesReferencia: referenciaNormalizada };
+    }
+
+    // Procura no próximo mês
+    const cicloProximoMes = await prisma.ciclo.findFirst({
+      where: {
+        userId,
+        dataInicio: {
+          gte: nextMonthStart,
+          lt: afterNextMonthStart,
+        },
+      },
+      orderBy: { dataInicio: "asc" },
+    });
+
+    if (cicloProximoMes) {
+      cicloProximoMes.dataFim = normalizarDataFim(cicloProximoMes.dataFim);
+      return { ciclo: cicloProximoMes, mesReferencia: nextMonthStart };
+    }
+
+    // Se não tem ciclo → retorna mês vazio
+    return { ciclo: null, mesReferencia: nextMonthStart };
+  }
+
+  // 🚦 Fluxo B: navegando sem ciclo
+  const cicloNoProximoMes = await prisma.ciclo.findFirst({
     where: {
       userId,
       dataInicio: {
-        gt: dataFim,
-        gte: monthStart,
-        lt: nextMonthStart,
+        gte: nextMonthStart,
+        lt: afterNextMonthStart,
       },
     },
     orderBy: { dataInicio: "asc" },
   });
 
-  if (cicloMesmoMes) return cicloMesmoMes;
-
-  // 🔎 2) Se não tiver, busca o primeiro ciclo do mês seguinte em diante
-  const cicloProximoMes = await prisma.ciclo.findFirst({
-    where: {
-      userId,
-      dataInicio: {
-        gte: nextMonthStart, // começa no próximo mês
-      },
-    },
-    orderBy: { dataInicio: "asc" }, // garante que vem o mais cedo possível
-  });
-
-  return cicloProximoMes ?? null; // se ainda não tiver, retorna null
+  if (cicloNoProximoMes) {
+    return { ciclo: cicloNoProximoMes, mesReferencia: nextMonthStart };
+  }
+  
+  return { ciclo: null, mesReferencia: nextMonthStart };
 }
+
+
