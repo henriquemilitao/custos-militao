@@ -7,7 +7,11 @@ import { formatPeriodoDayMonth } from "@/lib/formatters/formatDate";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
-import { CategoriAgrupada, Header, RegistroGasto} from "./components/header";
+import {
+  CategoriAgrupada,
+  Header,
+  RegistroGasto,
+} from "./components/header";
 import { ResumoValores } from "./components/resumoValores";
 import { ListagemPorCategoria } from "./components/listagemPorData";
 import { DialogAddEditGasto } from "./components/dialogAddEditGasto";
@@ -19,186 +23,129 @@ type ControleSemanalProps = {
   mutateCiclo: () => void;
 };
 
-export default function ControleSemanal({ cicloAtual, mutateCiclo }: ControleSemanalProps) {
+export default function ControleSemanal({
+  cicloAtual,
+  mutateCiclo,
+}: ControleSemanalProps) {
   const [open, setOpen] = useState(false);
   const [isEdit, setIsEdit] = useState<boolean>(false);
   const [semanaSelecionada, setSemanaSelecionada] = useState<string>("");
-  const [showModalSemCiclo, setShowModalSemCiclo] = useState(false)
+  const [showModalSemCiclo, setShowModalSemCiclo] = useState(false);
   const [currentGasto, setCurrentGasto] = useState<RegistroGasto | null>(null);
 
-
   const totalGoals =
-    cicloAtual?.gastosPorMetaTotais?.reduce((acc, gasto) => acc + gasto.totalPlanejado, 0) ?? 0;
-
-  // const semanas =
-  //   (cicloAtual?.semanas ?? []).map((semana, index) => {
-  //     const valorGasto = semana.registros?.reduce((acc, gasto) => acc + gasto.valor, 0) ?? 0;
-  //     const gastoAnterior = (cicloAtual?.semanas ?? [])
-  //       .slice(0, index)
-  //       .flatMap((s) => s.registros || [])
-  //       .reduce((acc, gasto) => acc + gasto.valor, 0);
-
-  //     const semanasRestantes = (cicloAtual?.semanas ?? []).length - index;
-  //     const valorTotal = semanasRestantes > 0 ? Math.floor((totalGoals - gastoAnterior) / semanasRestantes) : 0;
-
-  //     const gastosMeta = (cicloAtual?.gastosPorMetaTotais ?? []).map((meta) => {
-  //       const gastoAnteriorMeta = (cicloAtual?.semanas ?? [])
-  //         .slice(0, index)
-  //         .flatMap((s) => s.registros || [])
-  //         .filter((r) => r.gastoId === meta.id)
-  //         .reduce((acc, r) => acc + r.valor, 0);
-
-  //       const gastoNaSemana =
-  //         (semana.registros || [])
-  //           .filter((r) => r.gastoId === meta.id)
-  //           .reduce((acc, r) => acc + r.valor, 0);
-
-  //       const semanasRestantesMeta = (cicloAtual?.semanas ?? []).length - index;
-  //       const valorDisponivelMeta =
-  //         semanasRestantesMeta > 0
-  //           ? Math.floor((meta.totalPlanejado - gastoAnteriorMeta) / semanasRestantesMeta)
-  //           : 0;
-
-  //       return {
-  //         id: meta.id,
-  //         nome: meta.name,
-  //         totalPlanejado: meta.totalPlanejado,
-  //         gastoNaSemana,
-  //         gastoAnteriorMeta,
-  //         valorDisponivelMeta,
-  //       };
-  //     });
-
-  //     return {
-  //       id: semana.id,
-  //       label: `Semana ${semana.qualSemanaCiclo}`,
-  //       periodo: formatPeriodoDayMonth(semana.dataInicio, semana.dataFim),
-  //       valorGasto,
-  //       valorTotal,
-  //       gastosMeta,
-  //       registros: semana.registros,
-  //     };
-  //   }) || [];
+    cicloAtual?.gastosPorMetaTotais?.reduce(
+      (acc, gasto) => acc + gasto.totalPlanejado,
+      0
+    ) ?? 0;
 
   const semanas =
-  (cicloAtual?.semanas ?? []).map((semana, index) => {
-    const valorGasto = semana.registros?.reduce((acc, gasto) => acc + gasto.valor, 0) ?? 0;
-    const gastoAnterior = (cicloAtual?.semanas ?? [])
-      .slice(0, index)
-      .flatMap((s) => s.registros || [])
-      .reduce((acc, gasto) => acc + gasto.valor, 0);
-
-    // Nova lógica de distribuição progressiva
-    let valorTotal: number;
-    
-    if (index === 0) {
-      // Semana 1: Total / 4.5
-      valorTotal = Math.floor(totalGoals / 4.5);
-    } else if (index === 1) {
-      // Semana 2: (Total - gastos anteriores) / 3.5
-      valorTotal = Math.floor((totalGoals - gastoAnterior) / 3.5);
-    } else if (index === 2) {
-      // Semana 3: (Total - gastos anteriores) / 2.5
-      valorTotal = Math.floor((totalGoals - gastoAnterior) / 2.5);
-    } else {
-      // Semana 4: O que sobrou
-      valorTotal = totalGoals - gastoAnterior;
-    }
-
-    const gastosMeta = (cicloAtual?.gastosPorMetaTotais ?? []).map((meta) => {
-      const gastoAnteriorMeta = (cicloAtual?.semanas ?? [])
+    (cicloAtual?.semanas ?? []).map((semana, index) => {
+      const valorGasto =
+        semana.registros?.reduce((acc, gasto) => acc + gasto.valor, 0) ?? 0;
+      const gastoAnterior = (cicloAtual?.semanas ?? [])
         .slice(0, index)
         .flatMap((s) => s.registros || [])
-        .filter((r) => r.gastoId === meta.id)
-        .reduce((acc, r) => acc + r.valor, 0);
+        .reduce((acc, gasto) => acc + gasto.valor, 0);
 
-      const gastoNaSemana =
-        (semana.registros || [])
-          .filter((r) => r.gastoId === meta.id)
-          .reduce((acc, r) => acc + r.valor, 0);
-
-      // Aplicar a mesma lógica progressiva para cada meta
-      let valorDisponivelMeta: number;
-      
+      // Nova lógica progressiva
+      let valorTotal: number;
       if (index === 0) {
-        // Semana 1: Meta total / 4.5
-        valorDisponivelMeta = Math.floor(meta.totalPlanejado / 4.5);
+        valorTotal = Math.floor(totalGoals / 4.5);
       } else if (index === 1) {
-        // Semana 2: (Meta total - gastos anteriores) / 3.5
-        valorDisponivelMeta = Math.floor((meta.totalPlanejado - gastoAnteriorMeta) / 3.5);
+        valorTotal = Math.floor((totalGoals - gastoAnterior) / 3.5);
       } else if (index === 2) {
-        // Semana 3: (Meta total - gastos anteriores) / 2.5
-        valorDisponivelMeta = Math.floor((meta.totalPlanejado - gastoAnteriorMeta) / 2.5);
+        valorTotal = Math.floor((totalGoals - gastoAnterior) / 2.5);
       } else {
-        // Semana 4: O que sobrou da meta
-        valorDisponivelMeta = meta.totalPlanejado - gastoAnteriorMeta;
+        valorTotal = totalGoals - gastoAnterior;
       }
 
+      const gastosMeta =
+        (cicloAtual?.gastosPorMetaTotais ?? []).map((meta) => {
+          const gastoAnteriorMeta = (cicloAtual?.semanas ?? [])
+            .slice(0, index)
+            .flatMap((s) => s.registros || [])
+            .filter((r) => r.gastoId === meta.id)
+            .reduce((acc, r) => acc + r.valor, 0);
+
+          const gastoNaSemana =
+            (semana.registros || [])
+              .filter((r) => r.gastoId === meta.id)
+              .reduce((acc, r) => acc + r.valor, 0);
+
+          let valorDisponivelMeta: number;
+          if (index === 0) {
+            valorDisponivelMeta = Math.floor(meta.totalPlanejado / 4.5);
+          } else if (index === 1) {
+            valorDisponivelMeta = Math.floor(
+              (meta.totalPlanejado - gastoAnteriorMeta) / 3.5
+            );
+          } else if (index === 2) {
+            valorDisponivelMeta = Math.floor(
+              (meta.totalPlanejado - gastoAnteriorMeta) / 2.5
+            );
+          } else {
+            valorDisponivelMeta = meta.totalPlanejado - gastoAnteriorMeta;
+          }
+
+          return {
+            id: meta.id,
+            nome: meta.name,
+            totalPlanejado: meta.totalPlanejado,
+            gastoNaSemana,
+            gastoAnteriorMeta,
+            valorDisponivelMeta,
+          };
+        });
+
       return {
-        id: meta.id,
-        nome: meta.name,
-        totalPlanejado: meta.totalPlanejado,
-        gastoNaSemana,
-        gastoAnteriorMeta,
-        valorDisponivelMeta,
+        id: semana.id,
+        label: `Semana ${semana.qualSemanaCiclo}`,
+        periodo: formatPeriodoDayMonth(semana.dataInicio, semana.dataFim),
+        valorGasto,
+        valorTotal,
+        gastosMeta,
+        registros: semana.registros,
+        dataInicio: new Date(semana.dataInicio),
+        dataFim: new Date(semana.dataFim),
       };
-    });
+    }) || [];
 
-    return {
-      id: semana.id,
-      label: `Semana ${semana.qualSemanaCiclo}`,
-      periodo: formatPeriodoDayMonth(semana.dataInicio, semana.dataFim),
-      valorGasto,
-      valorTotal,
-      gastosMeta,
-      registros: semana.registros,
-    };
-  }) || [];
+  const semanaAtual =
+    semanas.find((s) => s.id === semanaSelecionada) || null;
 
-  const semanaAtual = semanas.find((s) => s.id === semanaSelecionada) || null;
-
+  // Selecionar a semana do dia atual
   useEffect(() => {
     if (semanas.length > 0 && !semanaSelecionada) {
-      setSemanaSelecionada(semanas[0].id);
+      const hoje = new Date();
+
+      const semanaDoHoje = semanas.find(
+        (s) => hoje >= s.dataInicio && hoje <= s.dataFim
+      );
+
+      setSemanaSelecionada(
+        semanaDoHoje ? semanaDoHoje.id : semanas[0].id
+      );
     }
   }, [semanas, semanaSelecionada]);
 
-  const gastosAgrupadosPorGoal:Record<string, CategoriAgrupada> = semanaAtual
+  const gastosAgrupadosPorGoal: Record<string, CategoriAgrupada> = semanaAtual
     ? semanaAtual.gastosMeta.reduce(
-        (
-          acc: Record<
-            string,
-            {
-              valorDisponivel: number;
-              gastoNaSemana: number;
-              datas: Record<
-                string,
-                {
-                  id: string;
-                  name: string;
-                  valor: number;
-                  data: Date;
-                  gastoId: string;
-                }[]
-              >;
-            }
-          >,
-          meta
-        ) => {
-          // cria sempre a categoria, mesmo sem gasto
+        (acc: Record<string, CategoriAgrupada>, meta) => {
           acc[meta.nome] = {
             valorDisponivel: meta.valorDisponivelMeta ?? 0,
             gastoNaSemana: meta.gastoNaSemana ?? 0,
             datas: {},
           };
 
-          // preenche se houver registros
           (semanaAtual.registros || [])
             .filter((r) => r.gastoId === meta.id)
             .forEach((reg) => {
-              const dataFormatada = format(new Date(reg.data), "dd/MM/yyyy", {
-                locale: ptBR,
-              });
+              const dataFormatada = format(
+                new Date(reg.data),
+                "dd/MM/yyyy",
+                { locale: ptBR }
+              );
 
               if (!acc[meta.nome].datas[dataFormatada]) {
                 acc[meta.nome].datas[dataFormatada] = [];
@@ -219,11 +166,6 @@ export default function ControleSemanal({ cicloAtual, mutateCiclo }: ControleSem
       )
     : {};
 
-
-
-
-
-
   return (
     <div className="p-4 max-w-sm mx-auto">
       <div className="bg-white rounded-2xl shadow-md p-4 mb-4 flex flex-col">
@@ -236,30 +178,29 @@ export default function ControleSemanal({ cicloAtual, mutateCiclo }: ControleSem
 
         <ResumoValores semanaAtual={semanaAtual} />
 
-        <div className="">
+        <div>
           <Button
             onClick={() => {
               if (!cicloAtual?.id) {
                 setShowModalSemCiclo(true);
                 return;
               }
-              setOpen(true)
+              setOpen(true);
             }}
             className="w-full rounded-xl bg-blue-500 text-white shadow hover:bg-blue-600 active:scale-95 transition mb-8"
           >
             <Plus size={16} className="mr-2" /> Adicionar gasto
           </Button>
         </div>
-        {/* <GastosPorMeta semanaAtual={semanaAtual} /> */}
 
-        <ListagemPorCategoria 
-          gastosPorCategoria={gastosAgrupadosPorGoal} 
+        <ListagemPorCategoria
+          gastosPorCategoria={gastosAgrupadosPorGoal}
           showModal={open}
           setShowModal={setOpen}
           cicloAtual={cicloAtual}
           isEdit={isEdit}
           setIsEdit={setIsEdit}
-          mutateCiclo={mutateCiclo} 
+          mutateCiclo={mutateCiclo}
           setCurrentGasto={setCurrentGasto}
           currentGasto={currentGasto}
         />
@@ -282,7 +223,6 @@ export default function ControleSemanal({ cicloAtual, mutateCiclo }: ControleSem
         onOpenChange={setShowModalSemCiclo}
         title="Valor indisponível"
         description="Você precisa adicionar quanto você recebe nesse mês para começar a adicionar seus gastos."
-    
       />
     </div>
   );
