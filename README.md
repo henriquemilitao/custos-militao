@@ -18,6 +18,12 @@ npx prisma migrate dev --name init
 npx prisma generate
 npx prisma db seed
 
+da pra apagar tbm
+rmdir /s /q node_modules\.prisma
+rmdir /s /q node_modules\@prisma\client
+
+e depois dar npm i e npx prisma generate
+
 Refazer banco
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
