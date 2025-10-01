@@ -1,0 +1,147 @@
+// prisma/schema.prisma
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id            String   @id @default(uuid())
+  name          String
+  email         String   @unique
+  emailVerified Boolean  @default(false)
+  image         String?
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  ciclos        Ciclo[]
+  sessions      Session[]
+  accounts      Account[]
+}
+
+
+model Session {
+  id         String   @id @default(uuid())
+  token      String   @unique
+  expiresAt  DateTime @map("expires_at")
+  ipAddress  String?  @map("ip_address")
+  userAgent  String?  @map("user_agent")
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+}
+
+
+model Account {
+  id                     String   @id @default(uuid())
+  accountId              String   @map("account_id")
+  providerId             String   @map("provider_id")
+  userId                 String
+  user                   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken            String?  @map("access_token")
+  refreshToken           String?  @map("refresh_token")
+  idToken                String?  @map("id_token")
+  accessTokenExpiresAt   DateTime? @map("access_token_expires_at")
+  refreshTokenExpiresAt  DateTime? @map("refresh_token_expires_at")
+  scope                  String?
+  password               String?
+  createdAt              DateTime @default(now()) @map("created_at")
+  updatedAt              DateTime @updatedAt @map("updated_at")
+}
+
+
+model Verification {
+  id         String   @id @default(uuid())
+  identifier String
+  value      String
+  expiresAt  DateTime @map("expires_at")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+}
+
+
+model Ciclo {
+  id                String   @id @default(uuid())
+  dataInicio        DateTime @map("data_inicio")
+  dataFim           DateTime @map("data_fim")
+  valorTotal        Int      @map("valor_total")
+  quantidadeSemanas Int      @map("quantidade_semanas")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  userId  String
+  user    User      @relation(fields: [userId], references: [id])
+
+  economias Economia[]
+  gastos    Gasto[]
+  semanas   Semana[]
+}
+
+model Economia {
+  id           String   @id @default(uuid())
+  nome         String
+  valor        Int
+  isGuardado   Boolean   @map("is_guardado")
+  dataGuardado DateTime? @map("data_guardado")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  cicloId String
+  ciclo   Ciclo   @relation(fields: [cicloId], references: [id])
+}
+
+model Gasto {
+  id        String   @id @default(uuid())
+  name      String
+  valor     Int
+  tipo      TipoGasto
+  isPago    Boolean   @map("is_pago")
+  dataPago  DateTime? @map("data_pago")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  cicloId   String
+  ciclo     Ciclo     @relation(fields: [cicloId], references: [id])
+
+  registros RegistroGasto[]
+}
+
+model RegistroGasto {
+  id        String   @id @default(uuid())
+  name      String
+  valor     Int
+  data      DateTime
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  gastoId  String
+  gasto    Gasto   @relation(fields: [gastoId], references: [id])
+
+  semanaId String
+  semana   Semana  @relation(fields: [semanaId], references: [id])
+}
+
+model Semana {
+  id             String   @id @default(uuid())
+  qualSemanaCiclo Int     @map("qual_semana_ciclo") // Ex: 1, 2, 3...
+  dataInicio     DateTime @map("data_inicio")
+  dataFim        DateTime @map("data_fim")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  cicloId String
+  ciclo   Ciclo   @relation(fields: [cicloId], references: [id])
+
+  registros RegistroGasto[]
+
+  @@unique([cicloId, qualSemanaCiclo]) // garante que não exista semana duplicada no mesmo ciclo
+}
+
+enum TipoGasto {
+  single
+  goal
+}

@@ -3,13 +3,13 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import EditableCurrency from "./EditableCurrency";
-import { moedaBRL } from "@/lib/currency";
+import { moedaBRL } from "@/lib/formatters/currency";
 import ProgressBar from "@/components/ui/progress-bar";
 
-function clamp(n: number) {
-  if (!isFinite(n)) return 0;
-  return Math.max(0, n);
-}
+// function clamp(n: number) {
+//   if (!isFinite(n)) return 0;
+//   return Math.max(0, n);
+// }
 
 export default function ResumoMes({
   saldoInicial,
@@ -52,7 +52,7 @@ export default function ResumoMes({
   return (
     <Card className="rounded-2xl shadow-sm m-4 mb-10">
       <CardHeader>
-        <CardTitle>Resumo do Mês</CardTitle>
+        <CardTitle>Resumo do Mês/Ciclo</CardTitle>
       </CardHeader>
 
       <CardContent>

@@ -29,7 +29,7 @@ export default function EditableCurrency({
     <input
       autoFocus
       type="text"
-      className="text-2xl font-semibold bg-transparent focus:outline-none w-full"
+      className="w-full text-center font-semibold bg-transparent focus:outline-none"
       value={draft}
       onChange={(e) => {
         const parsed = parseCurrency(e.target.value);
@@ -54,7 +54,7 @@ export default function EditableCurrency({
         setDraft(format(value));
         setEditing(true);
       }}
-      className="text-2xl font-semibold text-left w-full"
+      className="w-full text-center font-semibold text-gray-800"
     >
       {format(value)}
     </button>
