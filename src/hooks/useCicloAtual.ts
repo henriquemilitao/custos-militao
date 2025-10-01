@@ -1,4 +1,4 @@
-import useSWR from "swr";
+import useSWR, { KeyedMutator } from "swr";
 import { CicloAtualDTO } from "@/dtos/ciclo.dto";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
@@ -14,6 +14,6 @@ export function useCicloAtual(userId: string) {
     cicloAtual: data ?? null,
     isLoading,
     isError: error,
-    mutateCiclo: mutate,
+    mutateCiclo: mutate as KeyedMutator<CicloAtualDTO>, // 👈 garante que seja o mutate certo
   };
 }

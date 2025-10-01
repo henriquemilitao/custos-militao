@@ -3,16 +3,8 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import {
   Popover,
   PopoverTrigger,
-  PopoverContent,
 } from "@/components/ui/popover";
 import {
   Sheet,
@@ -25,116 +17,94 @@ import {
   LogOut,
   CalendarIcon,
   ChevronRight,
-  ChevronLeft,
 } from "lucide-react";
 import { format } from "date-fns";
-import { ptBR} from "date-fns/locale";
-import { Calendar } from "../ui/calendar";
+import { ptBR } from "date-fns/locale";
 import { authClient } from "@/lib/auth-client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useRouter } from "next/navigation";
 import { CicloAtualDTO } from "@/dtos/ciclo.dto";
+import { KeyedMutator } from "swr";
 
 type ResumoMesCardProps = {
-  mutateCiclo: () => void
-  cicloAtual: CicloAtualDTO | null
-}
+  mutateCiclo: KeyedMutator<CicloAtualDTO>; // ✅ agora aceita (data, options)
+  cicloAtual: CicloAtualDTO | null;
+};
 
-export default function HeaderSistema({mutateCiclo, cicloAtual}: ResumoMesCardProps) {
-  const [configOpen, setConfigOpen] = useState(false);
+export default function HeaderSistema({
+  mutateCiclo,
+  cicloAtual,
+}: ResumoMesCardProps) {
   const [sheetOpen, setSheetOpen] = useState(false);
-  const [mesAtual, _] = useState(new Date());
-  const [tipoCiclo, setTipoCiclo] = useState<"mensal" | "personalizado">(
-    "mensal"
-  );
-  const [dataInicio, setDataInicio] = useState<Date | undefined>(undefined);
-  const [dataFim, setDataFim] = useState<Date | undefined>(undefined);
+  const [mesAtual, setMesAtual] = useState(new Date());
 
-  // 🟢 pega session atual
+  // pega session atual
   const { data: session } = authClient.useSession();
   const router = useRouter();
 
   async function handleProximoCiclo() {
+    console.log('aaa')
     try {
-      if (cicloAtual?.dataFim) {
-        const res = await fetch(`/api/ciclos/proximo?dataFim=${encodeURIComponent(JSON.stringify(cicloAtual.dataFim))}`, {
-          method: "GET",
-        });
-        const data = await res.json().catch(() => null);
-        console.log(data);
-      }
+      const res = await fetch(
+        `/api/ciclos/proximo?dataFim=${encodeURIComponent(
+          cicloAtual?.dataFim instanceof Date
+            ? cicloAtual.dataFim.toISOString()
+            : String(cicloAtual?.dataFim || mesAtual.toISOString())
+        )}`,
+        { method: "GET" }
+      );
+
+      if (!res.ok) throw new Error("Erro ao buscar próximo ciclo");
+
+      const data = await res.json();
+
+      // ⚡ aqui atualiza o cache do SWR com o novo ciclo
+      mutateCiclo(data, { revalidate: false });
+
+
+
+      // if (res.status === 404) {
+      //   // Nenhum ciclo → avança só o mês e limpa cicloAtual
+      //   setMesAtual(new Date(mesAtual.setMonth(mesAtual.getMonth() + 1)));
+      //   mutateCiclo(null); 
+      //   return;
+      // }
+
+      // if (!res.ok) throw new Error("Erro ao buscar próximo ciclo");
+
+      // const data = await res.json();
+      // console.log("Próximo ciclo:", data);
+
+      // mutateCiclo(data);
+      // Atualiza o mesAtual baseado no ciclo retornado
+      // setMesAtual(new Date(data.dataInicio));
     } catch (error) {
-      
+      console.error("Erro ao buscar próximo ciclo:", error);
     }
   }
+
 
   return (
     <div className="flex items-center justify-between px-4 py-3 bg-white shadow-sm rounded-2xl mb-4">
       {/* Navegação de mês */}
       <div className="flex items-center gap-2">
-        {/* <Button
-          variant="outline"
-          size="sm"
-          // onClick={handleMesAnterior}
-          className="rounded-lg"
-        >
-          <ChevronLeft className="h-4 w-4" />
-        </Button> */}
-
         <Popover>
           <PopoverTrigger asChild>
             <Button variant="ghost" className="font-medium text-gray-700">
               {format(mesAtual, "MMMM/yyyy", { locale: ptBR })}
             </Button>
           </PopoverTrigger>
-          {/* <PopoverContent className="w-60">
-            <div className="flex gap-2">
-              <Select
-                defaultValue={String(mesAtual.getMonth())}
-                onValueChange={() => {}}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Mês" />
-                </SelectTrigger>
-                <SelectContent>
-                  {Array.from({ length: 12 }, (_, i) => (
-                    <SelectItem key={i} value={String(i)}>
-                      {format(new Date(2025, i, 1), "MMMM", { locale: ptBR })}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              <Select
-                defaultValue={String(mesAtual.getFullYear())}
-                onValueChange={() => {}}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Ano" />
-                </SelectTrigger>
-                <SelectContent>
-                  {Array.from({ length: 10 }, (_, i) => {
-                    const ano = new Date().getFullYear() - 5 + i;
-                    return (
-                      <SelectItem key={ano} value={String(ano)}>
-                        {ano}
-                      </SelectItem>
-                    );
-                  })}
-                </SelectContent>
-              </Select>
-            </div>
-          </PopoverContent> */}
         </Popover>
 
-        {/* <Button
+        {/* Botão próximo ciclo */}
+        <Button
           variant="outline"
           size="sm"
           onClick={handleProximoCiclo}
           className="rounded-lg"
         >
           <ChevronRight className="h-4 w-4" />
-        </Button> */}
+        </Button>
       </div>
 
       {/* Avatar dinâmico */}
@@ -182,19 +152,12 @@ export default function HeaderSistema({mutateCiclo, cicloAtual}: ResumoMesCardPr
 
           {session?.user && (
             <div className="mt-6 space-y-2 px-5">
-              {/* <Button
-                variant="outline"
-                className="w-full flex items-center gap-2 rounded-xl"
-                onClick={() => setConfigOpen(true)}
-              >
-                <Settings className="h-4 w-4" /> Configurações
-              </Button> */}
               <Button
                 variant="destructive"
                 className="w-full flex items-center gap-2 rounded-xl"
                 onClick={async () => {
                   await authClient.signOut();
-                  router.push('/authentication');
+                  router.push("/authentication");
                 }}
               >
                 <LogOut className="h-4 w-4" /> Sair
@@ -205,134 +168,6 @@ export default function HeaderSistema({mutateCiclo, cicloAtual}: ResumoMesCardPr
           <SheetFooter />
         </SheetContent>
       </Sheet>
-
-      {/* Modal Configuração */}
-      <Dialog open={configOpen} onOpenChange={setConfigOpen}>
-        <DialogContent className="w-[92%] max-w-md rounded-2xl p-6">
-          <DialogHeader>
-            <DialogTitle>Configurar ciclo financeiro</DialogTitle>
-          </DialogHeader>
-
-          <div className="space-y-4">
-            <p className="text-sm text-gray-600">
-              Escolha se deseja usar ciclo mensal padrão ou definir suas próprias
-              datas.
-            </p>
-
-            {/* Tipo de ciclo */}
-            <div className="flex flex-col gap-2">
-              <label className="flex items-center gap-2">
-                <input
-                  type="radio"
-                  name="tipoCiclo"
-                  value="mensal"
-                  checked={tipoCiclo === "mensal"}
-                  onChange={() => setTipoCiclo("mensal")}
-                />
-                <span className="text-sm text-neutral-700">
-                  Mensal (1º até fim do mês)
-                </span>
-              </label>
-
-              <label className="flex items-center gap-2">
-                <input
-                  type="radio"
-                  name="tipoCiclo"
-                  value="personalizado"
-                  checked={tipoCiclo === "personalizado"}
-                  onChange={() => setTipoCiclo("personalizado")}
-                />
-                <span className="text-sm text-neutral-700">
-                  Personalizado (definir datas)
-                </span>
-              </label>
-            </div>
-
-            {/* Datas só aparecem se for personalizado */}
-            {tipoCiclo === "personalizado" && (
-              <div className="flex gap-3 mt-3 flex-nowrap">
-                {/* Início */}
-                <div className="flex-1 min-w-0 space-y-1">
-                  <label className="text-base text-neutral-700">
-                    Início do ciclo
-                  </label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className="w-full justify-start rounded-xl"
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {dataInicio ? (
-                          format(dataInicio, "dd/MM/yyyy", { locale: ptBR })
-                        ) : (
-                          <span>Escolha</span>
-                        )}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                      <Calendar
-                        mode="single"
-                        selected={dataInicio}
-                        onSelect={(d) => d && setDataInicio(d)}
-                        locale={ptBR}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-
-                {/* Fim */}
-                <div className="flex-1 min-w-0 space-y-1">
-                  <label className="text-base text-neutral-700">
-                    Fim do ciclo
-                  </label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className="w-full justify-start rounded-xl"
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {dataFim ? (
-                          format(dataFim, "dd/MM/yyyy", { locale: ptBR })
-                        ) : (
-                          <span>Escolha</span>
-                        )}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                      <Calendar
-                        mode="single"
-                        selected={dataFim}
-                        onSelect={(d) => d && setDataFim(d)}
-                        locale={ptBR}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-              </div>
-            )}
-          </div>
-
-          <DialogFooter className="mt-4 flex flex-col sm:flex-row sm:flex-nowrap sm:justify-end gap-2">
-            <Button
-              variant="outline"
-              className="w-full sm:w-auto rounded-xl"
-              onClick={() => setConfigOpen(false)}
-            >
-              Cancelar
-            </Button>
-            <Button
-              className="w-full sm:w-auto rounded-xl bg-blue-500 text-white shadow hover:bg-blue-600"
-              onClick={() => setConfigOpen(false)}
-            >
-              Salvar
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

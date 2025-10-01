@@ -231,3 +231,47 @@ export async function updateCicloValorTotalService(params: {
   // retorna o ciclo atualizado
   return cicloAtualizado
 }
+
+export async function getProximoCiclo(userId: string, dataFimInput: Date | string) {
+  const dataFim = typeof dataFimInput === "string" ? new Date(dataFimInput) : dataFimInput;
+  if (isNaN(dataFim.getTime())) throw new Error("dataFim inválida");
+
+  const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+  const logicalDate = new Date(dataFim.getTime() - ONE_DAY_MS);
+  const ano = logicalDate.getUTCFullYear();
+  const mes = logicalDate.getUTCMonth();
+
+  // console.log({
+  //   dataFim,
+  //   logicalDate,
+  //   ano,
+  //   mes
+  // })
+
+  const monthStart = new Date(Date.UTC(ano, mes, 1, 0, 0, 0));
+  const nextMonthStart = new Date(Date.UTC(ano, mes + 1, 1, 0, 0, 0));
+
+  // console.log({
+  //   monthStart,
+  //   nextMonthStart,
+  // })
+
+  const cicloMesmoMes = await prisma.ciclo.findFirst({
+    where: {
+      userId,
+      dataInicio: {
+        gt: dataFim,         // queremos ciclo após o dataFim atual
+        gte: monthStart,
+        lt: nextMonthStart,
+      },
+    },
+    orderBy: { dataInicio: "asc" },
+  });
+
+  // console.log({
+  //   cicloMesmoMes
+  // })
+  if (cicloMesmoMes) return cicloMesmoMes
+
+  
+}
