@@ -9,7 +9,7 @@ import HeaderSistema from "@/components/2.0/testeHeader";
 import { useCicloAtual } from "@/hooks/useCicloAtual";
 
 export default function ClientPage({ userId }: { userId: string }) {
-  const { cicloAtual, isLoading, mutateCiclo } = useCicloAtual(userId);
+  const { cicloAtual, isLoading, mutateCiclo, mesReferencia } = useCicloAtual(userId);
 
   if (isLoading) {
     return (
@@ -56,7 +56,7 @@ export default function ClientPage({ userId }: { userId: string }) {
 
   return (
     <main className="min-h-screen bg-neutral-50">
-      <HeaderSistema cicloAtual={cicloAtual} mutateCiclo={mutateCiclo}/>
+      <HeaderSistema cicloAtual={cicloAtual} mutateCiclo={mutateCiclo} mesReferencia={mesReferencia} />
       <TesteResumo cicloAtual={cicloAtual} mutateCiclo={mutateCiclo}/>
       <TesteEconomia cicloAtual={cicloAtual} mutateCiclo={mutateCiclo} />
       <TesteGastos cicloAtual={cicloAtual} mutateCiclo={mutateCiclo} />

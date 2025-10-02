@@ -100,7 +100,7 @@ export default function GastosCard({ cicloAtual, mutateCiclo }: GastosCardProps)
         {/* Listagem */}
         <div className="space-y-3 flex flex-col justify-center">
           {!cicloAtual ? (
-            <p className="text-xs text-gray-400 text-center">Carregando ciclo...</p>
+            <p className="text-xs text-gray-400 text-center">Nenhum gasto registrado.</p>
           ) : cicloAtual.gastos && cicloAtual.gastos.length > 0 ? (
             cicloAtual.gastos.map((gasto) => {
               const totaisGasto = gasto.tipo === "goal" ? findTotalGastoPorMeta(gasto.id) : null;

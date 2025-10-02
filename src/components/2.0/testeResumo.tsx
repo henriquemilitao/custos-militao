@@ -101,6 +101,8 @@ export default function ResumoMesCard({cicloAtual, mutateCiclo}: ResumoMesCardPr
     { name: "Disponível", value: cicloAtual?.disponivelMes, color: "#22c55e" },
   ];
 
+  console.log({cicloAtual, data})
+
   return (
     <div className="p-4 max-w-sm mx-auto">
       <div className="bg-white rounded-2xl shadow-sm p-5">
