@@ -143,7 +143,7 @@ export default function GastosCard({ cicloAtual, mutateCiclo }: GastosCardProps)
                             : ""
                         }`}
                       >
-                        {gasto.name}
+                        {gasto.name === "Aleatório" ? 'Livre' : gasto.name }
                       </p>
                     </div>
 

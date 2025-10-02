@@ -39,14 +39,14 @@ export function TipoGastoSelect({
   const options = [
     {
       value: TipoGasto.single,
-      title: "Gasto Fixo",
-      desc: "Pago uma única vez por mês (ex.: aluguel, internet).",
+      title: "Conta Mensal",
+      desc: "Pago uma ÚNICA vez por mês. (ex.: mensalidades, faturas).",
       icon: <CreditCard className="w-5 h-5" />,
     },
     {
       value: TipoGasto.goal,
-      title: "Gasto Recorrente",
-      desc: "Pago várias vezes ao longo do mês (ex.: mercado, combustível).",
+      title: "Gasto Controlado",
+      desc: "Defino um valor para gastar no mês e vou abatendo conforme uso (ex.: saídas, lazer, gasolina).",
       icon: <BarChart className="w-5 h-5" />,
     },
   ];

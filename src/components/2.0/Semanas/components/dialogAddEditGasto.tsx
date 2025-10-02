@@ -361,7 +361,7 @@ export function DialogAddEditGasto({
                 gastoId === opt.id ? "border-blue-500 bg-blue-50" : ""
               }`}
             >
-              <div className="font-medium text-center text-neutral-700">{opt.nome}</div>
+              <div className="font-medium text-center text-neutral-700">{opt.nome  === "Aleatório" ? 'Livre' : opt.nome }</div>
               {/* <div className="text-xs text-gray-500">Disponível: R$ {(opt.valorDisponivelMeta / 100).toFixed(2)}</div> */}
             </button>
           )})}
