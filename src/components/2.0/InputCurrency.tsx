@@ -1,4 +1,3 @@
-// components/InputCurrency.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -16,14 +15,13 @@ export function InputCurrency({
   placeholder,
   className,
 }: InputCurrencyProps) {
-  const [draft, setDraft] = useState(format(value ?? 0));
+  const [draft, setDraft] = useState("");
 
   useEffect(() => {
-    // sincroniza quando value mudar de fora
-    if (value !== null && value !== undefined) {
+    if (value !== null && value !== undefined && value !== 0) {
       setDraft(format(value));
     } else {
-      setDraft("");
+      setDraft(""); // mostra placeholder em vazio ou zero
     }
   }, [value]);
 
@@ -49,6 +47,14 @@ export function InputCurrency({
       placeholder={placeholder || "Digite um valor"}
       onChange={(e) => {
         const parsed = parseCurrency(e.target.value);
+
+        // se digitou vazio -> null
+        if (e.target.value.trim() === "") {
+          setDraft("");
+          onValueChange?.(null);
+          return;
+        }
+
         setDraft(format(parsed));
         onValueChange?.(parsed);
       }}

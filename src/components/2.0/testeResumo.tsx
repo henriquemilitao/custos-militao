@@ -3,9 +3,23 @@
 import { CicloAtualDTO } from "@/dtos/ciclo.dto";
 import { formatCurrencyFromCents } from "@/lib/formatters/formatCurrency";
 import { formatDateDayMonth, formatIsoToDayMonth, formatPeriodoDayMonth} from "@/lib/formatters/formatDate";
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
+import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, XAxis, YAxis, Bar, LineChart, Line, Area, AreaChart, LabelList } from "recharts";
 import EditableCurrency from "../EditableCurrency";
+import { Doughnut, Radar } from "react-chartjs-2";
+
 import { toast } from "sonner";
+import {
+  Chart as ChartJS,
+  ArcElement,
+  Tooltip,
+  Legend
+} from "chart.js";
+
+import ChartDataLabels from "chartjs-plugin-datalabels";
+
+ChartJS.register(ArcElement, Tooltip, Legend, ChartDataLabels);
+
+
 
 // No início do arquivo testeResumo.tsx, adicione esta interface:
 interface PieLabelProps {
@@ -95,13 +109,31 @@ export default function ResumoMesCard({cicloAtual, mutateCiclo}: ResumoMesCardPr
   }
 
 
-  const data = [
-    { name: "Gastos", value: cicloAtual?.gastoTotalJaRealizado, color: "#ef4444" },
-    { name: "Economias", value: cicloAtual?.economiasJaGuardadas, color: "#3b82f6" },
-    { name: "Disponível", value: cicloAtual?.disponivelMes, color: "#22c55e" },
-  ];
+  const chartData = {
+    labels: ["Gastos", "Economias", "Disponível"],
+    datasets: [
+        {
+          data: [
+            cicloAtual?.gastoTotalJaRealizado ?? 0,
+            cicloAtual?.economiasJaGuardadas ?? 0,
+            cicloAtual?.disponivelMes ?? 0,
+          ],
+          backgroundColor: ["#ef4444", "#3b82f6", "#22c55e"],
+        },
+    ],
+  };
+  
+    const gastos = cicloAtual?.gastoTotalJaRealizado ?? 0;
+    const economias = cicloAtual?.economiasJaGuardadas ?? 0;
+    const disponivel = cicloAtual?.disponivelMes ?? 0;
 
-  console.log({cicloAtual, data})
+    // no gráfico, se disponível for negativo, vira 0
+    const dadosGrafico = [
+      gastos,
+      economias,
+      disponivel > 0 ? disponivel : 0,
+    ];
+
 
   return (
     <div className="p-4 max-w-sm mx-auto">
@@ -123,8 +155,8 @@ export default function ResumoMesCard({cicloAtual, mutateCiclo}: ResumoMesCardPr
 
         {/* Gráfico */}
         {cicloAtual?.id &&  
-          <div className="h-57 flex items-center justify-center">
-            <ResponsiveContainer>
+          <div className="h-60 flex items-center justify-center">
+            {/* <ResponsiveContainer>
               <PieChart>
                 <Pie
                   data={data}
@@ -143,12 +175,122 @@ export default function ResumoMesCard({cicloAtual, mutateCiclo}: ResumoMesCardPr
                 </Pie>
                 <Tooltip formatter={(value) => `R$ ${value}`} />
               </PieChart>
-            </ResponsiveContainer>
-          </div>
+            </ResponsiveContainer> */}
+
+              
+              {/* <Doughnut
+                data={chartData}
+                options={{
+                  plugins: {
+                    tooltip: {
+                      callbacks: {
+                        label: (context) =>
+                          `${context.label}: ${formatCurrencyFromCents(context.parsed)} (${(
+                            (context.parsed /
+                              context.dataset.data.reduce((a: number, b: number) => a + b, 0)) *
+                            100
+                          ).toFixed(0)}%)`,
+                      },
+                    },
+                  },
+                }}
+              /> */}
+
+
+
+            <Doughnut
+              data={{
+                labels: ["Gastos", "Economias", "Disponível"],
+                datasets: [
+                  {
+                    data: dadosGrafico,
+                    backgroundColor: ["#ef4444", "#3b82f6", "#22c55e"],
+                  },
+                ],
+              }}
+              options={{
+                layout: { padding: 34 },
+                plugins: {
+                  legend: { display: false },
+                  tooltip: {
+                    callbacks: {
+                      label: (ctx) => {
+                        const dataset = ctx.dataset.data as number[];
+                        const total = dataset.reduce((a, b) => a + b, 0);
+                        const percent = ((ctx.parsed / total) * 100).toFixed(1);
+                        return `${ctx.label}: ${formatCurrencyFromCents(ctx.parsed)} (${percent}%)`;
+                      },
+                    },
+                  },
+                  datalabels: {
+                    color: (ctx) => {
+                      const dataset = ctx.dataset;
+                      const index = ctx.dataIndex;
+                      const bg = dataset.backgroundColor as string[];
+                      return bg[index];
+                    },
+                    font: { weight: "bold" as const, size: 14 },
+                    anchor: "end",
+                    align: "end",
+                    formatter: (value, ctx) => {
+                      const dataset = ctx.chart.data.datasets[0].data as number[];
+                      const total = dataset.reduce((a, b) => a + b, 0);
+                      if (total === 0) return "0%";
+                      const percent = ((value / total) * 100).toFixed(0);
+                      return `${percent}%`;
+                    },
+                  },
+                },
+              }}
+            />
+
+
+
+              
+        {/* <ResponsiveContainer width="100%" height={300} 
+          className="mt-10"
+        >
+          <BarChart data={data} barSize={60}>
+          <XAxis dataKey="name" tick={{ fontSize: 14 }} />
+          <YAxis tick={{ fontSize: 14 }} />
+          <Tooltip formatter={(value) => `R$ ${value}`} />
+            <Bar dataKey="value">
+            {data.map((entry, index) => (
+            <Cell key={`cell-${index}`} fill={entry.color} />
+            ))}
+              <LabelList
+                dataKey="value"
+                position="top"
+                content={({ value, x, y, width }) => {
+                if (value == null) return null;
+
+                const numericValue = Number(value);
+                const percent = ((numericValue / total) * 100).toFixed(1);
+
+                return (
+                <text
+                x={Number(x) + Number(width) / 2}
+                y={Number(y) - 5}
+                textAnchor="middle"
+                fill="#333"
+                fontSize={12}
+                fontWeight="bold"
+                >
+                {percent}%
+                </text>
+                );
+                }}
+              />
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer> */}
+
+        
+      </div>
         }
 
         {/* Infos principais */}
-        <div className="grid grid-cols-2 gap-3 text-sm mt-5">
+        <div className="grid grid-cols-2 gap-3 text-sm mt-3">
           <div className="rounded-xl p-3 text-center bg-gray-50">
             <p className="text-gray-500">Recebido</p>
             {/* <p className="font-semibold text-gray-800">{formatCurrencyFromCents(cicloAtual?.valorTotal ?? 0)}</p> */}
