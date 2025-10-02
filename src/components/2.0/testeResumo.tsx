@@ -209,7 +209,7 @@ export default function ResumoMesCard({cicloAtual, mutateCiclo}: ResumoMesCardPr
                 ],
               }}
               options={{
-                layout: { padding: 34 },
+                layout: { padding: 41 },
                 plugins: {
                   legend: { display: false },
                   tooltip: {
@@ -229,7 +229,7 @@ export default function ResumoMesCard({cicloAtual, mutateCiclo}: ResumoMesCardPr
                       const bg = dataset.backgroundColor as string[];
                       return bg[index];
                     },
-                    font: { weight: "bold" as const, size: 14 },
+                    font: { weight: "bold" as const, size: 13 },
                     anchor: "end",
                     align: "end",
                     formatter: (value, ctx) => {
@@ -238,6 +238,14 @@ export default function ResumoMesCard({cicloAtual, mutateCiclo}: ResumoMesCardPr
                       if (total === 0) return "0%";
                       const percent = ((value / total) * 100).toFixed(0);
                       return `${percent}%`;
+                    },
+                     offset: (ctx) => {
+                      // cada label ganha um offset diferente
+                      const index = ctx.dataIndex;
+                      // exemplo: alterna offsets pra dar espaçamento
+                      return 0 + index * 10; 
+                      // 👉 o primeiro terá 20px, o segundo 30px, o terceiro 40px de distância
+                      // se quiser menos exagerado, troca por 20 + index * 5
                     },
                   },
                 },
