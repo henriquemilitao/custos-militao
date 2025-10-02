@@ -100,7 +100,7 @@ export function ListagemPorCategoria({
               <div className="mb-3">
                 <div className="flex justify-between items-center mb-1">
                   <h2 className="text-base font-bold text-gray-700">
-                    {categoria}
+                    {categoria === 'Aleatório' ? 'Livre' : categoria}
                   </h2>
                   <span className="text-sm text-gray-600">
                     {formatCurrencyFromCents(gastoNaSemana)} /{" "}
