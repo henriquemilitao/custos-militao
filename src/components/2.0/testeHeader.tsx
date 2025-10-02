@@ -100,14 +100,14 @@ export default function HeaderSistema({
         </Popover>
 
         {/* Botão próximo ciclo */}
-        <Button
+        {/* <Button
           variant="outline"
           size="sm"
           onClick={handleProximoCiclo}
           className="rounded-lg"
         >
           <ChevronRight className="h-4 w-4" />
-        </Button>
+        </Button> */}
       </div>
 
       {/* Avatar dinâmico */}
