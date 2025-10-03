@@ -40,12 +40,17 @@ export async function getCicloAtual(userId: string | undefined): Promise<CicloCo
       dataFim: { gte: hoje },
     },
     include: {
-      economias: { orderBy: [{ createdAt: "asc" }, { id: "asc" }] },
+      economias: { 
+        orderBy: [
+          { isGuardado: "desc" }, 
+          { nome: "asc" }
+        ], 
+      },
       gastos: {
         orderBy: [
           { tipo: "asc" },
-          { createdAt: "asc" },
-          { id: "asc" },
+          { isPago: "desc" },
+          { name: "asc"},
         ],
       },
       semanas: {
