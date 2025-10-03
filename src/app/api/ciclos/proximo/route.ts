@@ -6,11 +6,14 @@ import { NextRequest, NextResponse } from "next/server";
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url || "", "http://localhost");
 
-  const dataFim = searchParams.get("dataFim");
-  const referencia = searchParams.get("referencia");
-  const cicloAtual = searchParams.get("cicloAtual") === "true"; // vem do front
+  const inicio = searchParams.get("inicio");
+  const fim = searchParams.get("fim");
+  console.log({
+    inicio,
+    fim
+  })
 
-  if (!referencia) {
+  if (!inicio || !fim) {
     return NextResponse.json({ error: "Parâmetro referencia obrigatório" }, { status: 400 });
   }
 
@@ -20,13 +23,14 @@ export async function GET(req: NextRequest) {
   }
   
   try {
-    
-    const proximoCiclo = await getProximoCiclo(
-      session.user.id,
-      new Date(referencia),
-      cicloAtual
-    );
+    const proximoCiclo = await getProximoCiclo({
+      userId: session.user.id,
+      dataInicio: inicio,
+      dataFim: fim,
+    });
 
+    // console.log({proximoCiclo})
+    // return
     return NextResponse.json(proximoCiclo, { status: 200 });
   } catch (error) {
 

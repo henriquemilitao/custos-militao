@@ -37,9 +37,11 @@ interface PieLabelProps {
 type ResumoMesCardProps = {
   mutateCiclo: () => void
   cicloAtual: CicloAtualDTO | null
+  dataInicio: string | undefined;
+  dataFim: string | undefined
 }
 
-export default function ResumoMesCard({cicloAtual, mutateCiclo}: ResumoMesCardProps) {
+export default function ResumoMesCard({cicloAtual, mutateCiclo, dataInicio, dataFim}: ResumoMesCardProps) {
   // const economiasMesTotal = cicloAtual?.economias.reduce((acc, economia) => economia.valor + acc, 0) ?? 0
   // const gastosMesTotal = cicloAtual?.gastos?.reduce((acc, gasto) => gasto.valor + acc, 0) ?? 0
   // const valorMesTotal = cicloAtual?.valorTotal ?? 0
@@ -144,13 +146,19 @@ export default function ResumoMesCard({cicloAtual, mutateCiclo}: ResumoMesCardPr
             Resumo do Mês 
             
           </h2>
-        {cicloAtual?.id &&  
+
+          <p className="text-sm text-gray-500 mb-2">{
+            `${formatDateDayMonth(dataInicio)} - ${formatDateDayMonth(dataFim)}`
+            }
+          </p>
+
+        {/* {cicloAtual?.id &&  
           <p className="text-sm text-gray-500 mb-2">{
             cicloAtual && `
               ${formatDateDayMonth(cicloAtual?.dataInicio)} - ${formatDateDayMonth(cicloAtual?.dataFim)}
               `
             }</p>
-        }
+        } */}
         </div>
 
         {/* Gráfico */}

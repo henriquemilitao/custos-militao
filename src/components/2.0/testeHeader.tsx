@@ -25,18 +25,20 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useRouter } from "next/navigation";
 import { CicloAtualDTO } from "@/dtos/ciclo.dto";
 import { KeyedMutator } from "swr";
-import { CicloComMes } from "@/hooks/useCicloAtual";
+import { CicloResponse } from "@/hooks/useCicloAtual";
 
 type ResumoMesCardProps = {
-  mutateCiclo: KeyedMutator<CicloComMes>; // ✅ agora bate com o hook
+  mutateCiclo: KeyedMutator<CicloResponse>; // ✅ agora bate com o hook
   cicloAtual: CicloAtualDTO | null;
-  mesReferencia: Date;
+  dataInicio: string | undefined;
+  dataFim: string | undefined
 };
 
 export default function HeaderSistema({
   mutateCiclo,
   cicloAtual,
-  mesReferencia,
+  dataInicio,
+  dataFim
 }: ResumoMesCardProps) {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [mesAtual, setMesAtual] = useState(new Date());
@@ -47,24 +49,39 @@ export default function HeaderSistema({
 
   async function handleProximoCiclo() {
     try {
-      const referencia = cicloAtual?.dataFim
+      const inicio = cicloAtual
+        ? cicloAtual?.dataInicio instanceof Date
+          ? cicloAtual.dataInicio.toISOString()
+          : cicloAtual?.dataInicio
+        : dataInicio
+
+
+      const fim = cicloAtual 
         ? cicloAtual.dataFim instanceof Date
           ? cicloAtual.dataFim.toISOString()
-          : String(cicloAtual.dataFim)
-        : mesReferencia.toISOString();
+          : cicloAtual?.dataFim
+        : dataFim
 
-      const res = await fetch(
-        `/api/ciclos/proximo?referencia=${encodeURIComponent(referencia)}&cicloAtual=${!!cicloAtual}`,
-        { method: "GET" }
-      );
+      if (!inicio || !fim) throw new Error("Datas inválidas");
+      
+      console.log({dataInicio, dataFim})
+      const params = new URLSearchParams({
+        inicio: inicio,
+        fim: fim,
+        // inicio: inicio ?? '',
+        // fim: fim ?? '',
+      });
+
+      const res = await fetch(`/api/ciclos/proximo?${params}`, {
+        method: "GET",
+      });
 
       if (!res.ok) throw new Error("Erro ao buscar próximo ciclo");
 
       const data = await res.json();
-
+      console.log({inicio: data.dataInicio, fim: data.dataFim})
       // atualiza SWR com o novo ciclo
       mutateCiclo(data, { revalidate: false });
-
 
       // if (res.status === 404) {
       //   // Nenhum ciclo → avança só o mês e limpa cicloAtual
@@ -100,14 +117,14 @@ export default function HeaderSistema({
         </Popover>
 
         {/* Botão próximo ciclo */}
-        {/* <Button
+        <Button
           variant="outline"
           size="sm"
           onClick={handleProximoCiclo}
           className="rounded-lg"
         >
           <ChevronRight className="h-4 w-4" />
-        </Button> */}
+        </Button>
       </div>
 
       {/* Avatar dinâmico */}
