@@ -102,128 +102,149 @@ export default function GastosCard({ cicloAtual, mutateCiclo }: GastosCardProps)
           {!cicloAtual ? (
             <p className="text-xs text-gray-400 text-center">Nenhum gasto registrado.</p>
           ) : cicloAtual.gastos && cicloAtual.gastos.length > 0 ? (
-            cicloAtual.gastos.map((gasto) => {
-              const totaisGasto = gasto.tipo === "goal" ? findTotalGastoPorMeta(gasto.id) : null;
+            cicloAtual.gastos
+            .slice()
+            .sort((a, b) => {
+              // 1. single antes de goal
+              if (a.tipo !== b.tipo) return a.tipo === "single" ? -1 : 1;
 
-              // <-- CORREÇÃO: coalesce antes da divisão e cálculo do percent com proteção
-              const jaGastoCents = totaisGasto?.totalJaGasto ?? 0;
-              const disponivelCents = totaisGasto?.totalDisponivel ?? 0;
-              const metaCents = gasto.valor ?? 0;
-              const percent = metaCents > 0 ? Math.min((jaGastoCents / metaCents) * 100, 100) : 0;
-              
-              // calcula o percent real, sem travar em 100
-              const percentRaw = metaCents > 0 ? (jaGastoCents / metaCents) * 100 : 0;
+              // 2. Se forem "single": pagos antes de não pagos
+              if (a.tipo === "single") {
+                if (a.isPago !== b.isPago) return a.isPago ? -1 : 1;
+                return a.name.localeCompare(b.name, "pt-BR");
+              }
 
-              return (
-                <div
-                  key={gasto.id}
-                  className={`p-3 rounded-xl border flex justify-between items-start ${
-                    gasto.tipo === "single" && gasto.isPago
-                      ? "bg-green-200 border-green-400 opacity-70"
-                      : gasto.tipo === "goal"
-                      ? getBgClass(percentRaw) // <<< usa a função de cor
-                      : "bg-gray-50 border-gray-200"
-                  }`}
-                >
-                  {/* Infos */}
-                  <div className="flex flex-col flex-1">
-                    <div className="flex items-center gap-2">
-                      {gasto.tipo === "single" && gasto.isPago && (
-                        <CheckCircle size={18} className="text-green-600" />
-                      )}
-                      {gasto.tipo === "goal" && percent >= 100 && (
-                        <CheckCircle size={18} className="text-green-600" />
-                      )}
-                      <p
-                        className={`font-medium text-gray-800 ${
-                          gasto.tipo === "single" && gasto.isPago
-                            ? "line-through text-gray-600"
-                            : gasto.tipo === "goal" && percent >= 100
-                            ? "line-through text-gray-600"
-                            : ""
-                        }`}
-                      >
-                        {gasto.name === "Aleatório" ? 'Livre' : gasto.name }
-                      </p>
-                    </div>
+              // 3. Se forem "goal": "Aleatório" sempre primeiro
+              if (a.tipo === "goal") {
+                if (a.name === "Aleatório" && b.name !== "Aleatório") return -1;
+                if (b.name === "Aleatório" && a.name !== "Aleatório") return 1;
+                return a.name.localeCompare(b.name, "pt-BR");
+              }
 
-                    {gasto.tipo === "single" && (
-                      <>
-                        <p className="text-sm text-gray-500">Valor: {formatCurrencyFromCents(gasto.valor)}</p>
-                        {gasto.isPago && gasto.dataPago && (
-                          <p className="text-xs text-gray-400">Pago em {formatDateShort(gasto.dataPago)}</p>
+              return 0;
+            })
+            .map((gasto) => {
+                const totaisGasto = gasto.tipo === "goal" ? findTotalGastoPorMeta(gasto.id) : null;
+
+                // <-- CORREÇÃO: coalesce antes da divisão e cálculo do percent com proteção
+                const jaGastoCents = totaisGasto?.totalJaGasto ?? 0;
+                const disponivelCents = totaisGasto?.totalDisponivel ?? 0;
+                const metaCents = gasto.valor ?? 0;
+                const percent = metaCents > 0 ? Math.min((jaGastoCents / metaCents) * 100, 100) : 0;
+                
+                // calcula o percent real, sem travar em 100
+                const percentRaw = metaCents > 0 ? (jaGastoCents / metaCents) * 100 : 0;
+
+                return (
+                  <div
+                    key={gasto.id}
+                    className={`p-3 rounded-xl border flex justify-between items-start ${
+                      gasto.tipo === "single" && gasto.isPago
+                        ? "bg-green-200 border-green-400 opacity-70"
+                        : gasto.tipo === "goal"
+                        ? getBgClass(percentRaw) // <<< usa a função de cor
+                        : "bg-gray-50 border-gray-200"
+                    }`}
+                  >
+                    {/* Infos */}
+                    <div className="flex flex-col flex-1">
+                      <div className="flex items-center gap-2">
+                        {gasto.tipo === "single" && gasto.isPago && (
+                          <CheckCircle size={18} className="text-green-600" />
                         )}
-                      </>
-                    )}
-
-                    {gasto.tipo === "goal" && (
-                      <div className="mt-2 space-y-1 text-sm">
-                        <p className="text-gray-500">
-                          Meta: <span className="font-medium">{formatCurrencyFromCents(metaCents)}</span>
-                        </p>
-                        <p className="text-gray-500">
-                          Já gastei:{" "}
-                          <span className="font-medium text-red-500">
-                            {formatCurrencyFromCents(jaGastoCents)}
-                          </span>
-                        </p>
-                        <p className="text-gray-500">
-                          Disponível:{" "}
-                          <span className="font-medium text-green-600">
-                            {formatCurrencyFromCents(disponivelCents)}
-                          </span>
-                        </p>
-                        <ProgressBar percent={percentRaw} />
-                        <p className="text-xs text-gray-400">
-                          Gastei {percentRaw.toFixed(0)}%
+                        {gasto.tipo === "goal" && percent >= 100 && (
+                          <CheckCircle size={18} className="text-green-600" />
+                        )}
+                        <p
+                          className={`font-medium text-gray-800 ${
+                            gasto.tipo === "single" && gasto.isPago
+                              ? "line-through text-gray-600"
+                              : gasto.tipo === "goal" && percent >= 100
+                              ? "line-through text-gray-600"
+                              : ""
+                          }`}
+                        >
+                          {gasto.name === "Aleatório" ? 'Livre' : gasto.name }
                         </p>
                       </div>
-                    )}
-                  </div>
-                  
-                  {/* Menu */}
-                  {gasto.name != "Aleatório" && (
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <button className="p-1 rounded-full hover:bg-gray-200">
-                          <MoreVertical size={18} />
-                        </button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-32">
-                        {gasto.tipo === "single" && (
-                          <DropdownMenuItem
-                            onClick={() => handleGuardarGasto(gasto)}
-                          >
-                            {!gasto.isPago ?
-                              <CheckCircle size={16} className="text-green-500" />
-                              :
-                              <RotateCcw size={16} className="text-yellow-500" />
-                            }                          
-                            <p className="font-medium text-gray-600">{!gasto.isPago ? 'Pagar' : 'Reverter'}</p>
-                          </DropdownMenuItem>
-                        )}
-                        <DropdownMenuItem onClick={() => { 
-                          setIsEdit(true); 
-                          setCurrentGasto(gasto); 
-                          setShowModal(true); 
-                          }}>
-                          <Edit size={16} className="text-blue-500" />
-                          <p className="font-medium text-gray-600">Editar</p>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => {
-                          setCurrentGasto(gasto)
-                          setShowConfirmDelete(true)
-                          }}>
-                          <Trash2 size={16} className="text-red-500" />
-                          <p className="font-medium text-gray-600">Excluir</p>
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  )}
 
-                </div>
-              );
-            })
+                      {gasto.tipo === "single" && (
+                        <>
+                          <p className="text-sm text-gray-500">Valor: {formatCurrencyFromCents(gasto.valor)}</p>
+                          {gasto.isPago && gasto.dataPago && (
+                            <p className="text-xs text-gray-400">Pago em {formatDateShort(gasto.dataPago)}</p>
+                          )}
+                        </>
+                      )}
+
+                      {gasto.tipo === "goal" && (
+                        <div className="mt-2 space-y-1 text-sm">
+                          <p className="text-gray-500">
+                            Meta: <span className="font-medium">{formatCurrencyFromCents(metaCents)}</span>
+                          </p>
+                          <p className="text-gray-500">
+                            Já gastei:{" "}
+                            <span className="font-medium text-red-500">
+                              {formatCurrencyFromCents(jaGastoCents)}
+                            </span>
+                          </p>
+                          <p className="text-gray-500">
+                            Disponível:{" "}
+                            <span className="font-medium text-green-600">
+                              {formatCurrencyFromCents(disponivelCents)}
+                            </span>
+                          </p>
+                          <ProgressBar percent={percentRaw} />
+                          <p className="text-xs text-gray-400">
+                            Gastei {percentRaw.toFixed(0)}%
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Menu */}
+                    {gasto.name != "Aleatório" && (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <button className="p-1 rounded-full hover:bg-gray-200">
+                            <MoreVertical size={18} />
+                          </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-32">
+                          {gasto.tipo === "single" && (
+                            <DropdownMenuItem
+                              onClick={() => handleGuardarGasto(gasto)}
+                            >
+                              {!gasto.isPago ?
+                                <CheckCircle size={16} className="text-green-500" />
+                                :
+                                <RotateCcw size={16} className="text-yellow-500" />
+                              }                          
+                              <p className="font-medium text-gray-600">{!gasto.isPago ? 'Pagar' : 'Reverter'}</p>
+                            </DropdownMenuItem>
+                          )}
+                          <DropdownMenuItem onClick={() => { 
+                            setIsEdit(true); 
+                            setCurrentGasto(gasto); 
+                            setShowModal(true); 
+                            }}>
+                            <Edit size={16} className="text-blue-500" />
+                            <p className="font-medium text-gray-600">Editar</p>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => {
+                            setCurrentGasto(gasto)
+                            setShowConfirmDelete(true)
+                            }}>
+                            <Trash2 size={16} className="text-red-500" />
+                            <p className="font-medium text-gray-600">Excluir</p>
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    )}
+
+                  </div>
+                );
+              })
           ) : (
             <p className="text-xs text-gray-400 mt-7 text-center">Nenhum gasto registrado.</p>
           )}

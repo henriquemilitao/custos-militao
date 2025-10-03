@@ -115,71 +115,77 @@ export function ListagemPorCategoria({
 
               {/* Gastos agrupados por data */}
               <div className="space-y-2">
-                {Object.entries(datas).map(([data, gastos]) => (
-                  <div key={data}>
-                    {/* Data */}
-                    <div className="bg-gray-50 text-xs text-gray-500 px-2 py-1 rounded-md ml-2 mb-1">
-                      📅 {formatarData(data)}
-                    </div>
+                {Object.entries(datas)
+                  .sort(([dataA], [dataB]) => {
+                    const dateA = new Date(dataA).getTime();
+                    const dateB = new Date(dataB).getTime();
+                    return dateA - dateB; // crescente
+                  })
+                  .map(([data, gastos]) => (
+                    <div key={data}>
+                      {/* Data */}
+                      <div className="bg-gray-50 text-xs text-gray-500 px-2 py-1 rounded-md ml-2 mb-1">
+                        📅 {formatarData(data)}
+                      </div>
 
-                    {/* Itens */}
-                    <ul className="space-y-2 ml-4">
-                      {gastos.map((g, i) => (
-                        <li
-                          key={i}
-                          className="flex justify-between items-center text-sm pr-2"
-                        >
-                          <span>{g.name}</span>
+                      {/* Itens */}
+                      <ul className="space-y-2 ml-4">
+                        {gastos.map((g, i) => (
+                          <li
+                            key={i}
+                            className="flex justify-between items-center text-sm pr-2"
+                          >
+                            <span>{g.name}</span>
 
-                          <div className="flex items-center gap-2">
-                            <span className="font-semibold">
-                              {formatCurrencyFromCents(g.valor)}
-                            </span>
-                            {/* Menu */}
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <button className="p-1 rounded-full hover:bg-gray-200 text-gray-400">
-                                  <MoreVertical size={18} />
-                                </button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end" className="w-32">
-                                <DropdownMenuItem
-                                  onClick={() => {
-                                    setIsEdit(true);
+                            <div className="flex items-center gap-2">
+                              <span className="font-semibold">
+                                {formatCurrencyFromCents(g.valor)}
+                              </span>
+                              {/* Menu */}
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <button className="p-1 rounded-full hover:bg-gray-200 text-gray-400">
+                                    <MoreVertical size={18} />
+                                  </button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-32">
+                                  <DropdownMenuItem
+                                    onClick={() => {
+                                      setIsEdit(true);
+                                      setCurrentGasto({
+                                        id: g.id,
+                                        name: g.name,
+                                        valor: g.valor,
+                                        data: g.data,
+                                        gastoId: g.gastoId,
+                                      });
+                                      setShowModal(true);
+                                    }}
+                                  >
+                                    <Edit size={16} className="text-blue-500" />
+                                    <p className="font-medium text-gray-600">Editar</p>
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => {
                                     setCurrentGasto({
-                                      id: g.id,
-                                      name: g.name,
-                                      valor: g.valor,
-                                      data: g.data,
-                                      gastoId: g.gastoId,
-                                    });
-                                    setShowModal(true);
-                                  }}
-                                >
-                                  <Edit size={16} className="text-blue-500" />
-                                  <p className="font-medium text-gray-600">Editar</p>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => {
-                                  setCurrentGasto({
-                                      id: g.id,
-                                      name: g.name,
-                                      valor: g.valor,
-                                      data: g.data,
-                                      gastoId: g.gastoId,
-                                    });
-                                  setShowConfirmDelete(true)
-                                  }}>
-                                  <Trash2 size={16} className="text-red-500" />
-                                  <p className="font-medium text-gray-600">Excluir</p>
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
+                                        id: g.id,
+                                        name: g.name,
+                                        valor: g.valor,
+                                        data: g.data,
+                                        gastoId: g.gastoId,
+                                      });
+                                    setShowConfirmDelete(true)
+                                    }}>
+                                    <Trash2 size={16} className="text-red-500" />
+                                    <p className="font-medium text-gray-600">Excluir</p>
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
               </div>
             </div>
           );
