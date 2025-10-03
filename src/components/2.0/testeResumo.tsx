@@ -234,11 +234,11 @@ export default function ResumoMesCard({cicloAtual, mutateCiclo}: ResumoMesCardPr
                     align: "end",
                     formatter: (value, ctx) => {
                       const dataset = ctx.chart.data.datasets[0].data as number[];
-                      console.log({cicloAtual: cicloAtual.valorTotal});
                       const total = dataset.reduce((a, b) => a + b, 0);
                       if (total === 0) return "0%";
-                      const percent = (value / cicloAtual.valorTotal).toFixed(1);
-                      console.log({value, total, percent})
+                      const percent = Math.round((value / cicloAtual.valorTotal) * 10) / 10;
+                      // console.log(Number.isInteger(percent))
+                      // if (percent % 2 === 0) return `${percent.toFixed(0)}%`;
                       return `${percent}%`;
                     },
                      offset: (ctx) => {
