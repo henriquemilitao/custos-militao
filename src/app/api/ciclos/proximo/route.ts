@@ -8,10 +8,10 @@ export async function GET(req: NextRequest) {
 
   const inicio = searchParams.get("inicio");
   const fim = searchParams.get("fim");
-  console.log({
-    inicio,
-    fim
-  })
+  // console.log({
+  //   inicio,
+  //   fim
+  // })
 
   if (!inicio || !fim) {
     return NextResponse.json({ error: "Parâmetro referencia obrigatório" }, { status: 400 });
@@ -21,7 +21,11 @@ export async function GET(req: NextRequest) {
   if (!session?.user) {
     return NextResponse.json({ error: "Usuário não autenticado" }, { status: 401 });
   }
-  
+  console.log('DATAS Q CHEGARAM NA ROTAAAAAAAAAAAA')
+  console.log('---------------------------------------')
+
+  console.log({inicio, fim})
+  console.log('---------------------------------------')
   try {
     const proximoCiclo = await getProximoCiclo({
       userId: session.user.id,

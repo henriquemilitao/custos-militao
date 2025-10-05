@@ -11,114 +11,6 @@ export type CicloComMes = {
   dataFim: string;
 };
 
-export async function getCicloAtual(userId: string | undefined): Promise<CicloComMes | null> {
-  const hoje = new Date();
-  const ciclo = await prisma.ciclo.findFirst({
-    where: {
-      userId,
-      dataInicio: { lte: hoje },
-      dataFim: { gte: hoje },
-    },
-    include: {
-      economias: { 
-        orderBy: [
-          { isGuardado: "desc" }, 
-          { nome: "asc" }
-        ], 
-      },
-      gastos: {
-        orderBy: [
-          { tipo: "asc" },
-          { isPago: "desc" },
-          { name: "asc"},
-        ],
-      },
-      semanas: {
-        include: {
-          registros: { orderBy: { createdAt: "asc" } },
-        },
-      },
-    },
-  });
-
-  if (!ciclo) {
-    // Nenhum ciclo encontrado → retorna null + mês de hoje
-    return {
-      ciclo: null,
-      dataInicio: new Date().toISOString(),
-      dataFim: new Date().toISOString()
-    };
-  }
-
-  // --- cálculos agregados ---
-  const [
-    somaEconomias,
-    somaGastos,
-    somaEconomiaJaGuardada,
-    somaGastosUnicosJaRealizados,
-    somaGastosPorMetaJaRealizados,
-  ] = await Promise.all([
-    prisma.economia.aggregate({ where: { cicloId: ciclo.id }, _sum: { valor: true } }),
-    prisma.gasto.aggregate({ where: { cicloId: ciclo.id }, _sum: { valor: true } }),
-    prisma.economia.aggregate({ where: { cicloId: ciclo.id, isGuardado: true }, _sum: { valor: true } }),
-    prisma.gasto.aggregate({ where: { cicloId: ciclo.id, tipo: "single", isPago: true }, _sum: { valor: true } }),
-    prisma.registroGasto.aggregate({ where: { gasto: { cicloId: ciclo.id } }, _sum: { valor: true } }),
-  ]);
-
-  const economiasMesTotal = somaEconomias._sum.valor ?? 0;
-  const gastosMesTotal = somaGastos._sum.valor ?? 0;
-  const economiasJaGuardadas = somaEconomiaJaGuardada._sum.valor ?? 0;
-  const gastosUnicosJaRealizados = somaGastosUnicosJaRealizados._sum.valor ?? 0;
-  const gastosPorMetaJaRealizados = somaGastosPorMetaJaRealizados._sum.valor ?? 0;
-  const gastoTotalJaRealizado = gastosUnicosJaRealizados + gastosPorMetaJaRealizados;
-  const disponivelMes = (ciclo.valorTotal * 100 - economiasJaGuardadas - gastoTotalJaRealizado);
-
-  // --- gastos por meta enriquecidos ---
-  const registrosAgrupados = await prisma.registroGasto.groupBy({
-    by: ["gastoId"],
-    where: {
-      gastoId: {
-        in: (
-          await prisma.gasto.findMany({
-            where: { cicloId: ciclo.id },
-            select: { id: true },
-          })
-        ).map((g) => g.id),
-      },
-    },
-    _sum: { valor: true },
-  });
-
-  const gastosPorMetaTotais = ciclo.gastos
-    .filter((g) => g.tipo === "goal")
-    .map((g) => {
-      const registro = registrosAgrupados.find((r) => r.gastoId === g.id);
-      const totalJaGasto = registro?._sum.valor ?? 0;
-      return {
-        ...g,
-        totalPlanejado: g.valor,
-        totalJaGasto,
-        totalDisponivel: g.valor - totalJaGasto,
-      };
-    });
-
-  await syncAleatorio(ciclo.id);
-
-  return {
-    ciclo: {
-      ...ciclo,
-      economiasMesTotal,
-      gastosMesTotal,
-      economiasJaGuardadas,
-      gastoTotalJaRealizado,
-      disponivelMes,
-      gastosPorMetaTotais,
-    },
-    dataInicio: ciclo.dataInicio.toISOString(),
-    dataFim: ciclo.dataFim.toISOString()
-  };
-}
-
 export async function getCicloById(cicloId: string) {
   return prisma.ciclo.findUnique({
     where: { id: cicloId },
@@ -390,6 +282,164 @@ export async function updateCicloValorTotalService(params: {
 // }
 
 
+export async function getCicloAtual(userId: string | undefined, dataInicio: string, dataFim: string) {
+  const hoje = new Date();
+
+  let ciclo;
+  console.log('TO NO INICIOOOOOO SERVICEEEEEEEEEEEE')
+  console.log('Chegou essas datas')
+  console.log({dataInicio, dataFim})
+  if (dataInicio && dataFim) {
+    ciclo = await prisma.ciclo.findFirst({
+      where: {
+        userId,
+        dataInicio: { equals: new Date(dataInicio) },
+        dataFim: { equals: new Date(dataFim) },
+      },
+      include: {
+        economias: { 
+          orderBy: [
+            { isGuardado: "desc" }, 
+            { nome: "asc" }
+          ], 
+        },
+        gastos: {
+          orderBy: [
+            { tipo: "asc" },
+            { isPago: "desc" },
+            { name: "asc"},
+          ],
+        },
+        semanas: {
+          include: {
+            registros: { orderBy: { createdAt: "asc" } },
+          },
+        },
+      },
+    });
+  } else {
+    ciclo = await prisma.ciclo.findFirst({
+      where: {
+        userId,
+        dataInicio: { lte: hoje },
+        dataFim: { gte: hoje },
+      },
+      include: {
+        economias: { 
+          orderBy: [
+            { isGuardado: "desc" }, 
+            { nome: "asc" }
+          ], 
+        },
+        gastos: {
+          orderBy: [
+            { tipo: "asc" },
+            { isPago: "desc" },
+            { name: "asc"},
+          ],
+        },
+        semanas: {
+          include: {
+            registros: { orderBy: { createdAt: "asc" } },
+          },
+        },
+      },
+    });
+  }
+  console.log('TO NO BBBBBBBB SERVICEEEEEEEEEEEE')
+
+  if (!ciclo) {
+    // Nenhum ciclo encontrado → retorna null + mês de hoje
+    console.log('TO NO CCCCCCCC SERVICEEEEEEEEEEEE')
+    return {
+      ciclo: null,
+      dataInicio,
+      dataFim
+    };
+  }
+
+  // --- cálculos agregados ---
+  const [
+    somaEconomias,
+    somaGastos,
+    somaEconomiaJaGuardada,
+    somaGastosUnicosJaRealizados,
+    somaGastosPorMetaJaRealizados,
+  ] = await Promise.all([
+    prisma.economia.aggregate({ where: { cicloId: ciclo.id }, _sum: { valor: true } }),
+    prisma.gasto.aggregate({ where: { cicloId: ciclo.id }, _sum: { valor: true } }),
+    prisma.economia.aggregate({ where: { cicloId: ciclo.id, isGuardado: true }, _sum: { valor: true } }),
+    prisma.gasto.aggregate({ where: { cicloId: ciclo.id, tipo: "single", isPago: true }, _sum: { valor: true } }),
+    prisma.registroGasto.aggregate({ where: { gasto: { cicloId: ciclo.id } }, _sum: { valor: true } }),
+  ]);
+  console.log('TO NO DDDDDDDD SERVICEEEEEEEEEEEE')
+
+  const economiasMesTotal = somaEconomias._sum.valor ?? 0;
+  const gastosMesTotal = somaGastos._sum.valor ?? 0;
+  const economiasJaGuardadas = somaEconomiaJaGuardada._sum.valor ?? 0;
+  const gastosUnicosJaRealizados = somaGastosUnicosJaRealizados._sum.valor ?? 0;
+  const gastosPorMetaJaRealizados = somaGastosPorMetaJaRealizados._sum.valor ?? 0;
+  const gastoTotalJaRealizado = gastosUnicosJaRealizados + gastosPorMetaJaRealizados;
+  const disponivelMes = (ciclo.valorTotal * 100 - economiasJaGuardadas - gastoTotalJaRealizado);
+  console.log('TO NO EEEEEEEE SERVICEEEEEEEEEEEE')
+
+  // --- gastos por meta enriquecidos ---
+  const registrosAgrupados = await prisma.registroGasto.groupBy({
+    by: ["gastoId"],
+    where: {
+      gastoId: {
+        in: (
+          await prisma.gasto.findMany({
+            where: { cicloId: ciclo.id },
+            select: { id: true },
+          })
+        ).map((g) => g.id),
+      },
+    },
+    _sum: { valor: true },
+  });
+  console.log('TO NO FFFFFFFF SERVICEEEEEEEEEEEE')
+
+  const gastosPorMetaTotais = ciclo.gastos
+    .filter((g) => g.tipo === "goal")
+    .map((g) => {
+      const registro = registrosAgrupados.find((r) => r.gastoId === g.id);
+      const totalJaGasto = registro?._sum.valor ?? 0;
+      return {
+        ...g,
+        totalPlanejado: g.valor,
+        totalJaGasto,
+        totalDisponivel: g.valor - totalJaGasto,
+      };
+    });
+  console.log('TO NO GGGGGGGG SERVICEEEEEEEEEEEE')
+
+  await syncAleatorio(ciclo.id);
+  console.log('TO NO HHHHHHHHHHHH SERVICEEEEEEEEEEEE')
+
+  console.log('TO NO FIMMMMMM SERVICEEEEEEEEEEEE')
+  console.log({
+    dataINICIOMesQueChegouNoMutation: dataInicio,
+    dataFIMMesQueChegouNoMutation: dataFim,
+    dataINICIODoMesQueTaNoCicloQueTaMostrando: ciclo.dataInicio,
+    dataFIMDoMesQueTaNoCicloQueTaMostrando: ciclo.dataFim
+  })
+
+  return {
+    ciclo: {
+      ...ciclo,
+      economiasMesTotal,
+      gastosMesTotal,
+      economiasJaGuardadas,
+      gastoTotalJaRealizado,
+      disponivelMes,
+      gastosPorMetaTotais,
+    },
+    dataInicio: ciclo.dataInicio.toISOString(),
+    dataFim: ciclo.dataFim.toISOString()
+  };
+}
+
 
 function normalizarDatas(dataInicio: Date, dataFim: Date) {
   const inicioNormalizado = new Date(
@@ -415,21 +465,31 @@ export async function getProximoCiclo(params: {
   dataFim: string,
 }) {
   const { userId, dataInicio, dataFim } = params;
-  console.log('aaaa')
+  console.log('DATAS Q CHEGARAM NO SERVICEEEEEEEEEE')
+  console.log('---------------------------------------')
+
+  console.log({dataInicio, dataFim})
+  console.log('---------------------------------------')
+
 
   // converte as strings ISO em Date
   const inicioDate = new Date(dataInicio);
   const fimDate = new Date(dataFim);
+  console.log('DATAS NORMALIZADAS SERVICE')
+  console.log('---------------------------------------')
 
+  console.log({inicioDate, fimDate})
+  console.log('---------------------------------------')
   if (isNaN(fimDate.getTime())) {
     throw new Error("dataFim inválida");
   }
+  console.log('TO NO BBBBBBBBBBBBBBB PROXIMO SERVICEEEEEEEEEEEE')
 
   // procura ciclo que começa depois do fim atual
   const proximoCiclo = await prisma.ciclo.findFirst({
     where: {
       userId,
-      dataInicio: { gt: fimDate },
+      dataInicio: { gte: fimDate },
     },
     orderBy: { dataInicio: "asc" },
     include: {
@@ -447,11 +507,15 @@ export async function getProximoCiclo(params: {
     },
   });
 
-  console.log('bbbb')
+  console.log('TO NO CCCCCCCCCCCCCCCCCC PROXIMO SERVICEEEEEEEEEEEE')
+  console.log('CICLO QUE EU PESQUISEI COM ESSAS RESPOSTAS FOIIIIII')
+  console.log({proximoCiclo})
+
 
   // caso exista ciclo no futuro → retorna ele e suas datas
   if (proximoCiclo) {
-  console.log('ccc')
+    console.log('TO NO DDDDDDDDDDDDDDD PROXIMO SERVICEEEEEEEEEEEE')
+
     const [
       somaEconomias,
       somaGastos,
@@ -492,6 +556,7 @@ export async function getProximoCiclo(params: {
           totalDisponivel: g.valor - totalJaGasto,
         };
       });
+    console.log('TO NO FFFFFFFFFFF PROXIMO SERVICEEEEEEEEEEEE')
 
     const { inicioNormalizado, fimNormalizado } = normalizarDatas(
       proximoCiclo.dataInicio,
@@ -504,6 +569,7 @@ export async function getProximoCiclo(params: {
       inicioNormalizado,
       fimNormalizado
     })
+  console.log('TO NO GGGGGGGGGGGG PROXIMO SERVICEEEEEEEEEEEE')
 
     return {
       ciclo: {

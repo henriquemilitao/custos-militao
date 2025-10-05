@@ -31,14 +31,19 @@ type ResumoMesCardProps = {
   mutateCiclo: KeyedMutator<CicloResponse>; // ✅ agora bate com o hook
   cicloAtual: CicloAtualDTO | null;
   dataInicio: string | undefined;
-  dataFim: string | undefined
+  dataFim: string | undefined;
+  userId: string
+  setDatas: (datas: {inicio: string; fim: string}) => void
+
 };
 
 export default function HeaderSistema({
   mutateCiclo,
   cicloAtual,
   dataInicio,
-  dataFim
+  dataFim,
+  userId,
+  setDatas
 }: ResumoMesCardProps) {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [mesAtual, setMesAtual] = useState(new Date());
@@ -81,7 +86,8 @@ export default function HeaderSistema({
       const data = await res.json();
       console.log({inicio: data.dataInicio, fim: data.dataFim})
       // atualiza SWR com o novo ciclo
-      mutateCiclo(data, { revalidate: false });
+      // atualiza o estado com as novas datas
+      setDatas({ inicio: data.dataInicio, fim: data.dataFim });
 
       // if (res.status === 404) {
       //   // Nenhum ciclo → avança só o mês e limpa cicloAtual

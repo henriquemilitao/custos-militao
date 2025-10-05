@@ -9,17 +9,25 @@ export type CicloResponse = {
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
-export function useCicloAtual(userId: string) {
+export function useCicloAtual(
+  userId: string,
+  dataInicio?: string,
+  dataFim?: string
+) {
+  const shouldFetch = Boolean(userId);
+
   const { data, error, isLoading, mutate } = useSWR<CicloResponse>(
-    userId ? `/api/ciclos/atual?userId=${userId}` : null,
+    shouldFetch
+      ? `/api/ciclos/atual?userId=${userId}${
+          dataInicio && dataFim ? `&dataInicio=${dataInicio}&dataFim=${dataFim}` : ""
+        }`
+      : null,
     fetcher,
     { keepPreviousData: true }
   );
 
   return {
     cicloAtual: data?.ciclo ?? null,
-    // dataInicio: data ? new Date(data.dataInicio) : null,
-    // dataFim: data ? new Date(data.dataFim) : null,
     dataInicio: data?.dataInicio,
     dataFim: data?.dataFim,
     isLoading,
