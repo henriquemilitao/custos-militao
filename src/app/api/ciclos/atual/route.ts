@@ -11,10 +11,7 @@ export async function GET(req: NextRequest) {
     const fim = searchParams.get("dataFim");
 
 
-    console.log('TON NA ROTAAAAAAAAAAAAAAAAAAAAAA ANTES DE IR P SERVICE')
-    console.log({inicio, fim})
     const userId = searchParams.get("userId") ?? undefined;
-
 
     const cicloAtual = await getCicloAtual(
         userId, 

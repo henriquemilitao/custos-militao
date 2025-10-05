@@ -17,6 +17,7 @@ import {
   LogOut,
   CalendarIcon,
   ChevronRight,
+  ChevronLeft,
 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -84,28 +85,49 @@ export default function HeaderSistema({
       if (!res.ok) throw new Error("Erro ao buscar próximo ciclo");
 
       const data = await res.json();
-      console.log({inicio: data.dataInicio, fim: data.dataFim})
-      // atualiza SWR com o novo ciclo
       // atualiza o estado com as novas datas
       setDatas({ inicio: data.dataInicio, fim: data.dataFim });
-
-      // if (res.status === 404) {
-      //   // Nenhum ciclo → avança só o mês e limpa cicloAtual
-      //   setMesAtual(new Date(mesAtual.setMonth(mesAtual.getMonth() + 1)));
-      //   mutateCiclo(null); 
-      //   return;
-      // }
-
-      // if (!res.ok) throw new Error("Erro ao buscar próximo ciclo");
-
-      // const data = await res.json();
-      // console.log("Próximo ciclo:", data);
-
-      // mutateCiclo(data);
-      // Atualiza o mesAtual baseado no ciclo retornado
-      // setMesAtual(new Date(data.dataInicio));
     } catch (error) {
       console.error("Erro ao buscar próximo ciclo:", error);
+    }
+  }
+
+  async function handleAnteriorCiclo() {
+    try {
+      const inicio = cicloAtual
+        ? cicloAtual?.dataInicio instanceof Date
+          ? cicloAtual.dataInicio.toISOString()
+          : cicloAtual?.dataInicio
+        : dataInicio
+
+
+      const fim = cicloAtual 
+        ? cicloAtual.dataFim instanceof Date
+          ? cicloAtual.dataFim.toISOString()
+          : cicloAtual?.dataFim
+        : dataFim
+
+      if (!inicio || !fim) throw new Error("Datas inválidas");
+      
+      console.log({dataInicio, dataFim})
+      const params = new URLSearchParams({
+        inicio: inicio,
+        fim: fim,
+        // inicio: inicio ?? '',
+        // fim: fim ?? '',
+      });
+
+      const res = await fetch(`/api/ciclos/anterior?${params}`, {
+        method: "GET",
+      });
+
+      if (!res.ok) throw new Error("Erro ao buscar ciclo anterior");
+
+      const data = await res.json();
+      // atualiza o estado com as novas datas
+      setDatas({ inicio: data.dataInicio, fim: data.dataFim });
+    } catch (error) {
+      console.error("Erro ao buscar ciclo anterior:", error);
     }
   }
 
@@ -113,7 +135,18 @@ export default function HeaderSistema({
   return (
     <div className="flex items-center justify-between px-4 py-3 bg-white shadow-sm rounded-2xl mb-4">
       {/* Navegação de mês */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-0">
+
+        {/* Botão ciclo anterior*/}
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleAnteriorCiclo}
+          className="rounded-lg"
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
+
         <Popover>
           <PopoverTrigger asChild>
             <Button variant="ghost" className="font-medium text-gray-700">
