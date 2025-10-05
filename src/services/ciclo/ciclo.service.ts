@@ -473,6 +473,13 @@ export async function getProximoCiclo(params: {
     throw new Error("dataFim inválida");
   }
 
+  console.log('DATAS Q CHEGARAM NO SERVICEEEEEEEEEE')
+  console.log('---------------------------------------')
+
+  console.log({dataInicio, dataFim})
+  console.log('---------------------------------------')
+
+
   // procura ciclo que começa depois do fim atual
   const proximoCiclo = await prisma.ciclo.findFirst({
     where: {
@@ -537,12 +544,14 @@ export async function getProximoCiclo(params: {
           totalDisponivel: g.valor - totalJaGasto,
         };
       });
-    console.log('TO NO FFFFFFFFFFF PROXIMO SERVICEEEEEEEEEEEE')
+    console.log('ACHEI UM PROXIMO CICLOOOOO SERVICEEEEEEEEEEEE')
 
     const { inicioNormalizado, fimNormalizado } = normalizarDatas(
       proximoCiclo.dataInicio,
       proximoCiclo.dataFim
     );
+    console.log('VOU PASSAR PRO FRONT O PROXIMO CICLO QUE É::::')
+    console.log({inicioNormalizado, fimNormalizado})
 
     return {
       ciclo: {
@@ -558,6 +567,7 @@ export async function getProximoCiclo(params: {
       dataFim: fimNormalizado.toISOString(),
     };
   }
+  console.log('NAO ESISTE PROXIMO CICLO, SERVICEEEEEEEEEEEE')
 
   // se não existe ciclo → devolve "ciclo null" e datas 1 mês pra frente
   const proxInicio = new Date(dataInicio);
@@ -567,6 +577,8 @@ export async function getProximoCiclo(params: {
   proxFim.setMonth(proxFim.getMonth() + 1);
 
   const { inicioNormalizado, fimNormalizado } = normalizarDatas(proxInicio, proxFim);
+  console.log('VOU PASSAR PRO FRONT O PROXIMO CICLO QUE É::::')
+  console.log({inicioNormalizado, fimNormalizado})
 
   return {
     ciclo: null,
@@ -706,13 +718,14 @@ export async function getCicloAnterior(params: {
   // se não existe ciclo → devolve "ciclo null" e datas 1 mês pra frente
   const proxInicio = new Date(dataInicio);
   proxInicio.setMonth(proxInicio.getMonth() - 1);
-  console.log('eeee')
-
+  
   const proxFim = new Date(dataFim);
   proxFim.setMonth(proxFim.getMonth() - 1);
 
   const { inicioNormalizado, fimNormalizado } = normalizarDatas(proxInicio, proxFim);
 
+  console.log('VOU PASSAR PRO FRONT O CICLO ANTERIOR QUE É::::')
+  console.log({inicioNormalizado, fimNormalizado})
   return {
     ciclo: null,
     dataInicio: inicioNormalizado.toISOString(),

@@ -8,7 +8,8 @@ export async function GET(req: NextRequest) {
 
   const inicio = searchParams.get("inicio");
   const fim = searchParams.get("fim");
-
+  console.log('PROXIMO ROTAAAAAAAAAAAAAAAAAAAAAAAAA')
+  console.log({inicio, fim})
   if (!inicio || !fim) {
     return NextResponse.json({ error: "Parâmetro referencia obrigatório" }, { status: 400 });
   }
