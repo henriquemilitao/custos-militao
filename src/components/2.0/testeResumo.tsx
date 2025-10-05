@@ -2,10 +2,10 @@
 
 import { CicloAtualDTO } from "@/dtos/ciclo.dto";
 import { formatCurrencyFromCents } from "@/lib/formatters/formatCurrency";
-import { formatDateDayMonth, formatIsoToDayMonth, formatPeriodoDayMonth} from "@/lib/formatters/formatDate";
-import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, XAxis, YAxis, Bar, LineChart, Line, Area, AreaChart, LabelList } from "recharts";
+import { formatDateDayMonth } from "@/lib/formatters/formatDate";
+// import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, XAxis, YAxis, Bar, LineChart, Line, Area, AreaChart, LabelList } from "recharts";
 import EditableCurrency from "../EditableCurrency";
-import { Doughnut, Radar } from "react-chartjs-2";
+import { Doughnut } from "react-chartjs-2";
 
 import { toast } from "sonner";
 import {
@@ -111,19 +111,19 @@ export default function ResumoMesCard({cicloAtual, mutateCiclo, dataInicio, data
   }
 
 
-  const chartData = {
-    labels: ["Gastos", "Economias", "Disponível"],
-    datasets: [
-        {
-          data: [
-            cicloAtual?.gastoTotalJaRealizado ?? 0,
-            cicloAtual?.economiasJaGuardadas ?? 0,
-            cicloAtual?.disponivelMes ?? 0,
-          ],
-          backgroundColor: ["#ef4444", "#3b82f6", "#22c55e"],
-        },
-    ],
-  };
+  // const chartData = {
+  //   labels: ["Gastos", "Economias", "Disponível"],
+  //   datasets: [
+  //       {
+  //         data: [
+  //           cicloAtual?.gastoTotalJaRealizado ?? 0,
+  //           cicloAtual?.economiasJaGuardadas ?? 0,
+  //           cicloAtual?.disponivelMes ?? 0,
+  //         ],
+  //         backgroundColor: ["#ef4444", "#3b82f6", "#22c55e"],
+  //       },
+  //   ],
+  // };
   
     const gastos = cicloAtual?.gastoTotalJaRealizado ?? 0;
     const economias = cicloAtual?.economiasJaGuardadas ?? 0;

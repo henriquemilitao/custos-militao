@@ -3,7 +3,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { ZodError, ZodIssue } from "zod";
 import { createEconomiaSchema } from "@/dtos/economia.schema";
 import { createEconomiaService } from "@/services/economia/economia.service";
-import { created } from "@/lib/http";
 
 function zodErrorToMessage(err: ZodError) {
   return err.issues

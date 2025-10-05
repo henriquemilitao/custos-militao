@@ -1,9 +1,8 @@
-import { CicloAtualComRelacionamentos, CicloAtualDTO } from "@/dtos/ciclo.dto";
+import { CicloAtualDTO } from "@/dtos/ciclo.dto";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { gerarSemanasParaCiclo, getMesAtualTimeZone } from "./utils";
 import { syncAleatorio } from "../aleatorio/aleatorio.service";
-import { notFound } from "@/lib/http";
 
 export type CicloComMes = {
   ciclo: CicloAtualDTO | null;
@@ -467,7 +466,6 @@ export async function getProximoCiclo(params: {
   const { userId, dataInicio, dataFim } = params;
 
   // converte as strings ISO em Date
-  const inicioDate = new Date(dataInicio);
   const fimDate = new Date(dataFim);
   if (isNaN(fimDate.getTime())) {
     throw new Error("dataFim inválida");

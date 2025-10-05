@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { ZodError} from "zod";
 import { createRegistroGastoSchema } from "@/dtos/registroGasto.schema";
 import { createRegistroGastoService } from "@/services/registroGasto/registroGasto.service";
-import { created } from "@/lib/http";
 
 export async function POST(req: NextRequest) {
   try {

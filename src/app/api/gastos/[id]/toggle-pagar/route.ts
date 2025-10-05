@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { badRequest, notFound, ok, serverError } from "@/lib/http";
+import { badRequest, notFound, serverError } from "@/lib/http";
 import { togglePagarGastoService } from "@/services/gasto/gasto.service";
 
 export async function PATCH(

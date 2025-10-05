@@ -73,10 +73,8 @@ export default function ClientPage({ userId }: { userId: string }) {
     <main className="min-h-screen bg-neutral-50">
       <HeaderSistema
         cicloAtual={cicloAtual}
-        mutateCiclo={mutateCiclo}
         dataInicio={dataInicio}
         dataFim={dataFim}
-        userId={userId}
         setDatas={setDatas}
       />
       <TesteResumo cicloAtual={cicloAtual} mutateCiclo={mutateCiclo} dataInicio={dataInicio} dataFim={dataFim}/>

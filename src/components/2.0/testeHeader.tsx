@@ -15,7 +15,6 @@ import {
 } from "@/components/ui/sheet";
 import {
   LogOut,
-  CalendarIcon,
   ChevronRight,
   ChevronLeft,
 } from "lucide-react";
@@ -25,25 +24,19 @@ import { authClient } from "@/lib/auth-client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useRouter } from "next/navigation";
 import { CicloAtualDTO } from "@/dtos/ciclo.dto";
-import { KeyedMutator } from "swr";
-import { CicloResponse } from "@/hooks/useCicloAtual";
 
 type ResumoMesCardProps = {
-  mutateCiclo: KeyedMutator<CicloResponse>; // ✅ agora bate com o hook
   cicloAtual: CicloAtualDTO | null;
   dataInicio: string | undefined;
   dataFim: string | undefined;
-  userId: string
   setDatas: (datas: {inicio: string; fim: string}) => void
 
 };
 
 export default function HeaderSistema({
-  mutateCiclo,
   cicloAtual,
   dataInicio,
   dataFim,
-  userId,
   setDatas
 }: ResumoMesCardProps) {
   const [sheetOpen, setSheetOpen] = useState(false);

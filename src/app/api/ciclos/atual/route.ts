@@ -1,4 +1,4 @@
-import { notFound, ok } from "@/lib/http";
+import { notFound } from "@/lib/http";
 import { getCicloAtual } from "@/services/ciclo/ciclo.service";
 import { NextRequest, NextResponse } from "next/server";
 

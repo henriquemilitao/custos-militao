@@ -1,7 +1,6 @@
 // app/api/economias/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { ZodError, ZodIssue } from "zod";
-import { created } from "@/lib/http";
 import { createGastoSchema } from "@/dtos/gasto.schema";
 import { createGastoService } from "@/services/gasto/gasto.service";
 

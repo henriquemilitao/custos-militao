@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { ZodError } from "zod";
 import { editRegistroGastoSchema } from "@/dtos/registroGasto.schema";
 import { deleteRegistroGastoService, editRegistroGastoService } from "@/services/registroGasto/registroGasto.service";
-import { notFound, ok } from "@/lib/http";
+import { notFound } from "@/lib/http";
 
 export async function PATCH(req: NextRequest, context: { params: Promise<{ id: string}>} ) {
   try {
