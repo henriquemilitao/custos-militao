@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import TesteResumo from "@/components/2.0/testeResumo";
+import TesteResumo from "@/components/2.0/Resumo/testeResumo";
 import TesteEconomia from "@/components/2.0/Economia/cardEconomias";
 import TesteGastos from "@/components/2.0/Gastos/cardGastos";
 import TesteSemanas from "@/components/2.0/Semanas/controleSemanal";
-import HeaderSistema from "@/components/2.0/testeHeader";
+import HeaderSistema from "@/components/2.0/Header/testeHeader";
 import { useCicloAtual } from "@/hooks/useCicloAtual";
 
 export default function ClientPage({ userId }: { userId: string }) {
@@ -77,10 +77,10 @@ export default function ClientPage({ userId }: { userId: string }) {
         dataFim={dataFim}
         setDatas={setDatas}
       />
-      <TesteResumo cicloAtual={cicloAtual} mutateCiclo={mutateCiclo} dataInicio={dataInicio} dataFim={dataFim}/>
-      <TesteEconomia cicloAtual={cicloAtual} mutateCiclo={mutateCiclo} />
-      <TesteGastos cicloAtual={cicloAtual} mutateCiclo={mutateCiclo} />
-      <TesteSemanas cicloAtual={cicloAtual} mutateCiclo={mutateCiclo} />
+      <TesteResumo cicloAtual={cicloAtual} mutateCiclo={mutateCiclo} dataInicio={dataInicio} dataFim={dataFim} setDatas={setDatas}/>
+      {/* <TesteEconomia cicloAtual={cicloAtual} mutateCiclo={mutateCiclo} /> */}
+      {/* <TesteGastos cicloAtual={cicloAtual} mutateCiclo={mutateCiclo} /> */}
+      <TesteSemanas cicloAtual={cicloAtual} mutateCiclo={mutateCiclo} datas={datas}/>
     </main>
   );
 }

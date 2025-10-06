@@ -8,7 +8,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { CalendarIcon } from "lucide-react";
 import { ptBR } from "date-fns/locale";
 import { format } from "date-fns";
-import { InputCurrency } from "../../InputCurrency";
+import { InputCurrency } from "../../../common/InputCurrency";
 import { CreateRegistroGastoDTO, createRegistroGastoSchema, EditRegistroGastoDTO, editRegistroGastoSchema } from "@/dtos/registroGasto.schema";
 import { toast } from "sonner";
 import { BaseDialog } from "@/components/common/BaseDialog";
@@ -141,7 +141,7 @@ export function DialogAddEditGasto({
       semanaId: semanaAtual?.id ?? "",
     };
 
-    console.log({aaaaaa: gastoId})
+    // console.log({aaaaaa: gastoId})
 
 
     const schema = isEdit ? editRegistroGastoSchema : createRegistroGastoSchema;
@@ -206,7 +206,7 @@ export function DialogAddEditGasto({
       mutateCiclo();
       handleClose();
     } catch (err) {
-      console.log(err)
+      // console.log(err)
       toast.error( "Erro inesperado");
     } finally {
       setLoading(false);
@@ -255,7 +255,7 @@ export function DialogAddEditGasto({
       mutateCiclo();
       handleClose();
     } catch (err) {
-      console.log(err)
+      // console.log(err)
       toast.error("Erro inesperado");
     } finally {
       setLoading(false);

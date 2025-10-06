@@ -29,6 +29,8 @@ interface ResumoValoresProps {
 }
 
 export function ResumoValores({ semanaAtual }: ResumoValoresProps) {
+  // console.log('RESUMO DA SEMANAAAAAAAAA')
+  // console.log({semanaAtual})
   return (
     <div className="grid grid-cols-3 gap-2 text-center mb-6">
       <div>

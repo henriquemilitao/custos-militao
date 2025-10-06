@@ -2,9 +2,9 @@
 
 import { CicloAtualDTO } from "@/dtos/ciclo.dto";
 import { formatCurrencyFromCents } from "@/lib/formatters/formatCurrency";
-import { formatDateDayMonth } from "@/lib/formatters/formatDate";
+import { formatDateDayMonth, getPeriodoAtual } from "@/lib/formatters/formatDate";
 // import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, XAxis, YAxis, Bar, LineChart, Line, Area, AreaChart, LabelList } from "recharts";
-import EditableCurrency from "../EditableCurrency";
+import EditableCurrency from "../../1.0/EditableCurrency";
 import { Doughnut } from "react-chartjs-2";
 
 import { toast } from "sonner";
@@ -38,10 +38,11 @@ type ResumoMesCardProps = {
   mutateCiclo: () => void
   cicloAtual: CicloAtualDTO | null
   dataInicio: string | undefined;
-  dataFim: string | undefined
+  dataFim: string | undefined;
+  setDatas: (datas: {inicio: string; fim: string}) => void
 }
 
-export default function ResumoMesCard({cicloAtual, mutateCiclo, dataInicio, dataFim}: ResumoMesCardProps) {
+export default function ResumoMesCard({cicloAtual, mutateCiclo, dataInicio, dataFim, setDatas}: ResumoMesCardProps) {
   // const economiasMesTotal = cicloAtual?.economias.reduce((acc, economia) => economia.valor + acc, 0) ?? 0
   // const gastosMesTotal = cicloAtual?.gastos?.reduce((acc, gasto) => gasto.valor + acc, 0) ?? 0
   // const valorMesTotal = cicloAtual?.valorTotal ?? 0
@@ -57,7 +58,7 @@ export default function ResumoMesCard({cicloAtual, mutateCiclo, dataInicio, data
   }
 
   async function createCiclo(novoTotal: number) {
-    console.log('ENTRANDO NA FUNCAO')
+    // console.log('ENTRANDO NA s')
     try {
       const res = await fetch(`/api/ciclos`, {
         method: "POST",
@@ -72,8 +73,8 @@ export default function ResumoMesCard({cicloAtual, mutateCiclo, dataInicio, data
       });
 
       const data = await res.json().catch(() => null);
-      console.log('RESPOSTA DEPOIS DE IR PARA A ROTA')
-      console.log({data})
+      // console.log('RESPOSTA DEPOIS DE IR PARA A ROTA')
+      // console.log({data})
 
       if (!res.ok) {
         toast.error(data?.error || "Erro ao criar ciclo");
@@ -143,7 +144,16 @@ export default function ResumoMesCard({cicloAtual, mutateCiclo, dataInicio, data
       disponivel > 0 ? disponivel : 0,
     ];
 
+  const datasMes = dataInicio && dataFim 
+                  ? { inicio: dataInicio, fim: dataFim }
+                  : getPeriodoAtual()
 
+  // Se não existir nenhum ciclo ainda, eu seto o mes atual como parametro
+  if (!dataInicio && !dataFim)
+    setDatas({
+      inicio: datasMes.inicio, 
+      fim: datasMes.fim
+  })
   return (
     <div className="p-4 max-w-sm mx-auto">
       <div className="bg-white rounded-2xl shadow-sm p-5">
@@ -155,7 +165,7 @@ export default function ResumoMesCard({cicloAtual, mutateCiclo, dataInicio, data
           </h2>
 
           <p className="text-sm text-gray-500 mb-2">{
-            `${formatDateDayMonth(dataInicio)} - ${formatDateDayMonth(dataFim)}`
+            `${formatDateDayMonth(datasMes.inicio)} - ${formatDateDayMonth(datasMes.fim)}`
             }
           </p>
 

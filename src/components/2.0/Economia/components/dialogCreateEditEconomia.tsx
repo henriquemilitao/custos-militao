@@ -6,7 +6,7 @@ import { BaseDialog } from "@/components/common/BaseDialog";
 import { CicloAtualDTO } from "@/dtos/ciclo.dto";
 import { toast } from "sonner";
 import { Economia } from "@prisma/client";
-import { InputCurrency } from "../../InputCurrency";
+import { InputCurrency } from "../../../common/InputCurrency";
 import { Button } from "@/components/common/Button";
 import {
   createEconomiaSchema,
@@ -136,7 +136,7 @@ export function DialogCreateEditEconomia({
       handleClose();
       setIsEdit(false);
     } catch (err) {
-      console.log(err)
+      // console.log(err)
       toast.error("Não foi possível salvar a economia");
     } finally {
       setLoading(false);
@@ -173,7 +173,7 @@ export function DialogCreateEditEconomia({
       handleClose();
       setIsEdit(false);
     } catch (err) {
-      console.log(err)
+      // console.log(err)
       toast.error("Não foi possível editar a economia");
     } finally {
       setLoading(false);

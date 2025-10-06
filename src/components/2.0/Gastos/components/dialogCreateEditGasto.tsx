@@ -5,9 +5,9 @@ import { BaseDialog } from "@/components/common/BaseDialog";
 import { CicloAtualDTO } from "@/dtos/ciclo.dto";
 import { toast } from "sonner";
 import { Gasto, TipoGasto } from "@prisma/client";
-import { InputCurrency } from "../../InputCurrency";
+import { InputCurrency } from "../../../common/InputCurrency";
 import { Button } from "@/components/common/Button";
-import { TipoGastoSelect } from "../../testeTipoGastoSelect";
+import { TipoGastoSelect } from "./testeTipoGastoSelect";
 import { DialogBlockTipoChange } from "./dialogBlockTipoChange";
 import { DialogAvisoMigracaoTipoChange } from "./dialogAvisoMigracaoTipoChange";
 import { formatDateShort } from "@/lib/formatters/formatDate";
@@ -182,7 +182,7 @@ export function DialogCreateEditGasto({
       handleClose();
       setIsEdit(false);
     } catch (err) {
-      console.log(err)
+      // console.log(err)
       toast.error("Não foi possível editar seu gasto");
     } finally {
       setLoading(false);

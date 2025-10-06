@@ -54,3 +54,19 @@ export function formatIsoToDayMonth(date?: string | Date | null): string {
   const [ano, mes, dia] = iso.split("T")[0].split("-");
   return `${dia}/${mes}`;
 }
+
+
+export function getPeriodoAtual(): { inicio: string; fim: string } {
+  const agora = new Date();
+
+  // início do mês atual (dia 1, 00:00:00)
+  const inicio = new Date(agora.getFullYear(), agora.getMonth(), 1);
+
+  // fim do mês atual (último dia, 23:59:59.999)
+  const fim = new Date(agora.getFullYear(), agora.getMonth() + 1, 0, 23, 59, 59, 999);
+
+  return {
+    inicio: inicio.toISOString(),
+    fim: fim.toISOString(),
+  };
+}
