@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { CategoriaFixaType, EstadoMes, GastoGasolina } from "@/types/budget";
 import ConfigGastoFixo from "./ConfigGastoFixo";
-import ProgressBar from "./ui/progress-bar";
+import ProgressBar from "../ui/progress-bar";
 
 type Props = {
   categoria: CategoriaFixaType;
