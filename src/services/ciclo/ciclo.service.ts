@@ -46,8 +46,8 @@ export async function createCicloByValorTotalService(params: {
   req: Request;
 }) {
   const { valorCents, dataInicio, dataFim, req } = params;
-  console.log('TO NO SERVICE DE CRIAR CICLO E TENHO ISSO::::')
-  console.log({ valorCents, req })
+  // console.log('TO NO SERVICE DE CRIAR CICLO E TENHO ISSO::::')
+  // console.log({ valorCents, req })
   
   const session = await auth.api.getSession({
     headers: req.headers,
@@ -289,9 +289,9 @@ export async function getCicloAtual(userId: string | undefined, dataInicio: stri
   const hoje = new Date();
 
   let ciclo;
-  console.log('TO NO INICIOOOOOO SERVICEEEEEEEEEEEE CICLO ATUALLLLL')
-  console.log('Chegou essas datas')
-  console.log({dataInicio, dataFim})
+  // console.log('TO NO INICIOOOOOO SERVICEEEEEEEEEEEE CICLO ATUALLLLL')
+  // console.log('Chegou essas datas')
+  // console.log({dataInicio, dataFim})
   if (dataInicio && dataFim) {
     ciclo = await prisma.ciclo.findFirst({
       where: {
@@ -349,11 +349,11 @@ export async function getCicloAtual(userId: string | undefined, dataInicio: stri
       },
     });
   }
-  console.log('TO NO BBBBBBBB SERVICEEEEEEEEEEEE')
+  // console.log('TO NO BBBBBBBB SERVICEEEEEEEEEEEE')
 
   if (!ciclo) {
     // Nenhum ciclo encontrado → retorna null + mês de hoje
-    console.log('TO NO CCCCCCCC SERVICEEEEEEEEEEEE')
+    // console.log('TO NO CCCCCCCC SERVICEEEEEEEEEEEE')
     return {
       ciclo: null,
       dataInicio,
@@ -375,7 +375,7 @@ export async function getCicloAtual(userId: string | undefined, dataInicio: stri
     prisma.gasto.aggregate({ where: { cicloId: ciclo.id, tipo: "single", isPago: true }, _sum: { valor: true } }),
     prisma.registroGasto.aggregate({ where: { gasto: { cicloId: ciclo.id } }, _sum: { valor: true } }),
   ]);
-  console.log('TO NO DDDDDDDD SERVICEEEEEEEEEEEE')
+  // console.log('TO NO DDDDDDDD SERVICEEEEEEEEEEEE')
 
   const economiasMesTotal = somaEconomias._sum.valor ?? 0;
   const gastosMesTotal = somaGastos._sum.valor ?? 0;
@@ -384,7 +384,7 @@ export async function getCicloAtual(userId: string | undefined, dataInicio: stri
   const gastosPorMetaJaRealizados = somaGastosPorMetaJaRealizados._sum.valor ?? 0;
   const gastoTotalJaRealizado = gastosUnicosJaRealizados + gastosPorMetaJaRealizados;
   const disponivelMes = (ciclo.valorTotal * 100 - economiasJaGuardadas - gastoTotalJaRealizado);
-  console.log('TO NO EEEEEEEE SERVICEEEEEEEEEEEE')
+  // console.log('TO NO EEEEEEEE SERVICEEEEEEEEEEEE')
 
   // --- gastos por meta enriquecidos ---
   const registrosAgrupados = await prisma.registroGasto.groupBy({
@@ -401,7 +401,7 @@ export async function getCicloAtual(userId: string | undefined, dataInicio: stri
     },
     _sum: { valor: true },
   });
-  console.log('TO NO FFFFFFFF SERVICEEEEEEEEEEEE')
+  // console.log('TO NO FFFFFFFF SERVICEEEEEEEEEEEE')
 
   const gastosPorMetaTotais = ciclo.gastos
     .filter((g) => g.tipo === "goal")
@@ -415,18 +415,18 @@ export async function getCicloAtual(userId: string | undefined, dataInicio: stri
         totalDisponivel: g.valor - totalJaGasto,
       };
     });
-  console.log('TO NO GGGGGGGG SERVICEEEEEEEEEEEE')
+  // console.log('TO NO GGGGGGGG SERVICEEEEEEEEEEEE')
 
   await syncAleatorio(ciclo.id);
-  console.log('TO NO HHHHHHHHHHHH SERVICEEEEEEEEEEEE')
+  // console.log('TO NO HHHHHHHHHHHH SERVICEEEEEEEEEEEE')
 
-  console.log('TO NO FIMMMMMM SERVICEEEEEEEEEEEE')
-  console.log({
-    dataINICIOMesQueChegouNoMutation: dataInicio,
-    dataFIMMesQueChegouNoMutation: dataFim,
-    dataINICIODoMesQueTaNoCicloQueTaMostrando: ciclo.dataInicio,
-    dataFIMDoMesQueTaNoCicloQueTaMostrando: ciclo.dataFim
-  })
+  // console.log('TO NO FIMMMMMM SERVICEEEEEEEEEEEE')
+  // console.log({
+  //   dataINICIOMesQueChegouNoMutation: dataInicio,
+  //   dataFIMMesQueChegouNoMutation: dataFim,
+  //   dataINICIODoMesQueTaNoCicloQueTaMostrando: ciclo.dataInicio,
+  //   dataFIMDoMesQueTaNoCicloQueTaMostrando: ciclo.dataFim
+  // })
 
   return {
     ciclo: {
@@ -476,8 +476,8 @@ export async function getProximoCiclo(params: {
     throw new Error("Datas inválidas");
   }
 
-  console.log("DATAS Q CHEGARAM NO SERVICE PROXIMO CICLOOOOOO");
-  console.log({ dataInicio, dataFim });
+  // console.log("DATAS Q CHEGARAM NO SERVICE PROXIMO CICLOOOOOO");
+  // console.log({ dataInicio, dataFim });
 
   // cria as datas de 1 mês à frente
   const inicioProxMes = new Date(inicioDate);
@@ -486,8 +486,8 @@ export async function getProximoCiclo(params: {
   const fimProxMes = new Date(fimDate);
   fimProxMes.setMonth(fimProxMes.getMonth() + 1);
 
-  console.log("PERÍODO QUE SERÁ BUSCADO NO BANCO (1 mês à frente):");
-  console.log({ inicioProxMes, fimProxMes });
+  // console.log("PERÍODO QUE SERÁ BUSCADO NO BANCO (1 mês à frente):");
+  // console.log({ inicioProxMes, fimProxMes });
 
   // procura ciclo dentro desse novo intervalo (1 mês à frente)
   const proximoCiclo = await prisma.ciclo.findFirst({
@@ -557,7 +557,7 @@ export async function getProximoCiclo(params: {
         };
       });
 
-    console.log("ACHEI UM CICLO DENTRO DO PRÓXIMO MÊS!");
+    // console.log("ACHEI UM CICLO DENTRO DO PRÓXIMO MÊS!");
 
     const { inicioNormalizado, fimNormalizado } = normalizarDatas(
       proximoCiclo.dataInicio,
@@ -579,7 +579,7 @@ export async function getProximoCiclo(params: {
     };
   }
 
-  console.log("NENHUM CICLO ENCONTRADO NO PRÓXIMO MÊS.");
+  // console.log("NENHUM CICLO ENCONTRADO NO PRÓXIMO MÊS.");
 
   // se não existe ciclo → devolve "ciclo null" e datas 1 mês pra frente
   const { inicioNormalizado, fimNormalizado } = normalizarDatas(inicioProxMes, fimProxMes);
@@ -598,11 +598,11 @@ export async function getCicloAnterior(params: {
   dataFim: string,
 }) {
   const { userId, dataInicio, dataFim } = params;
-  console.log('DATAS Q CHEGARAM NO SERVICEEEEEEEEEE ANTERIORRRRRRRRRRRRRR')
-  console.log('---------------------------------------')
+  // console.log('DATAS Q CHEGARAM NO SERVICEEEEEEEEEE ANTERIORRRRRRRRRRRRRR')
+  // console.log('---------------------------------------')
 
-  console.log({dataInicio, dataFim})
-  console.log('---------------------------------------')
+  // console.log({dataInicio, dataFim})
+  // console.log('---------------------------------------')
   
 
   // // converte as strings ISO em Date
@@ -626,8 +626,8 @@ export async function getCicloAnterior(params: {
     throw new Error("Datas inválidas");
   }
 
-  console.log("DATAS Q CHEGARAM NO SERVICE ANTERIOR CICLOOOOOO");
-  console.log({ dataInicio, dataFim });
+  // console.log("DATAS Q CHEGARAM NO SERVICE ANTERIOR CICLOOOOOO");
+  // console.log({ dataInicio, dataFim });
 
   // cria as datas de 1 mês à frente
   const inicioMesAnterior = new Date(inicioDate);
@@ -662,14 +662,14 @@ export async function getCicloAnterior(params: {
     },
   });
 
-  console.log('TO NO CCCCCCCCCCCCCCCCCC PROXIMO SERVICEEEEEEEEEEEE')
-  console.log('CICLO QUE EU PESQUISEI COM ESSAS RESPOSTAS FOIIIIII')
-  console.log({cicloAnterior})
+  // console.log('TO NO CCCCCCCCCCCCCCCCCC PROXIMO SERVICEEEEEEEEEEEE')
+  // console.log('CICLO QUE EU PESQUISEI COM ESSAS RESPOSTAS FOIIIIII')
+  // console.log({cicloAnterior})
 
 
   // caso exista ciclo no futuro → retorna ele e suas datas
   if (cicloAnterior) {
-    console.log('TO NO DDDDDDDDDDDDDDD PROXIMO SERVICEEEEEEEEEEEE')
+    // console.log('TO NO DDDDDDDDDDDDDDD PROXIMO SERVICEEEEEEEEEEEE')
 
     const [
       somaEconomias,
@@ -711,20 +711,20 @@ export async function getCicloAnterior(params: {
           totalDisponivel: g.valor - totalJaGasto,
         };
       });
-    console.log('TO NO FFFFFFFFFFF PROXIMO SERVICEEEEEEEEEEEE')
+    // console.log('TO NO FFFFFFFFFFF PROXIMO SERVICEEEEEEEEEEEE')
 
     const { inicioNormalizado, fimNormalizado } = normalizarDatas(
       cicloAnterior.dataInicio,
       cicloAnterior.dataFim
     );
 
-    console.log({
-      proxCicloInicio: cicloAnterior.dataInicio,
-      proxCicloFim: cicloAnterior.dataFim,
-      inicioNormalizado,
-      fimNormalizado
-    })
-  console.log('TO NO GGGGGGGGGGGG PROXIMO SERVICEEEEEEEEEEEE')
+    // console.log({
+    //   proxCicloInicio: cicloAnterior.dataInicio,
+    //   proxCicloFim: cicloAnterior.dataFim,
+    //   inicioNormalizado,
+    //   fimNormalizado
+    // })
+  // console.log('TO NO GGGGGGGGGGGG PROXIMO SERVICEEEEEEEEEEEE')
 
     return {
       ciclo: {
@@ -740,7 +740,7 @@ export async function getCicloAnterior(params: {
       dataFim: fimNormalizado.toISOString(),
     };
   }
-  console.log('dddd')
+  // console.log('dddd')
 
   // se não existe ciclo → devolve "ciclo null" e datas 1 mês pra frente
   const proxInicio = new Date(dataInicio);
@@ -751,8 +751,8 @@ export async function getCicloAnterior(params: {
 
   const { inicioNormalizado, fimNormalizado } = normalizarDatas(proxInicio, proxFim);
 
-  console.log('VOU PASSAR PRO FRONT O CICLO ANTERIOR QUE É::::')
-  console.log({inicioNormalizado, fimNormalizado})
+  // console.log('VOU PASSAR PRO FRONT O CICLO ANTERIOR QUE É::::')
+  // console.log({inicioNormalizado, fimNormalizado})
   return {
     ciclo: null,
     dataInicio: inicioNormalizado.toISOString(),

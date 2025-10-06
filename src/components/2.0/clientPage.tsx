@@ -78,9 +78,9 @@ export default function ClientPage({ userId }: { userId: string }) {
         setDatas={setDatas}
       />
       <TesteResumo cicloAtual={cicloAtual} mutateCiclo={mutateCiclo} dataInicio={dataInicio} dataFim={dataFim}/>
-      <TesteEconomia cicloAtual={cicloAtual} mutateCiclo={mutateCiclo} />
-      <TesteGastos cicloAtual={cicloAtual} mutateCiclo={mutateCiclo} />
-      <TesteSemanas cicloAtual={cicloAtual} mutateCiclo={mutateCiclo} />
+      {/* <TesteEconomia cicloAtual={cicloAtual} mutateCiclo={mutateCiclo} /> */}
+      {/* <TesteGastos cicloAtual={cicloAtual} mutateCiclo={mutateCiclo} /> */}
+      <TesteSemanas cicloAtual={cicloAtual} mutateCiclo={mutateCiclo} datas={datas}/>
     </main>
   );
 }

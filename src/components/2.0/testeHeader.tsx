@@ -63,9 +63,9 @@ export default function HeaderSistema({
 
       if (!inicio || !fim) throw new Error("Datas inválidas");
       
-      console.log('CLIQUEI EM PROXXXXXXXXXXX')
-      console.log('DATAS NA HORA QUE CLIQUEI SÃO:::::X')
-      console.log({dataInicio, dataFim})
+      // console.log('CLIQUEI EM PROXXXXXXXXXXX')
+      // console.log('DATAS NA HORA QUE CLIQUEI SÃO:::::X')
+      // console.log({dataInicio, dataFim})
       const params = new URLSearchParams({
         inicio: inicio,
         fim: fim,
@@ -82,8 +82,8 @@ export default function HeaderSistema({
       const data = await res.json();
       // atualiza o estado com as novas datas
       
-      console.log('VOLTOU A RESPOSTA COM AS PROXIMAS DATASSSSSSSSSS::::::')
-      console.log({dataInicio: data.dataInicio, dataFim: data.dataFim})
+      // console.log('VOLTOU A RESPOSTA COM AS PROXIMAS DATASSSSSSSSSS::::::')
+      // console.log({dataInicio: data.dataInicio, dataFim: data.dataFim})
       setDatas({ inicio: data.dataInicio, fim: data.dataFim });
     } catch (error) {
       console.error("Erro ao buscar próximo ciclo:", error);
@@ -107,9 +107,9 @@ export default function HeaderSistema({
 
       if (!inicio || !fim) throw new Error("Datas inválidas");
       
-      console.log('CLIQUEI EM ANTERIORRRRRRR')
-      console.log('DATAS NA HORA QUE CLIQUEI SÃO:::::X')
-      console.log({dataInicio, dataFim})
+      // console.log('CLIQUEI EM ANTERIORRRRRRR')
+      // console.log('DATAS NA HORA QUE CLIQUEI SÃO:::::X')
+      // console.log({dataInicio, dataFim})
       const params = new URLSearchParams({
         inicio: inicio,
         fim: fim,
@@ -126,8 +126,8 @@ export default function HeaderSistema({
       const data = await res.json();
 
     
-      console.log('VOLTOU A RESPOSTA COM AS ANTERIORES DATASSSSSSSSSS::::::')
-      console.log({dataInicio: data.dataInicio, dataFim: data.dataFim})
+      // console.log('VOLTOU A RESPOSTA COM AS ANTERIORES DATASSSSSSSSSS::::::')
+      // console.log({dataInicio: data.dataInicio, dataFim: data.dataFim})
       // atualiza o estado com as novas datas
       setDatas({ inicio: data.dataInicio, fim: data.dataFim });
     } catch (error) {

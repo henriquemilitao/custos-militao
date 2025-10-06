@@ -47,7 +47,10 @@ export function Header({ semanaAtual, semanaSelecionada, setSemanaSelecionada, s
       {semanaAtual?.id && (
           <select
             value={semanaSelecionada}
-            onChange={(e) => setSemanaSelecionada(e.target.value)}
+            onChange={(e) => {
+              console.log({semanaSelecionada: e.target.value})
+              setSemanaSelecionada(e.target.value)
+            }}
             className="border rounded-lg px-2 py-1 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             {semanas.map((sem) => (

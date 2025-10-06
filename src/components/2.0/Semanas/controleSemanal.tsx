@@ -21,11 +21,13 @@ import { PersonilazedDialog } from "@/components/common/personalized-dialog";
 type ControleSemanalProps = {
   cicloAtual: CicloAtualDTO | null;
   mutateCiclo: () => void;
+  datas: { inicio: string, fim: string} | null
 };
 
 export default function ControleSemanal({
   cicloAtual,
   mutateCiclo,
+  datas
 }: ControleSemanalProps) {
   const [open, setOpen] = useState(false);
   const [isEdit, setIsEdit] = useState<boolean>(false);
@@ -112,11 +114,11 @@ export default function ControleSemanal({
     }) || [];
 
   const semanaAtual =
-    semanas.find((s) => s.id === semanaSelecionada) || null;
-
+    semanas.find((s) => s.id === semanaSelecionada) || null
+  
   // Selecionar a semana do dia atual
   useEffect(() => {
-    if (semanas.length > 0 && !semanaSelecionada) {
+    if (semanas.length > 0) {
       const hoje = new Date();
 
       const semanaDoHoje = semanas.find(
@@ -127,7 +129,7 @@ export default function ControleSemanal({
         semanaDoHoje ? semanaDoHoje.id : semanas[0].id
       );
     }
-  }, [semanas, semanaSelecionada]);
+  }, [datas]);
 
   const gastosAgrupadosPorGoal: Record<string, CategoriAgrupada> = semanaAtual
     ? semanaAtual.gastosMeta.reduce(
