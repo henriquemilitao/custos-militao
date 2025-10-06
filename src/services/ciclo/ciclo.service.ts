@@ -41,9 +41,13 @@ export async function getCicloById(cicloId: string) {
 
 export async function createCicloByValorTotalService(params: {
   valorCents: number | null;
+  dataInicio: string;
+  dataFim: string
   req: Request;
 }) {
-  const { valorCents, req } = params;
+  const { valorCents, dataInicio, dataFim, req } = params;
+  console.log('TO NO SERVICE DE CRIAR CICLO E TENHO ISSO::::')
+  console.log({ valorCents, req })
   
   const session = await auth.api.getSession({
     headers: req.headers,
@@ -54,24 +58,24 @@ export async function createCicloByValorTotalService(params: {
   }
 
   // pega início e fim do mês
-  let { dataInicio, dataFim } = getMesAtualTimeZone("America/Campo_Grande");
+  // let { dataInicio, dataFim } = getMesAtualTimeZone("America/Campo_Grande");
 
   // padroniza início e fim no esquema 04:00 -> 03:59
-  dataInicio = new Date(
-    dataInicio.getFullYear(),
-    dataInicio.getMonth(),
-    dataInicio.getDate(),
-    4, 0, 0, 0
-  );
+  // dataInicio = new Date(
+  //   dataInicio.getFullYear(),
+  //   dataInicio.getMonth(),
+  //   dataInicio.getDate(),
+  //   4, 0, 0, 0
+  // );
 
-  dataFim = new Date(
-    dataFim.getFullYear(),
-    dataFim.getMonth(),
-    dataFim.getDate() + 1,
-    3, 59, 59, 999
-  );
+  // dataFim = new Date(
+  //   dataFim.getFullYear(),
+  //   dataFim.getMonth(),
+  //   dataFim.getDate() + 1,
+  //   3, 59, 59, 999
+  // );
 
-  const semanas = gerarSemanasParaCiclo(dataInicio, dataFim);
+  const semanas = gerarSemanasParaCiclo(new Date(dataInicio), new Date(dataFim));
 
   const ciclo = await prisma.$transaction(async (tx) => {
     const ciclo = await tx.ciclo.create({
