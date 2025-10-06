@@ -60,7 +60,7 @@ const SignInForm = () => {
             router.push("/");
           },
           onError: (ctx) => {
-            console.log(ctx.error)
+            // console.log(ctx.error)
             
             if (ctx.error.code === "USER_NOT_FOUND") {
               form.setError("email", { message: "Email ou senha inválidos" });

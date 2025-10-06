@@ -57,7 +57,7 @@ export default function ResumoMesCard({cicloAtual, mutateCiclo, dataInicio, data
   }
 
   async function createCiclo(novoTotal: number) {
-    console.log('ENTRANDO NA FUNCAO')
+    // console.log('ENTRANDO NA s')
     try {
       const res = await fetch(`/api/ciclos`, {
         method: "POST",
@@ -72,8 +72,8 @@ export default function ResumoMesCard({cicloAtual, mutateCiclo, dataInicio, data
       });
 
       const data = await res.json().catch(() => null);
-      console.log('RESPOSTA DEPOIS DE IR PARA A ROTA')
-      console.log({data})
+      // console.log('RESPOSTA DEPOIS DE IR PARA A ROTA')
+      // console.log({data})
 
       if (!res.ok) {
         toast.error(data?.error || "Erro ao criar ciclo");

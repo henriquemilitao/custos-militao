@@ -141,7 +141,7 @@ export function DialogAddEditGasto({
       semanaId: semanaAtual?.id ?? "",
     };
 
-    console.log({aaaaaa: gastoId})
+    // console.log({aaaaaa: gastoId})
 
 
     const schema = isEdit ? editRegistroGastoSchema : createRegistroGastoSchema;
@@ -206,7 +206,7 @@ export function DialogAddEditGasto({
       mutateCiclo();
       handleClose();
     } catch (err) {
-      console.log(err)
+      // console.log(err)
       toast.error( "Erro inesperado");
     } finally {
       setLoading(false);
@@ -255,7 +255,7 @@ export function DialogAddEditGasto({
       mutateCiclo();
       handleClose();
     } catch (err) {
-      console.log(err)
+      // console.log(err)
       toast.error("Erro inesperado");
     } finally {
       setLoading(false);

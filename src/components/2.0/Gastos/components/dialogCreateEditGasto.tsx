@@ -182,7 +182,7 @@ export function DialogCreateEditGasto({
       handleClose();
       setIsEdit(false);
     } catch (err) {
-      console.log(err)
+      // console.log(err)
       toast.error("Não foi possível editar seu gasto");
     } finally {
       setLoading(false);

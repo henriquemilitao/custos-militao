@@ -72,7 +72,7 @@ export default function GastosCard({ cicloAtual, mutateCiclo }: GastosCardProps)
 
       mutateCiclo();
     } catch (err) {
-      console.log(err)
+      // console.log(err)
       toast.error("Não foi possível atualizar a gasto");
     }
   }
