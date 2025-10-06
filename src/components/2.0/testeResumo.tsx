@@ -2,10 +2,10 @@
 
 import { CicloAtualDTO } from "@/dtos/ciclo.dto";
 import { formatCurrencyFromCents } from "@/lib/formatters/formatCurrency";
-import { formatDateDayMonth, formatIsoToDayMonth, formatPeriodoDayMonth} from "@/lib/formatters/formatDate";
-import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, XAxis, YAxis, Bar, LineChart, Line, Area, AreaChart, LabelList } from "recharts";
+import { formatDateDayMonth } from "@/lib/formatters/formatDate";
+// import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, XAxis, YAxis, Bar, LineChart, Line, Area, AreaChart, LabelList } from "recharts";
 import EditableCurrency from "../EditableCurrency";
-import { Doughnut, Radar } from "react-chartjs-2";
+import { Doughnut } from "react-chartjs-2";
 
 import { toast } from "sonner";
 import {
@@ -37,9 +37,11 @@ interface PieLabelProps {
 type ResumoMesCardProps = {
   mutateCiclo: () => void
   cicloAtual: CicloAtualDTO | null
+  dataInicio: string | undefined;
+  dataFim: string | undefined
 }
 
-export default function ResumoMesCard({cicloAtual, mutateCiclo}: ResumoMesCardProps) {
+export default function ResumoMesCard({cicloAtual, mutateCiclo, dataInicio, dataFim}: ResumoMesCardProps) {
   // const economiasMesTotal = cicloAtual?.economias.reduce((acc, economia) => economia.valor + acc, 0) ?? 0
   // const gastosMesTotal = cicloAtual?.gastos?.reduce((acc, gasto) => gasto.valor + acc, 0) ?? 0
   // const valorMesTotal = cicloAtual?.valorTotal ?? 0
@@ -55,16 +57,23 @@ export default function ResumoMesCard({cicloAtual, mutateCiclo}: ResumoMesCardPr
   }
 
   async function createCiclo(novoTotal: number) {
+    console.log('ENTRANDO NA FUNCAO')
     try {
       const res = await fetch(`/api/ciclos`, {
         method: "POST",
-        body: JSON.stringify({ valorCents: novoTotal }),
+        body: JSON.stringify({ 
+          valorCents: novoTotal,
+          dataInicio,
+          dataFim
+        }),
         headers: {
           "Content-Type": "application/json",
         },
       });
 
       const data = await res.json().catch(() => null);
+      console.log('RESPOSTA DEPOIS DE IR PARA A ROTA')
+      console.log({data})
 
       if (!res.ok) {
         toast.error(data?.error || "Erro ao criar ciclo");
@@ -109,19 +118,19 @@ export default function ResumoMesCard({cicloAtual, mutateCiclo}: ResumoMesCardPr
   }
 
 
-  const chartData = {
-    labels: ["Gastos", "Economias", "Disponível"],
-    datasets: [
-        {
-          data: [
-            cicloAtual?.gastoTotalJaRealizado ?? 0,
-            cicloAtual?.economiasJaGuardadas ?? 0,
-            cicloAtual?.disponivelMes ?? 0,
-          ],
-          backgroundColor: ["#ef4444", "#3b82f6", "#22c55e"],
-        },
-    ],
-  };
+  // const chartData = {
+  //   labels: ["Gastos", "Economias", "Disponível"],
+  //   datasets: [
+  //       {
+  //         data: [
+  //           cicloAtual?.gastoTotalJaRealizado ?? 0,
+  //           cicloAtual?.economiasJaGuardadas ?? 0,
+  //           cicloAtual?.disponivelMes ?? 0,
+  //         ],
+  //         backgroundColor: ["#ef4444", "#3b82f6", "#22c55e"],
+  //       },
+  //   ],
+  // };
   
     const gastos = cicloAtual?.gastoTotalJaRealizado ?? 0;
     const economias = cicloAtual?.economiasJaGuardadas ?? 0;
@@ -144,13 +153,19 @@ export default function ResumoMesCard({cicloAtual, mutateCiclo}: ResumoMesCardPr
             Resumo do Mês 
             
           </h2>
-        {cicloAtual?.id &&  
+
+          <p className="text-sm text-gray-500 mb-2">{
+            `${formatDateDayMonth(dataInicio)} - ${formatDateDayMonth(dataFim)}`
+            }
+          </p>
+
+        {/* {cicloAtual?.id &&  
           <p className="text-sm text-gray-500 mb-2">{
             cicloAtual && `
               ${formatDateDayMonth(cicloAtual?.dataInicio)} - ${formatDateDayMonth(cicloAtual?.dataFim)}
               `
             }</p>
-        }
+        } */}
         </div>
 
         {/* Gráfico */}

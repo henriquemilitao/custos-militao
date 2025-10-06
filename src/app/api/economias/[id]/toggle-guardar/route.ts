@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { toggleGuardarEconomiaService } from "@/services/economia/economia.service";
-import { badRequest, notFound, ok, serverError } from "@/lib/http";
+import { badRequest, notFound, serverError } from "@/lib/http";
 
 export async function PATCH(
   _: NextRequest,

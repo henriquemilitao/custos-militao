@@ -1,27 +1,37 @@
 import useSWR, { KeyedMutator } from "swr";
 import { CicloAtualDTO } from "@/dtos/ciclo.dto";
 
-export type CicloComMes = {
+export type CicloResponse = {
   ciclo: CicloAtualDTO | null;
-  mesReferencia: string; // sempre vem do backend
+  dataInicio: string;
+  dataFim: string;
 };
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
-export function useCicloAtual(userId: string) {
-  const { data, error, isLoading, mutate } = useSWR<CicloComMes>(
-    userId ? `/api/ciclos/atual?userId=${userId}` : null,
+export function useCicloAtual(
+  userId: string,
+  dataInicio?: string,
+  dataFim?: string
+) {
+  const shouldFetch = Boolean(userId);
+
+  const { data, error, isLoading, mutate } = useSWR<CicloResponse>(
+    shouldFetch
+      ? `/api/ciclos/atual?userId=${userId}${
+          dataInicio && dataFim ? `&dataInicio=${dataInicio}&dataFim=${dataFim}` : ""
+        }`
+      : null,
     fetcher,
     { keepPreviousData: true }
   );
 
   return {
     cicloAtual: data?.ciclo ?? null,
-    mesReferencia: data?.mesReferencia
-      ? new Date(data.mesReferencia)
-      : new Date(), // fallback
+    dataInicio: data?.dataInicio,
+    dataFim: data?.dataFim,
     isLoading,
     isError: error,
-    mutateCiclo: mutate as KeyedMutator<CicloComMes>,
+    mutateCiclo: mutate as KeyedMutator<CicloResponse>,
   };
 }

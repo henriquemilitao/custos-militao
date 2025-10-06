@@ -2,8 +2,6 @@
 
 import { prisma } from "@/lib/prisma";
 import { CreateRegistroGastoDTO, EditRegistroGastoDTO } from "@/dtos/registroGasto.schema";
-import { startOfDay } from "date-fns";
-import { syncAleatorio } from "../aleatorio/aleatorio.service";
 
 // Tipo específico para o registro retornado pelo Prisma
 interface RegistroGasto {

@@ -1,5 +1,5 @@
 import { editGastoSchema } from "@/dtos/gasto.schema";
-import { notFound, ok } from "@/lib/http"
+import { notFound } from "@/lib/http"
 import { deleteGastoService, editGastoService } from "@/services/gasto/gasto.service"
 import { NextRequest, NextResponse } from "next/server"
 import { ZodError, ZodIssue } from "zod";

@@ -1,6 +1,6 @@
-// components/ClientPage.tsx
 "use client";
 
+import { useEffect, useState } from "react";
 import TesteResumo from "@/components/2.0/testeResumo";
 import TesteEconomia from "@/components/2.0/Economia/cardEconomias";
 import TesteGastos from "@/components/2.0/Gastos/cardGastos";
@@ -9,7 +9,22 @@ import HeaderSistema from "@/components/2.0/testeHeader";
 import { useCicloAtual } from "@/hooks/useCicloAtual";
 
 export default function ClientPage({ userId }: { userId: string }) {
-  const { cicloAtual, isLoading, mutateCiclo, mesReferencia } = useCicloAtual(userId);
+  // estado que controla o ciclo atual
+  const [datas, setDatas] = useState<{ inicio: string; fim: string } | null>(null);
+
+  // hook que busca o ciclo atual
+  const { cicloAtual, isLoading, dataInicio, dataFim, mutateCiclo } = useCicloAtual(
+    userId,
+    datas?.inicio,
+    datas?.fim
+  );
+
+  // quando a página abrir, se não tiver datas salvas, usa as de hoje
+  useEffect(() => {
+    if (!datas && dataInicio && dataFim) {
+      setDatas({ inicio: dataInicio, fim: dataFim });
+    }
+  }, [dataInicio, dataFim]);
 
   if (isLoading) {
     return (
@@ -56,8 +71,13 @@ export default function ClientPage({ userId }: { userId: string }) {
 
   return (
     <main className="min-h-screen bg-neutral-50">
-      <HeaderSistema cicloAtual={cicloAtual} mutateCiclo={mutateCiclo} mesReferencia={mesReferencia} />
-      <TesteResumo cicloAtual={cicloAtual} mutateCiclo={mutateCiclo}/>
+      <HeaderSistema
+        cicloAtual={cicloAtual}
+        dataInicio={dataInicio}
+        dataFim={dataFim}
+        setDatas={setDatas}
+      />
+      <TesteResumo cicloAtual={cicloAtual} mutateCiclo={mutateCiclo} dataInicio={dataInicio} dataFim={dataFim}/>
       <TesteEconomia cicloAtual={cicloAtual} mutateCiclo={mutateCiclo} />
       <TesteGastos cicloAtual={cicloAtual} mutateCiclo={mutateCiclo} />
       <TesteSemanas cicloAtual={cicloAtual} mutateCiclo={mutateCiclo} />

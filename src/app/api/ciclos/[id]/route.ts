@@ -1,4 +1,4 @@
-import { notFound, ok, serverError } from "@/lib/http"
+import { notFound, serverError } from "@/lib/http"
 import { getCicloById, updateCicloValorTotalService } from "@/services/ciclo/ciclo.service"
 import { NextRequest, NextResponse } from "next/server"
 import { ZodError, ZodIssue } from "zod";

@@ -9,9 +9,9 @@ import { DialogConfirmDelete, TipoItemDelete } from "@/components/common/dialogC
 import { parse, format, isValid } from "date-fns"
 import { ptBR } from "date-fns/locale"
 
-function capitalizeWords(str: string) {
-  return str.replace(/\b\w/g, (char) => char.toUpperCase())
-}
+// function capitalizeWords(str: string) {
+//   return str.replace(/\b\w/g, (char) => char.toUpperCase())
+// }
 
 function formatarData(data: string | Date) {
   let dateObj: Date;
