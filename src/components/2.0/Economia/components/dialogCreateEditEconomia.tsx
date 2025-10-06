@@ -6,7 +6,7 @@ import { BaseDialog } from "@/components/common/BaseDialog";
 import { CicloAtualDTO } from "@/dtos/ciclo.dto";
 import { toast } from "sonner";
 import { Economia } from "@prisma/client";
-import { InputCurrency } from "../../InputCurrency";
+import { InputCurrency } from "../../../common/InputCurrency";
 import { Button } from "@/components/common/Button";
 import {
   createEconomiaSchema,

@@ -157,8 +157,11 @@ export default function HeaderSistema({
         <Popover>
           <PopoverTrigger asChild>
             <Button variant="ghost" className="font-medium text-gray-700">
-              {format(mesAtual, "MMMM/yyyy", { locale: ptBR })}
-            </Button>
+              {(() => {
+                const texto = format(mesAtual, "MMMM/yyyy", { locale: ptBR });
+                return texto.charAt(0).toUpperCase() + texto.slice(1);
+              })()}
+    </Button>
           </PopoverTrigger>
         </Popover>
 

@@ -4,7 +4,7 @@ import { CicloAtualDTO } from "@/dtos/ciclo.dto";
 import { formatCurrencyFromCents } from "@/lib/formatters/formatCurrency";
 import { formatDateDayMonth, getPeriodoAtual } from "@/lib/formatters/formatDate";
 // import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, XAxis, YAxis, Bar, LineChart, Line, Area, AreaChart, LabelList } from "recharts";
-import EditableCurrency from "../1.0/EditableCurrency";
+import EditableCurrency from "../../1.0/EditableCurrency";
 import { Doughnut } from "react-chartjs-2";
 
 import { toast } from "sonner";

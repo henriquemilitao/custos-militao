@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import TesteResumo from "@/components/2.0/testeResumo";
+import TesteResumo from "@/components/2.0/Resumo/testeResumo";
 import TesteEconomia from "@/components/2.0/Economia/cardEconomias";
 import TesteGastos from "@/components/2.0/Gastos/cardGastos";
 import TesteSemanas from "@/components/2.0/Semanas/controleSemanal";
-import HeaderSistema from "@/components/2.0/testeHeader";
+import HeaderSistema from "@/components/2.0/Header/testeHeader";
 import { useCicloAtual } from "@/hooks/useCicloAtual";
 
 export default function ClientPage({ userId }: { userId: string }) {
