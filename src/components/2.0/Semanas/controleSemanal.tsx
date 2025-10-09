@@ -42,76 +42,85 @@ export default function ControleSemanal({
     ) ?? 0;
 
   const semanas =
-    (cicloAtual?.semanas ?? []).map((semana, index) => {
-      const valorGasto =
-        semana.registros?.reduce((acc, gasto) => acc + gasto.valor, 0) ?? 0;
-      const gastoAnterior = (cicloAtual?.semanas ?? [])
-        .slice(0, index)
-        .flatMap((s) => s.registros || [])
-        .reduce((acc, gasto) => acc + gasto.valor, 0);
+    (cicloAtual?.semanas ?? [])
+     //✅ Ordena pela data de início antes de mapear
+      .slice() // cria uma cópia para não alterar o array original
+      .sort(
+        (a, b) =>
+          new Date(a.dataInicio).getTime() - new Date(b.dataInicio).getTime()
+      )
+      .map((semana, index) => {
+        const valorGasto =
+          semana.registros?.reduce((acc, gasto) => acc + gasto.valor, 0) ?? 0;
+        const gastoAnterior = (cicloAtual?.semanas ?? [])
+          .slice(0, index)
+          .flatMap((s) => s.registros || [])
+          .reduce((acc, gasto) => acc + gasto.valor, 0);
 
-      // Nova lógica progressiva
-      let valorTotal: number;
-      if (index === 0) {
-        valorTotal = Math.floor(totalGoals / 4.5);
-      } else if (index === 1) {
-        valorTotal = Math.floor((totalGoals - gastoAnterior) / 3.5);
-      } else if (index === 2) {
-        valorTotal = Math.floor((totalGoals - gastoAnterior) / 2.5);
-      } else {
-        valorTotal = totalGoals - gastoAnterior;
-      }
+        // Nova lógica progressiva
+        let valorTotal: number;
+        if (index === 0) {
+          valorTotal = Math.floor(totalGoals / 4.5);
+        } else if (index === 1) {
+          valorTotal = Math.floor((totalGoals - gastoAnterior) / 3.5);
+        } else if (index === 2) {
+          valorTotal = Math.floor((totalGoals - gastoAnterior) / 2.5);
+        } else {
+          valorTotal = totalGoals - gastoAnterior;
+        }
 
-      const gastosMeta =
-        (cicloAtual?.gastosPorMetaTotais ?? []).map((meta) => {
-          const gastoAnteriorMeta = (cicloAtual?.semanas ?? [])
-            .slice(0, index)
-            .flatMap((s) => s.registros || [])
-            .filter((r) => r.gastoId === meta.id)
-            .reduce((acc, r) => acc + r.valor, 0);
-
-          const gastoNaSemana =
-            (semana.registros || [])
+        const gastosMeta =
+          (cicloAtual?.gastosPorMetaTotais ?? []).map((meta) => {
+            const gastoAnteriorMeta = (cicloAtual?.semanas ?? [])
+              .slice(0, index)
+              .flatMap((s) => s.registros || [])
               .filter((r) => r.gastoId === meta.id)
               .reduce((acc, r) => acc + r.valor, 0);
 
-          let valorDisponivelMeta: number;
-          if (index === 0) {
-            valorDisponivelMeta = Math.floor(meta.totalPlanejado / 4.5);
-          } else if (index === 1) {
-            valorDisponivelMeta = Math.floor(
-              (meta.totalPlanejado - gastoAnteriorMeta) / 3.5
-            );
-          } else if (index === 2) {
-            valorDisponivelMeta = Math.floor(
-              (meta.totalPlanejado - gastoAnteriorMeta) / 2.5
-            );
-          } else {
-            valorDisponivelMeta = meta.totalPlanejado - gastoAnteriorMeta;
-          }
+            const gastoNaSemana =
+              (semana.registros || [])
+                .filter((r) => r.gastoId === meta.id)
+                .reduce((acc, r) => acc + r.valor, 0);
 
-          return {
-            id: meta.id,
-            nome: meta.name,
-            totalPlanejado: meta.totalPlanejado,
-            gastoNaSemana,
-            gastoAnteriorMeta,
-            valorDisponivelMeta,
-          };
-        });
+            let valorDisponivelMeta: number;
+            if (index === 0) {
+              valorDisponivelMeta = Math.floor(meta.totalPlanejado / 4.5);
+            } else if (index === 1) {
+              valorDisponivelMeta = Math.floor(
+                (meta.totalPlanejado - gastoAnteriorMeta) / 3.5
+              );
+            } else if (index === 2) {
+              valorDisponivelMeta = Math.floor(
+                (meta.totalPlanejado - gastoAnteriorMeta) / 2.5
+              );
+            } else {
+              valorDisponivelMeta = meta.totalPlanejado - gastoAnteriorMeta;
+            }
 
-      return {
-        id: semana.id,
-        label: `Semana ${semana.qualSemanaCiclo}`,
-        periodo: formatPeriodoDayMonth(semana.dataInicio, semana.dataFim),
-        valorGasto,
-        valorTotal,
-        gastosMeta,
-        registros: semana.registros,
-        dataInicio: new Date(semana.dataInicio),
-        dataFim: new Date(semana.dataFim),
-      };
-    }) || [];
+            return {
+              id: meta.id,
+              nome: meta.name,
+              totalPlanejado: meta.totalPlanejado,
+              gastoNaSemana,
+              gastoAnteriorMeta,
+              valorDisponivelMeta,
+            };
+          });
+
+        return {
+          id: semana.id,
+          label: `Semana ${semana.qualSemanaCiclo}`,
+          periodo: formatPeriodoDayMonth(semana.dataInicio, semana.dataFim),
+          valorGasto,
+          valorTotal,
+          gastosMeta,
+          registros: semana.registros,
+          dataInicio: new Date(semana.dataInicio),
+          dataFim: new Date(semana.dataFim),
+        };
+      }) || [];
+
+  console.log({semanas})
 
   const semanaAtual =
     semanas.find((s) => s.id === semanaSelecionada) || null
