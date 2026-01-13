@@ -1,12 +1,12 @@
-# 💰 App de Gestão Financeira (MVP)
+# App de Gestão Financeira (MVP)
 
 SaaS de controle financeiro pessoal desenvolvido com foco em usabilidade e projeção de gastos.
 
-> 📱 **AVISO IMPORTANTE (Mobile First):**
+> **AVISO IMPORTANTE (Mobile First):**
 > Esta aplicação foi desenhada exclusivamente para **dispositivos móveis**.
 > Se estiver visualizando em um computador, por favor, utilize o **Modo de Inspeção (F12)** do navegador e ative a visualização de dispositivo móvel.
 
-## 🚀 Tecnologias Utilizadas
+## Tecnologias Utilizadas
 
 - **Frontend/Backend:** Next.js 14 (App Router)
 - **Linguagem:** TypeScript
@@ -14,7 +14,7 @@ SaaS de controle financeiro pessoal desenvolvido com foco em usabilidade e proje
 - **Banco de Dados:** PostgreSQL
 - **Estilização:** Tailwind CSS (ou CSS Modules, ajuste conforme usou)
 
-## 🎯 Funcionalidades Principais
+## Funcionalidades Principais
 
 - **Projeção de Budget:** Cálculo automático de quanto pode ser gasto na semana.
 - **Gestão de Recorrência:** Controle inteligente de gastos fixos vs. variáveis.
