@@ -140,103 +140,105 @@ export default function HeaderSistema({
   }, [dataInicio]);
 
   return (
-    <div className="flex items-center justify-between px-4 py-3 bg-white shadow-sm rounded-2xl mb-4">
-      {/* Navegação de mês */}
-      <div className="flex items-center gap-0">
+    <div className="p-4 max-w-sm mx-auto w-full">
+      <div className="flex items-center justify-between px-4 py-3 bg-white shadow-sm rounded-2xl">        
+        {/* Navegação de mês */}
+        <div className="flex items-center gap-0">
 
-        {/* Botão ciclo anterior*/}
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleAnteriorCiclo}
-          className="rounded-lg"
-        >
-          <ChevronLeft className="h-4 w-4" />
-        </Button>
+          {/* Botão ciclo anterior*/}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleAnteriorCiclo}
+            className="rounded-lg"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
 
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button variant="ghost" className="font-medium text-gray-700">
-              {(() => {
-                const texto = format(mesAtual, "MMMM/yyyy", { locale: ptBR });
-                return texto.charAt(0).toUpperCase() + texto.slice(1);
-              })()}
-    </Button>
-          </PopoverTrigger>
-        </Popover>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="ghost" className="font-medium text-gray-700">
+                {(() => {
+                  const texto = format(mesAtual, "MMMM/yyyy", { locale: ptBR });
+                  return texto.charAt(0).toUpperCase() + texto.slice(1);
+                })()}
+      </Button>
+            </PopoverTrigger>
+          </Popover>
 
-        {/* Botão próximo ciclo */}
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleProximoCiclo}
-          className="rounded-lg"
-        >
-          <ChevronRight className="h-4 w-4" />
-        </Button>
+          {/* Botão próximo ciclo */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleProximoCiclo}
+            className="rounded-lg"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+
+        {/* Avatar dinâmico */}
+        {session?.user && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="rounded-full"
+            onClick={() => setSheetOpen(true)}
+          >
+            <Avatar>
+              <AvatarImage src={session.user.image as string | undefined} />
+              <AvatarFallback>
+                {session.user.name?.split(" ")?.[0]?.[0]}
+                {session.user.name?.split(" ")?.[1]?.[0]}
+              </AvatarFallback>
+            </Avatar>
+          </Button>
+        )}
+
+        {/* Sheet lateral */}
+        <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+          <SheetContent side="right" className="w-72">
+            <SheetHeader>
+              <SheetTitle>Minha conta</SheetTitle>
+            </SheetHeader>
+
+            {session?.user ? (
+              <div className="flex flex-col items-center gap-2 mt-4">
+                <Avatar className="h-16 w-16">
+                  <AvatarImage src={session.user.image as string | undefined} />
+                  <AvatarFallback>
+                    {session.user.name?.split(" ")?.[0]?.[0]}
+                    {session.user.name?.split(" ")?.[1]?.[0]}
+                  </AvatarFallback>
+                </Avatar>
+                <p className="font-medium">{session.user.name}</p>
+                <p className="text-sm text-gray-500">{session.user.email}</p>
+              </div>
+            ) : (
+              <p className="text-center mt-6 text-gray-500">
+                Nenhum usuário logado
+              </p>
+            )}
+
+            {session?.user && (
+              <div className="mt-6 space-y-2 px-5">
+                <Button
+                  variant="destructive"
+                  className="w-full flex items-center gap-2 rounded-xl"
+                  onClick={async () => {
+                    await authClient.signOut();
+                    router.push("/authentication");
+                  }}
+                >
+                  <LogOut className="h-4 w-4" /> Sair
+                </Button>
+              </div>
+            )}
+
+            <SheetFooter />
+          </SheetContent>
+        </Sheet>
       </div>
-
-      {/* Avatar dinâmico */}
-      {session?.user && (
-        <Button
-          variant="ghost"
-          size="sm"
-          className="rounded-full"
-          onClick={() => setSheetOpen(true)}
-        >
-          <Avatar>
-            <AvatarImage src={session.user.image as string | undefined} />
-            <AvatarFallback>
-              {session.user.name?.split(" ")?.[0]?.[0]}
-              {session.user.name?.split(" ")?.[1]?.[0]}
-            </AvatarFallback>
-          </Avatar>
-        </Button>
-      )}
-
-      {/* Sheet lateral */}
-      <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-        <SheetContent side="right" className="w-72">
-          <SheetHeader>
-            <SheetTitle>Minha conta</SheetTitle>
-          </SheetHeader>
-
-          {session?.user ? (
-            <div className="flex flex-col items-center gap-2 mt-4">
-              <Avatar className="h-16 w-16">
-                <AvatarImage src={session.user.image as string | undefined} />
-                <AvatarFallback>
-                  {session.user.name?.split(" ")?.[0]?.[0]}
-                  {session.user.name?.split(" ")?.[1]?.[0]}
-                </AvatarFallback>
-              </Avatar>
-              <p className="font-medium">{session.user.name}</p>
-              <p className="text-sm text-gray-500">{session.user.email}</p>
-            </div>
-          ) : (
-            <p className="text-center mt-6 text-gray-500">
-              Nenhum usuário logado
-            </p>
-          )}
-
-          {session?.user && (
-            <div className="mt-6 space-y-2 px-5">
-              <Button
-                variant="destructive"
-                className="w-full flex items-center gap-2 rounded-xl"
-                onClick={async () => {
-                  await authClient.signOut();
-                  router.push("/authentication");
-                }}
-              >
-                <LogOut className="h-4 w-4" /> Sair
-              </Button>
-            </div>
-          )}
-
-          <SheetFooter />
-        </SheetContent>
-      </Sheet>
-    </div>
+    </ div>
   );
 }

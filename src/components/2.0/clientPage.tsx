@@ -29,18 +29,22 @@ export default function ClientPage({ userId }: { userId: string }) {
   if (isLoading) {
     return (
       <main className="min-h-screen bg-neutral-50 space-y-6">
-        {/* Skeleton Header */}
-        <div className="flex items-center justify-between px-4 py-3 bg-white shadow-sm rounded-2xl">
-          {/* Navegação esquerda */}
-          <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-lg shimmer"></div>
-            <div className="h-6 w-28 rounded-md shimmer"></div>
-            <div className="h-8 w-8 rounded-lg shimmer"></div>
-          </div>
+          {/* Skeleton Header */}
 
-          {/* Avatar */}
-          <div className="h-8 w-8 rounded-full shimmer"></div>
-        </div>
+          <div className="p-4 max-w-sm mx-auto w-full">
+            <div className="flex items-center justify-between px-4 py-3 bg-white shadow-sm rounded-2xl -mb-5"> 
+              {/* Navegação esquerda */}
+              <div className="flex items-center gap-2">
+                <div className="h-8 w-8 rounded-lg shimmer"></div>
+                <div className="h-6 w-28 rounded-md shimmer"></div>
+                <div className="h-8 w-8 rounded-lg shimmer"></div>
+              </div>
+
+              {/* Avatar */}
+              <div className="h-8 w-8 rounded-full shimmer"></div>
+            </div>
+          </div>
+        
 
         {/* Skeleton Resumo do Mês */}
         <div className="p-4 max-w-sm mx-auto">
